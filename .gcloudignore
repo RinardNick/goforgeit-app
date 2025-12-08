@@ -1,0 +1,10 @@
+# Ignore symlinks and local dev files
+adk-service
+node_modules/
+.next/
+.git/
+.env
+.env.local
+*.log
+test-results/
+playwright-report/
