@@ -34,4 +34,7 @@ images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/app-goforgeit/app:$COMMIT_SHA'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/app-goforgeit/app:latest'
 
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 timeout: '1200s'
