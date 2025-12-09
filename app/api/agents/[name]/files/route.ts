@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Storage } from '@google-cloud/storage';
 import fs from 'fs/promises';
 import path from 'path';
 import YAML from 'yaml';
 
 const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-const GCS_BUCKET = process.env.GCS_BUCKET_NAME || 'nicholasrinard-adk-agents';
-const USE_GCS = process.env.NODE_ENV === 'production';
-
-// Initialize GCS client
-const storage = USE_GCS ? new Storage() : null;
+const ADK_BACKEND_URL = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
+const USE_ADK_BACKEND = process.env.NODE_ENV === 'production';
 
 interface AgentFile {
   filename: string;
@@ -92,31 +88,26 @@ export async function GET(
   try {
     const agentFiles: AgentFile[] = [];
 
-    if (USE_GCS && storage) {
-      // Production: Read from GCS
-      const bucket = storage.bucket(GCS_BUCKET);
-      const [files] = await bucket.getFiles({ prefix: `${agentName}/` });
+    if (USE_ADK_BACKEND) {
+      // Production: Read from ADK backend's builder endpoint
+      const response = await fetch(`${ADK_BACKEND_URL}/builder/app/${agentName}`);
 
-      if (files.length === 0) {
-        return NextResponse.json(
-          { error: `Agent directory not found: ${agentName}` },
-          { status: 404 }
-        );
+      if (!response.ok) {
+        if (response.status === 404) {
+          return NextResponse.json(
+            { error: `Agent not found: ${agentName}` },
+            { status: 404 }
+          );
+        }
+        throw new Error(`ADK backend error: ${response.statusText}`);
       }
 
-      // Filter for YAML files
-      const yamlFiles = files.filter(f =>
-        f.name.endsWith('.yaml') || f.name.endsWith('.yml')
-      );
-
-      for (const file of yamlFiles) {
-        const [content] = await file.download();
-        const filename = path.basename(file.name);
-        agentFiles.push({
-          filename,
-          yaml: content.toString('utf-8'),
-        });
-      }
+      // ADK backend returns the root_agent.yaml content directly
+      const yamlContent = await response.text();
+      agentFiles.push({
+        filename: 'root_agent.yaml',
+        yaml: yamlContent,
+      });
     } else {
       // Local: Read from filesystem
       const agentDir = path.join(ADK_AGENTS_DIR, agentName);
@@ -175,11 +166,21 @@ export async function PUT(
       );
     }
 
-    if (USE_GCS && storage) {
-      // Production: Write to GCS
-      const bucket = storage.bucket(GCS_BUCKET);
-      const file = bucket.file(`${agentName}/${filename}`);
-      await file.save(yaml, { contentType: 'text/yaml' });
+    if (USE_ADK_BACKEND) {
+      // Production: Save via ADK backend's builder endpoint
+      const response = await fetch(`${ADK_BACKEND_URL}/builder/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          app_name: agentName,
+          yaml_content: yaml,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`ADK backend error: ${error}`);
+      }
     } else {
       // Local: Write to filesystem
       const agentDir = path.join(ADK_AGENTS_DIR, agentName);
@@ -234,25 +235,10 @@ export async function POST(
     let baseFilename = providedFilename || `${name.toLowerCase().replace(/\s+/g, '_')}.yaml`;
     let filename = baseFilename;
 
-    if (USE_GCS && storage) {
-      // Production: Check if agent exists in GCS and find unique filename
-      const bucket = storage.bucket(GCS_BUCKET);
-      const [agentFiles] = await bucket.getFiles({ prefix: `${agentName}/` });
-
-      if (agentFiles.length === 0) {
-        return NextResponse.json(
-          { error: `Agent directory not found: ${agentName}` },
-          { status: 404 }
-        );
-      }
-
-      // Find unique filename
-      let counter = 1;
-      while (agentFiles.some(f => f.name === `${agentName}/${filename}`)) {
-        const baseName = baseFilename.replace('.yaml', '');
-        filename = `${baseName}_${counter}.yaml`;
-        counter++;
-      }
+    if (USE_ADK_BACKEND) {
+      // Production: Creating sub-agents not yet supported via ADK backend
+      // For now, just use the filename as provided
+      // Future: Could call ADK backend to create sub-agent files
     } else {
       // Local: Check filesystem
       const agentDir = path.join(ADK_AGENTS_DIR, agentName);
@@ -314,9 +300,21 @@ export async function POST(
     const yamlContent = YAML.stringify(agentObj);
 
     // Write the file
-    if (USE_GCS && storage) {
-      const bucket = storage.bucket(GCS_BUCKET);
-      await bucket.file(`${agentName}/${filename}`).save(yamlContent);
+    if (USE_ADK_BACKEND) {
+      // Production: Save via ADK backend (only works for root_agent.yaml currently)
+      const response = await fetch(`${ADK_BACKEND_URL}/builder/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          app_name: agentName,
+          yaml_content: yamlContent,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`ADK backend error: ${error}`);
+      }
     } else {
       const agentDir = path.join(ADK_AGENTS_DIR, agentName);
       await fs.writeFile(path.join(agentDir, filename), yamlContent, 'utf-8');
