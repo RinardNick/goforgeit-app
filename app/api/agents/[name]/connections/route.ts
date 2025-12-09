@@ -1,51 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
-import { Storage } from '@google-cloud/storage';
 import YAML from 'yaml';
-
-const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-const GCS_BUCKET = process.env.GCS_BUCKET_NAME || 'goforgeit-adk-agents';
-const USE_GCS = process.env.NODE_ENV === 'production';
-
-// Initialize GCS client (lazy)
-let storage: Storage | null = null;
-function getStorage(): Storage {
-  if (!storage) {
-    storage = new Storage();
-  }
-  return storage;
-}
-
-// Helper to read a file from GCS or filesystem
-async function readAgentFile(agentName: string, filename: string): Promise<string | null> {
-  if (USE_GCS) {
-    const bucket = getStorage().bucket(GCS_BUCKET);
-    const file = bucket.file(`${agentName}/${filename}`);
-    const [exists] = await file.exists();
-    if (!exists) return null;
-    const [content] = await file.download();
-    return content.toString('utf-8');
-  } else {
-    const filePath = path.join(ADK_AGENTS_DIR, agentName, filename);
-    try {
-      return await fs.readFile(filePath, 'utf-8');
-    } catch {
-      return null;
-    }
-  }
-}
-
-// Helper to write a file to GCS or filesystem
-async function writeAgentFile(agentName: string, filename: string, content: string): Promise<void> {
-  if (USE_GCS) {
-    const bucket = getStorage().bucket(GCS_BUCKET);
-    await bucket.file(`${agentName}/${filename}`).save(content, { contentType: 'text/yaml' });
-  } else {
-    const filePath = path.join(ADK_AGENTS_DIR, agentName, filename);
-    await fs.writeFile(filePath, content, 'utf-8');
-  }
-}
+import { readAgentFile, writeAgentFile } from '@/lib/storage';
 
 interface SubAgent {
   config_path?: string;

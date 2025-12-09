@@ -1,48 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 import {
   EvalSetWithHistory,
   isEvalSet,
 } from '@/lib/adk/evaluation-types';
-
-const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-
-async function getEvalsetPath(agentName: string, evalsetId: string): Promise<string | null> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-
-  // Try both .test.json and .json extensions
-  const testJsonPath = path.join(evalsDir, `${evalsetId}.test.json`);
-  const jsonPath = path.join(evalsDir, `${evalsetId}.json`);
-
-  try {
-    await fs.access(testJsonPath);
-    return testJsonPath;
-  } catch {
-    try {
-      await fs.access(jsonPath);
-      return jsonPath;
-    } catch {
-      return null;
-    }
-  }
-}
+import { readAgentFile } from '@/lib/storage';
 
 async function loadEvalset(agentName: string, evalsetId: string): Promise<EvalSetWithHistory | null> {
-  const filepath = await getEvalsetPath(agentName, evalsetId);
+  // Try both .test.json and .json extensions
+  let content = await readAgentFile(agentName, `evaluations/${evalsetId}.test.json`);
+  if (!content) {
+    content = await readAgentFile(agentName, `evaluations/${evalsetId}.json`);
+  }
 
-  if (!filepath) {
+  if (!content) {
     return null;
   }
 
   try {
-    const content = await fs.readFile(filepath, 'utf-8');
     const data = JSON.parse(content);
-
     if (isEvalSet(data)) {
       return data as EvalSetWithHistory;
     }
-
     return null;
   } catch {
     return null;

@@ -1,49 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 import {
   EvalSet,
   EvalSetWithHistory,
   isEvalSet,
 } from '@/lib/adk/evaluation-types';
-
-const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-
-async function getEvalsetPath(agentName: string, evalsetId: string): Promise<string | null> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-
-  // Try both .test.json and .json extensions
-  const testJsonPath = path.join(evalsDir, `${evalsetId}.test.json`);
-  const jsonPath = path.join(evalsDir, `${evalsetId}.json`);
-
-  try {
-    await fs.access(testJsonPath);
-    return testJsonPath;
-  } catch {
-    try {
-      await fs.access(jsonPath);
-      return jsonPath;
-    } catch {
-      return null;
-    }
-  }
-}
+import {
+  readAgentFile,
+  writeAgentFile,
+  deleteAgentFile,
+  ensureEvalsDir,
+} from '@/lib/storage';
 
 async function loadEvalset(agentName: string, evalsetId: string): Promise<EvalSetWithHistory | null> {
-  const filepath = await getEvalsetPath(agentName, evalsetId);
+  // Try both .test.json and .json extensions
+  let content = await readAgentFile(agentName, `evaluations/${evalsetId}.test.json`);
+  if (!content) {
+    content = await readAgentFile(agentName, `evaluations/${evalsetId}.json`);
+  }
 
-  if (!filepath) {
+  if (!content) {
     return null;
   }
 
   try {
-    const content = await fs.readFile(filepath, 'utf-8');
     const data = JSON.parse(content);
-
     if (isEvalSet(data)) {
       return data as EvalSetWithHistory;
     }
-
     return null;
   } catch {
     return null;
@@ -51,9 +34,22 @@ async function loadEvalset(agentName: string, evalsetId: string): Promise<EvalSe
 }
 
 async function saveEvalset(agentName: string, evalset: EvalSet | EvalSetWithHistory): Promise<void> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-  const filepath = path.join(evalsDir, `${evalset.eval_set_id}.test.json`);
-  await fs.writeFile(filepath, JSON.stringify(evalset, null, 2));
+  await ensureEvalsDir(agentName);
+  await writeAgentFile(
+    agentName,
+    `evaluations/${evalset.eval_set_id}.test.json`,
+    JSON.stringify(evalset, null, 2),
+    'application/json'
+  );
+}
+
+async function deleteEvalsetFile(agentName: string, evalsetId: string): Promise<boolean> {
+  // Try both .test.json and .json extensions
+  let deleted = await deleteAgentFile(agentName, `evaluations/${evalsetId}.test.json`);
+  if (!deleted) {
+    deleted = await deleteAgentFile(agentName, `evaluations/${evalsetId}.json`);
+  }
+  return deleted;
 }
 
 // GET /api/agents/[name]/evaluations/[id] - Get evalset detail
@@ -128,16 +124,14 @@ export async function DELETE(
   try {
     const { name: agentName, id: evalsetId } = await params;
 
-    const filepath = await getEvalsetPath(agentName, evalsetId);
+    const deleted = await deleteEvalsetFile(agentName, evalsetId);
 
-    if (!filepath) {
+    if (!deleted) {
       return NextResponse.json(
         { error: 'Evaluation not found' },
         { status: 404 }
       );
     }
-
-    await fs.unlink(filepath);
 
     return NextResponse.json({ success: true });
   } catch (error) {

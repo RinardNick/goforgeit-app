@@ -1,31 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 import {
   EvalSetWithHistory,
   isEvalSet,
 } from '@/lib/adk/evaluation-types';
-
-const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-
-async function getEvalsDir(agentName: string): Promise<string> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-
-  // Ensure directory exists
-  try {
-    await fs.access(evalsDir);
-  } catch {
-    await fs.mkdir(evalsDir, { recursive: true });
-  }
-
-  return evalsDir;
-}
+import {
+  writeAgentFile,
+  agentFileExists,
+  ensureEvalsDir,
+} from '@/lib/storage';
 
 async function saveEvalset(agentName: string, evalset: EvalSetWithHistory): Promise<void> {
-  const evalsDir = await getEvalsDir(agentName);
-  // Use .test.json extension for ADK compatibility
-  const filepath = path.join(evalsDir, `${evalset.eval_set_id}.test.json`);
-  await fs.writeFile(filepath, JSON.stringify(evalset, null, 2));
+  await ensureEvalsDir(agentName);
+  await writeAgentFile(
+    agentName,
+    `evaluations/${evalset.eval_set_id}.test.json`,
+    JSON.stringify(evalset, null, 2),
+    'application/json'
+  );
 }
 
 // POST /api/agents/[name]/evaluations/import - Import .test.json file
@@ -67,17 +58,12 @@ export async function POST(
     const evalset = parsedEvalset as EvalSetWithHistory;
 
     // Check if evalset with same ID already exists
-    const evalsDir = await getEvalsDir(agentName);
-    const existingFile = path.join(evalsDir, `${evalset.eval_set_id}.test.json`);
-
-    try {
-      await fs.access(existingFile);
+    const existingFile = await agentFileExists(agentName, `evaluations/${evalset.eval_set_id}.test.json`);
+    if (existingFile) {
       return NextResponse.json(
         { error: `Evaluation with ID "${evalset.eval_set_id}" already exists. Please rename or delete the existing one.` },
         { status: 409 }
       );
-    } catch {
-      // File doesn't exist, proceed with import
     }
 
     // Save the evalset

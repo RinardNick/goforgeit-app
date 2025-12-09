@@ -1,21 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-
-async function getEvalsDir(agentName: string): Promise<string> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-
-  // Ensure directory exists
-  try {
-    await fs.access(evalsDir);
-  } catch {
-    await fs.mkdir(evalsDir, { recursive: true });
-  }
-
-  return evalsDir;
-}
+import {
+  readAgentFile,
+  writeAgentFile,
+  deleteAgentFile,
+  ensureEvalsDir,
+} from '@/lib/storage';
 
 // GET /api/agents/[name]/evaluations/[id]/config - Load metrics configuration
 export async function GET(
@@ -25,28 +14,19 @@ export async function GET(
   try {
     const { name: agentName, id: evalsetId } = await params;
 
-    const evalsDir = await getEvalsDir(agentName);
-    const configPath = path.join(evalsDir, `${evalsetId}.config.json`);
+    const configContent = await readAgentFile(agentName, `evaluations/${evalsetId}.config.json`);
 
-    // Check if config file exists
-    try {
-      await fs.access(configPath);
-
-      // Read and parse config file
-      const configContent = await fs.readFile(configPath, 'utf-8');
+    if (configContent) {
       const config = JSON.parse(configContent);
-
       return NextResponse.json({
         config,
         hasCustomConfig: true,
-        configPath,
       });
-    } catch {
+    } else {
       // Config file doesn't exist, return defaults
       return NextResponse.json({
         config: null,
         hasCustomConfig: false,
-        configPath,
       });
     }
   } catch (error) {
@@ -82,13 +62,16 @@ export async function POST(
     const config = { criteria };
 
     // Save to .config.json file
-    const evalsDir = await getEvalsDir(agentName);
-    const configPath = path.join(evalsDir, `${evalsetId}.config.json`);
-    await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+    await ensureEvalsDir(agentName);
+    await writeAgentFile(
+      agentName,
+      `evaluations/${evalsetId}.config.json`,
+      JSON.stringify(config, null, 2),
+      'application/json'
+    );
 
     return NextResponse.json({
       success: true,
-      configPath,
       message: 'Configuration saved',
     });
   } catch (error) {
@@ -111,25 +94,20 @@ export async function DELETE(
   try {
     const { name: agentName, id: evalsetId } = await params;
 
-    const evalsDir = await getEvalsDir(agentName);
-    const configPath = path.join(evalsDir, `${evalsetId}.config.json`);
-
     // Try to delete the config file
-    try {
-      await fs.unlink(configPath);
+    const deleted = await deleteAgentFile(agentName, `evaluations/${evalsetId}.config.json`);
+
+    if (deleted) {
       return NextResponse.json({
         success: true,
         message: 'Reset to defaults',
       });
-    } catch (error) {
+    } else {
       // File might not exist, which is fine
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        return NextResponse.json({
-          success: true,
-          message: 'Already using defaults',
-        });
-      }
-      throw error;
+      return NextResponse.json({
+        success: true,
+        message: 'Already using defaults',
+      });
     }
   } catch (error) {
     console.error('Error deleting config:', error);

@@ -9,50 +9,36 @@ import {
   EvalRun,
   EvalCaseResult,
   TurnResult,
-  Content,
   isEvalSet,
   MetricResult,
-  EvaluationMetric,
 } from '@/lib/adk/evaluation-types';
+import {
+  readAgentFile,
+  writeAgentFile,
+  ensureEvalsDir,
+  USE_GCS,
+} from '@/lib/storage';
 
 const execAsync = promisify(exec);
 const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-
-async function getEvalsetPath(agentName: string, evalsetId: string): Promise<string | null> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-
-  // Try both .test.json and .json extensions
-  const testJsonPath = path.join(evalsDir, `${evalsetId}.test.json`);
-  const jsonPath = path.join(evalsDir, `${evalsetId}.json`);
-
-  try {
-    await fs.access(testJsonPath);
-    return testJsonPath;
-  } catch {
-    try {
-      await fs.access(jsonPath);
-      return jsonPath;
-    } catch {
-      return null;
-    }
-  }
-}
+const ADK_BACKEND_URL = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
 
 async function loadEvalset(agentName: string, evalsetId: string): Promise<EvalSetWithHistory | null> {
-  const filepath = await getEvalsetPath(agentName, evalsetId);
+  // Try both .test.json and .json extensions
+  let content = await readAgentFile(agentName, `evaluations/${evalsetId}.test.json`);
+  if (!content) {
+    content = await readAgentFile(agentName, `evaluations/${evalsetId}.json`);
+  }
 
-  if (!filepath) {
+  if (!content) {
     return null;
   }
 
   try {
-    const content = await fs.readFile(filepath, 'utf-8');
     const data = JSON.parse(content);
-
     if (isEvalSet(data)) {
       return data as EvalSetWithHistory;
     }
-
     return null;
   } catch {
     return null;
@@ -60,19 +46,24 @@ async function loadEvalset(agentName: string, evalsetId: string): Promise<EvalSe
 }
 
 async function saveEvalset(agentName: string, evalset: EvalSetWithHistory): Promise<void> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-  const filepath = path.join(evalsDir, `${evalset.eval_set_id}.test.json`);
-  await fs.writeFile(filepath, JSON.stringify(evalset, null, 2));
+  await ensureEvalsDir(agentName);
+  await writeAgentFile(
+    agentName,
+    `evaluations/${evalset.eval_set_id}.test.json`,
+    JSON.stringify(evalset, null, 2),
+    'application/json'
+  );
 }
 
 /**
- * Run ADK eval CLI command and return the result file path
+ * Run ADK eval CLI command and return the result file path (local only)
  */
-async function runAdkEval(
+async function runAdkEvalLocal(
   agentName: string,
-  evalsetPath: string
+  evalsetId: string
 ): Promise<string> {
   const agentsDir = ADK_AGENTS_DIR;
+  const evalsetPath = path.join(agentsDir, agentName, 'evaluations', `${evalsetId}.test.json`);
   const relativeEvalsetPath = path.relative(agentsDir, evalsetPath);
 
   // Run adk eval command from agents directory
@@ -103,6 +94,19 @@ async function runAdkEval(
     }
     throw new Error('ADK eval failed with unknown error');
   }
+}
+
+/**
+ * Run ADK eval via backend API (production)
+ */
+async function runAdkEvalViaBackend(
+  agentName: string,
+  evalset: EvalSetWithHistory
+): Promise<EvalCaseResult[]> {
+  // In production, we need to call the ADK backend's eval endpoint
+  // For now, return a placeholder since the ADK backend doesn't have an eval API yet
+  // This will need to be implemented when the backend supports it
+  throw new Error('Evaluation execution is not yet supported in production. Please run evaluations locally.');
 }
 
 /**
@@ -192,20 +196,19 @@ export async function POST(
       );
     }
 
-    // Get evalset file path
-    const evalsetPath = await getEvalsetPath(agentName, evalsetId);
-    if (!evalsetPath) {
+    let results: EvalCaseResult[];
+
+    if (USE_GCS) {
+      // Production: Use ADK backend (not yet implemented)
       return NextResponse.json(
-        { error: 'Evaluation file not found' },
-        { status: 404 }
+        { error: 'Evaluation execution is not yet supported in production. Please run evaluations locally.' },
+        { status: 501 }
       );
+    } else {
+      // Local: Run ADK eval CLI command
+      const resultFilePath = await runAdkEvalLocal(agentName, evalsetId);
+      results = await parseAdkEvalResult(resultFilePath);
     }
-
-    // Run ADK eval CLI command
-    const resultFilePath = await runAdkEval(agentName, evalsetPath);
-
-    // Parse ADK eval results
-    const results = await parseAdkEvalResult(resultFilePath);
 
     // Calculate overall pass rate
     const passedCases = results.filter(r => r.passed).length;

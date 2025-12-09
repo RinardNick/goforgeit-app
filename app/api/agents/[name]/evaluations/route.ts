@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 import {
-  EvalSet,
   EvalSetWithHistory,
   createEvalSet,
-  generateEvalSetId,
   isEvalSet,
 } from '@/lib/adk/evaluation-types';
-
-const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
-const ADK_BACKEND_URL = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
-const USE_ADK_BACKEND = process.env.NODE_ENV === 'production';
+import {
+  readAgentFile,
+  writeAgentFile,
+  listAgentFiles,
+  verifyAgentExists,
+  ensureEvalsDir,
+} from '@/lib/storage';
 
 // Legacy types for backward compatibility (will be migrated)
 interface LegacyTestCase {
@@ -33,65 +32,50 @@ interface LegacyEvalset {
   runs?: any[];
 }
 
-async function getEvalsDir(agentName: string): Promise<string> {
-  const evalsDir = path.join(ADK_AGENTS_DIR, agentName, 'evaluations');
-
-  // Ensure directory exists
-  try {
-    await fs.access(evalsDir);
-  } catch {
-    await fs.mkdir(evalsDir, { recursive: true });
-  }
-
-  return evalsDir;
-}
-
 /**
  * Load evalsets - supports both legacy and new ADK format
  */
 async function loadEvalsets(agentName: string): Promise<EvalSetWithHistory[]> {
-  const evalsDir = await getEvalsDir(agentName);
+  const files = await listAgentFiles(agentName, 'evaluations');
+  const jsonFiles = files.filter(f => f.endsWith('.json'));
 
-  try {
-    const files = await fs.readdir(evalsDir);
-    // Support both .json and .test.json formats
-    const jsonFiles = files.filter(f => f.endsWith('.json'));
+  const evalsets: EvalSetWithHistory[] = [];
+  for (const file of jsonFiles) {
+    try {
+      const content = await readAgentFile(agentName, `evaluations/${file}`);
+      if (!content) continue;
 
-    const evalsets: EvalSetWithHistory[] = [];
-    for (const file of jsonFiles) {
-      try {
-        const content = await fs.readFile(path.join(evalsDir, file), 'utf-8');
-        const data = JSON.parse(content);
+      const data = JSON.parse(content);
 
-        // Check if it's new ADK format
-        if (isEvalSet(data)) {
-          evalsets.push(data as EvalSetWithHistory);
-        } else {
-          // Legacy format - migrate to ADK format
-          const legacy = data as LegacyEvalset;
-          const migrated = migrateLegacyToADK(agentName, legacy);
-          evalsets.push(migrated);
-        }
-      } catch (error) {
-        // Skip invalid files
-        console.error(`Failed to parse evalset file: ${file}`, error);
+      // Check if it's new ADK format
+      if (isEvalSet(data)) {
+        evalsets.push(data as EvalSetWithHistory);
+      } else {
+        // Legacy format - migrate to ADK format
+        const legacy = data as LegacyEvalset;
+        const migrated = migrateLegacyToADK(agentName, legacy);
+        evalsets.push(migrated);
       }
+    } catch (error) {
+      // Skip invalid files
+      console.error(`Failed to parse evalset file: ${file}`, error);
     }
-
-    return evalsets;
-  } catch {
-    return [];
   }
+
+  return evalsets;
 }
 
 /**
  * Save evalset in ADK .test.json format
  */
-async function saveEvalset(agentName: string, evalset: EvalSet | EvalSetWithHistory): Promise<void> {
-  const evalsDir = await getEvalsDir(agentName);
-  // Use .test.json extension for ADK compatibility
-  const filepath = path.join(evalsDir, `${evalset.eval_set_id}.test.json`);
-  await fs.writeFile(filepath, JSON.stringify(evalset, null, 2));
+async function saveEvalset(agentName: string, evalset: EvalSetWithHistory): Promise<void> {
+  await ensureEvalsDir(agentName);
+  await writeAgentFile(
+    agentName,
+    `evaluations/${evalset.eval_set_id}.test.json`,
+    JSON.stringify(evalset, null, 2),
+    'application/json'
+  );
 }
 
 /**
@@ -144,28 +128,6 @@ function migrateLegacyToADK(agentName: string, legacy: LegacyEvalset): EvalSetWi
   };
 }
 
-// Helper to verify agent exists
-async function verifyAgentExists(agentName: string): Promise<boolean> {
-  if (USE_ADK_BACKEND) {
-    // Check via ADK backend
-    try {
-      const response = await fetch(`${ADK_BACKEND_URL}/builder/app/${agentName}`);
-      return response.ok;
-    } catch {
-      return false;
-    }
-  } else {
-    // Check filesystem
-    const agentDir = path.join(ADK_AGENTS_DIR, agentName);
-    try {
-      await fs.access(agentDir);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-}
-
 // GET /api/agents/[name]/evaluations - List all evalsets
 export async function GET(
   request: NextRequest,
@@ -180,12 +142,6 @@ export async function GET(
         { error: `Agent '${agentName}' not found` },
         { status: 404 }
       );
-    }
-
-    // In production, evaluations are not yet persisted
-    // Return empty list for now (evaluations would need cloud storage)
-    if (USE_ADK_BACKEND) {
-      return NextResponse.json({ evalsets: [] });
     }
 
     const evalsets = await loadEvalsets(agentName);
@@ -223,14 +179,6 @@ export async function POST(
       return NextResponse.json(
         { error: `Agent '${agentName}' not found` },
         { status: 404 }
-      );
-    }
-
-    // In production, evaluations are not yet persisted
-    if (USE_ADK_BACKEND) {
-      return NextResponse.json(
-        { error: 'Evaluations not yet supported in production' },
-        { status: 501 }
       );
     }
 
