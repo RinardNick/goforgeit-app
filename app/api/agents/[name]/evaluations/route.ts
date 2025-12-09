@@ -10,6 +10,8 @@ import {
 } from '@/lib/adk/evaluation-types';
 
 const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
+const ADK_BACKEND_URL = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
+const USE_ADK_BACKEND = process.env.NODE_ENV === 'production';
 
 // Legacy types for backward compatibility (will be migrated)
 interface LegacyTestCase {
@@ -142,6 +144,28 @@ function migrateLegacyToADK(agentName: string, legacy: LegacyEvalset): EvalSetWi
   };
 }
 
+// Helper to verify agent exists
+async function verifyAgentExists(agentName: string): Promise<boolean> {
+  if (USE_ADK_BACKEND) {
+    // Check via ADK backend
+    try {
+      const response = await fetch(`${ADK_BACKEND_URL}/builder/app/${agentName}`);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  } else {
+    // Check filesystem
+    const agentDir = path.join(ADK_AGENTS_DIR, agentName);
+    try {
+      await fs.access(agentDir);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
 // GET /api/agents/[name]/evaluations - List all evalsets
 export async function GET(
   request: NextRequest,
@@ -151,14 +175,17 @@ export async function GET(
     const { name: agentName } = await params;
 
     // Verify agent exists
-    const agentDir = path.join(ADK_AGENTS_DIR, agentName);
-    try {
-      await fs.access(agentDir);
-    } catch {
+    if (!(await verifyAgentExists(agentName))) {
       return NextResponse.json(
         { error: `Agent '${agentName}' not found` },
         { status: 404 }
       );
+    }
+
+    // In production, evaluations are not yet persisted
+    // Return empty list for now (evaluations would need cloud storage)
+    if (USE_ADK_BACKEND) {
+      return NextResponse.json({ evalsets: [] });
     }
 
     const evalsets = await loadEvalsets(agentName);
@@ -192,13 +219,18 @@ export async function POST(
     }
 
     // Verify agent exists
-    const agentDir = path.join(ADK_AGENTS_DIR, agentName);
-    try {
-      await fs.access(agentDir);
-    } catch {
+    if (!(await verifyAgentExists(agentName))) {
       return NextResponse.json(
         { error: `Agent '${agentName}' not found` },
         { status: 404 }
+      );
+    }
+
+    // In production, evaluations are not yet persisted
+    if (USE_ADK_BACKEND) {
+      return NextResponse.json(
+        { error: 'Evaluations not yet supported in production' },
+        { status: 501 }
       );
     }
 
