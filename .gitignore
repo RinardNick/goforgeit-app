@@ -20,6 +20,9 @@ build/
 .env.test.local
 .env.production.local
 
+# OAuth client secrets
+client_secret_*.json
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

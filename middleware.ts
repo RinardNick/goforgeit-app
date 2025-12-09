@@ -6,7 +6,8 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/api/auth'];
+  // Note: /api/adk-router is public because it's called server-to-server by the ADK client
+  const publicRoutes = ['/login', '/api/auth', '/api/adk-router'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   // Allow public routes
