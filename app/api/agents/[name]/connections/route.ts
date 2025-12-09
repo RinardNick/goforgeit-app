@@ -1,9 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { promises as fs } from 'fs';
+import { Storage } from '@google-cloud/storage';
 import YAML from 'yaml';
 
 const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
+const GCS_BUCKET = process.env.GCS_BUCKET_NAME || 'goforgeit-adk-agents';
+const USE_GCS = process.env.NODE_ENV === 'production';
+
+// Initialize GCS client (lazy)
+let storage: Storage | null = null;
+function getStorage(): Storage {
+  if (!storage) {
+    storage = new Storage();
+  }
+  return storage;
+}
+
+// Helper to read a file from GCS or filesystem
+async function readAgentFile(agentName: string, filename: string): Promise<string | null> {
+  if (USE_GCS) {
+    const bucket = getStorage().bucket(GCS_BUCKET);
+    const file = bucket.file(`${agentName}/${filename}`);
+    const [exists] = await file.exists();
+    if (!exists) return null;
+    const [content] = await file.download();
+    return content.toString('utf-8');
+  } else {
+    const filePath = path.join(ADK_AGENTS_DIR, agentName, filename);
+    try {
+      return await fs.readFile(filePath, 'utf-8');
+    } catch {
+      return null;
+    }
+  }
+}
+
+// Helper to write a file to GCS or filesystem
+async function writeAgentFile(agentName: string, filename: string, content: string): Promise<void> {
+  if (USE_GCS) {
+    const bucket = getStorage().bucket(GCS_BUCKET);
+    await bucket.file(`${agentName}/${filename}`).save(content, { contentType: 'text/yaml' });
+  } else {
+    const filePath = path.join(ADK_AGENTS_DIR, agentName, filename);
+    await fs.writeFile(filePath, content, 'utf-8');
+  }
+}
 
 interface SubAgent {
   config_path?: string;
@@ -36,32 +78,24 @@ export async function POST(
       );
     }
 
-    const agentDir = path.join(ADK_AGENTS_DIR, agentName);
-
     // Verify both files exist
-    const parentPath = path.join(agentDir, parentFilename);
-    const childPath = path.join(agentDir, childFilename);
-
-    try {
-      await fs.access(parentPath);
-    } catch {
+    const parentContent = await readAgentFile(agentName, parentFilename);
+    if (!parentContent) {
       return NextResponse.json(
         { error: `Parent file not found: ${parentFilename}` },
         { status: 404 }
       );
     }
 
-    try {
-      await fs.access(childPath);
-    } catch {
+    const childContent = await readAgentFile(agentName, childFilename);
+    if (!childContent) {
       return NextResponse.json(
         { error: `Child file not found: ${childFilename}` },
         { status: 404 }
       );
     }
 
-    // Read the parent YAML
-    const parentContent = await fs.readFile(parentPath, 'utf-8');
+    // Parse the parent YAML
     const parentYaml = YAML.parse(parentContent) as AgentYaml;
 
     // Check if the connection already exists
@@ -82,7 +116,7 @@ export async function POST(
 
     // Write the updated YAML
     const updatedContent = YAML.stringify(parentYaml);
-    await fs.writeFile(parentPath, updatedContent, 'utf-8');
+    await writeAgentFile(agentName, parentFilename, updatedContent);
 
     console.log(`Created connection: ${parentFilename} -> ${childFilename}`);
 
@@ -118,21 +152,16 @@ export async function PATCH(
       );
     }
 
-    const agentDir = path.join(ADK_AGENTS_DIR, agentName);
-    const parentPath = path.join(agentDir, parentFilename);
-
     // Verify parent file exists
-    try {
-      await fs.access(parentPath);
-    } catch {
+    const parentContent = await readAgentFile(agentName, parentFilename);
+    if (!parentContent) {
       return NextResponse.json(
         { error: `Parent file not found: ${parentFilename}` },
         { status: 404 }
       );
     }
 
-    // Read the parent YAML
-    const parentContent = await fs.readFile(parentPath, 'utf-8');
+    // Parse the parent YAML
     const parentYaml = YAML.parse(parentContent) as AgentYaml;
 
     // Check if sub_agents exists and the child is in the array
@@ -164,7 +193,7 @@ export async function PATCH(
 
     // Write the updated YAML
     const updatedContent = YAML.stringify(parentYaml);
-    await fs.writeFile(parentPath, updatedContent, 'utf-8');
+    await writeAgentFile(agentName, parentFilename, updatedContent);
 
     console.log(`Reordered ${childFilename} from index ${currentIndex} to ${newIndex} in ${parentFilename}`);
 
@@ -203,21 +232,16 @@ export async function DELETE(
       );
     }
 
-    const agentDir = path.join(ADK_AGENTS_DIR, agentName);
-    const parentPath = path.join(agentDir, parentFilename);
-
     // Verify parent file exists
-    try {
-      await fs.access(parentPath);
-    } catch {
+    const parentContent = await readAgentFile(agentName, parentFilename);
+    if (!parentContent) {
       return NextResponse.json(
         { error: `Parent file not found: ${parentFilename}` },
         { status: 404 }
       );
     }
 
-    // Read the parent YAML
-    const parentContent = await fs.readFile(parentPath, 'utf-8');
+    // Parse the parent YAML
     const parentYaml = YAML.parse(parentContent) as AgentYaml;
 
     // Check if the connection exists
@@ -245,7 +269,7 @@ export async function DELETE(
 
     // Write the updated YAML
     const updatedContent = YAML.stringify(parentYaml);
-    await fs.writeFile(parentPath, updatedContent, 'utf-8');
+    await writeAgentFile(agentName, parentFilename, updatedContent);
 
     console.log(`Deleted connection: ${parentFilename} -> ${childFilename}`);
 
