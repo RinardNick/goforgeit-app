@@ -3,6 +3,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import {
+  loadConversationForAgent,
+  saveConversationForAgent,
+  clearConversationForAgent,
+} from '@/lib/adk/assistant-conversation-store';
 
 // Executed action from the backend
 interface ExecutedAction {
@@ -69,6 +74,21 @@ export function AIAssistantPanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation from localStorage when projectName changes
+  useEffect(() => {
+    if (projectName) {
+      const savedMessages = loadConversationForAgent(projectName);
+      setMessages(savedMessages as Message[]);
+    }
+  }, [projectName]);
+
+  // Save conversation to localStorage when messages change
+  useEffect(() => {
+    if (projectName && messages.length > 0) {
+      saveConversationForAgent(projectName, messages);
+    }
+  }, [projectName, messages]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -193,6 +213,11 @@ export function AIAssistantPanel({
     inputRef.current?.focus();
   };
 
+  const handleClearConversation = () => {
+    setMessages([]);
+    clearConversationForAgent(projectName);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -213,12 +238,24 @@ export function AIAssistantPanel({
 
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          AI Builder Assistant
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            AI Builder Assistant
+          </h3>
+          {messages.length > 0 && (
+            <button
+              data-testid="ai-assistant-clear"
+              onClick={handleClearConversation}
+              className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+              title="Clear conversation"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         {selectedAgent && (
           <div
             data-testid="ai-assistant-context"

@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI, SchemaType, FunctionCallingMode, Content, FunctionDeclaration } from '@google/generative-ai';
+import { SchemaType, FunctionCallingMode, Content, FunctionDeclaration } from '@google/generative-ai';
 import { z } from 'zod';
 import { promises as fs } from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
+import { getGeminiClient, isGeminiConfigured } from '@/lib/gemini';
 
 export const runtime = 'nodejs';
+
+// Environment configuration
+const ADK_BACKEND_URL = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
+const USE_ADK_BACKEND = process.env.NODE_ENV === 'production';
 
 // Request schema for the AI assistant
 const AssistantRequestSchema = z.object({
@@ -71,26 +76,87 @@ const AGENT_CLASSES = {
 const ADK_AGENTS_BASE_PATH = path.join(process.cwd(), 'adk-service', 'agents');
 
 /**
+ * Helper to save agent YAML via ADK backend
+ */
+async function saveAgentViaBackend(projectName: string, yamlContent: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${ADK_BACKEND_URL}/builder/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        app_name: projectName,
+        yaml_content: yamlContent,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return { success: false, error: `ADK backend error: ${error}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: `Failed to connect to ADK backend: ${error instanceof Error ? error.message : 'Unknown error'}` };
+  }
+}
+
+/**
+ * Helper to read agent YAML via ADK backend
+ */
+async function readAgentViaBackend(projectName: string): Promise<{ success: boolean; content?: string; error?: string }> {
+  try {
+    const response = await fetch(`${ADK_BACKEND_URL}/builder/app/${projectName}`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { success: false, error: 'Agent not found' };
+      }
+      return { success: false, error: `ADK backend error: ${response.statusText}` };
+    }
+
+    const content = await response.text();
+    return { success: true, content };
+  } catch (error) {
+    return { success: false, error: `Failed to connect to ADK backend: ${error instanceof Error ? error.message : 'Unknown error'}` };
+  }
+}
+
+/**
  * Read all YAML files from the project directory
  */
 async function readProjectAgentYamls(projectName: string): Promise<Map<string, string>> {
   const agentYamls = new Map<string, string>();
-  const projectPath = path.join(ADK_AGENTS_BASE_PATH, projectName);
 
-  try {
-    const files = await fs.readdir(projectPath);
-    const yamlFiles = files.filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
-
-    for (const file of yamlFiles) {
-      try {
-        const content = await fs.readFile(path.join(projectPath, file), 'utf-8');
-        agentYamls.set(file, content);
-      } catch {
-        // Skip files that can't be read
+  if (USE_ADK_BACKEND) {
+    // Production: Read from ADK backend's builder endpoint
+    try {
+      const response = await fetch(`${ADK_BACKEND_URL}/builder/app/${projectName}`);
+      if (response.ok) {
+        const yamlContent = await response.text();
+        agentYamls.set('root_agent.yaml', yamlContent);
       }
+    } catch {
+      // Backend unavailable or project doesn't exist
     }
-  } catch {
-    // Project directory doesn't exist or can't be read
+  } else {
+    // Local: Read from filesystem
+    const projectPath = path.join(ADK_AGENTS_BASE_PATH, projectName);
+
+    try {
+      const files = await fs.readdir(projectPath);
+      const yamlFiles = files.filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
+
+      for (const file of yamlFiles) {
+        try {
+          const content = await fs.readFile(path.join(projectPath, file), 'utf-8');
+          agentYamls.set(file, content);
+        } catch {
+          // Skip files that can't be read
+        }
+      }
+    } catch {
+      // Project directory doesn't exist or can't be read
+    }
   }
 
   return agentYamls;
@@ -101,6 +167,14 @@ async function readProjectAgentYamls(projectName: string): Promise<Map<string, s
  */
 async function readProjectPythonTools(projectName: string): Promise<Map<string, string>> {
   const pythonTools = new Map<string, string>();
+
+  if (USE_ADK_BACKEND) {
+    // Production: Python tools reading not yet supported via ADK backend
+    // Return empty map for now
+    return pythonTools;
+  }
+
+  // Local: Read from filesystem
   const toolsPath = path.join(ADK_AGENTS_BASE_PATH, projectName, 'tools');
 
   try {
@@ -354,18 +428,6 @@ async function executeTool(
 
         // Generate filename
         const filename = `${name}.yaml`;
-        const filePath = path.join(projectPath, filename);
-
-        // Check if file already exists
-        try {
-          await fs.access(filePath);
-          return {
-            success: false,
-            message: `Agent file ${filename} already exists`,
-          };
-        } catch {
-          // File doesn't exist, good to proceed
-        }
 
         // Build YAML content
         const agentConfig: Record<string, unknown> = {
@@ -385,7 +447,40 @@ async function executeTool(
         }
 
         const yamlContent = yaml.dump(agentConfig, { lineWidth: -1 });
-        await fs.writeFile(filePath, yamlContent, 'utf-8');
+
+        if (USE_ADK_BACKEND) {
+          // Production: In production, we can only create/update the root agent
+          // The ADK backend's /builder/save endpoint updates root_agent.yaml
+          if (filename !== 'root_agent.yaml') {
+            return {
+              success: false,
+              message: `In production, only root_agent.yaml can be created/modified. Creating sub-agents requires the root agent to be updated with inline sub_agents.`,
+            };
+          }
+          const saveResult = await saveAgentViaBackend(projectName, yamlContent);
+          if (!saveResult.success) {
+            return {
+              success: false,
+              message: saveResult.error || 'Failed to save agent via backend',
+            };
+          }
+        } else {
+          // Local: Write to filesystem
+          const filePath = path.join(projectPath, filename);
+
+          // Check if file already exists
+          try {
+            await fs.access(filePath);
+            return {
+              success: false,
+              message: `Agent file ${filename} already exists`,
+            };
+          } catch {
+            // File doesn't exist, good to proceed
+          }
+
+          await fs.writeFile(filePath, yamlContent, 'utf-8');
+        }
 
         return {
           success: true,
@@ -397,6 +492,15 @@ async function executeTool(
       case 'add_sub_agent': {
         const parentFilename = args.parentFilename as string;
         const childFilename = args.childFilename as string;
+
+        if (USE_ADK_BACKEND) {
+          // Production: Sub-agent management not fully supported yet
+          // The ADK backend only supports root_agent.yaml
+          return {
+            success: false,
+            message: `In production, sub-agent relationships must be defined inline in the root agent YAML. Use modify_agent to update the root_agent with sub_agents array.`,
+          };
+        }
 
         const parentPath = path.join(projectPath, parentFilename);
         const childPath = path.join(projectPath, childFilename);
@@ -459,20 +563,40 @@ async function executeTool(
         const agentFilename = args.agentFilename as string;
         const tool = args.tool as string;
 
-        const agentPath = path.join(projectPath, agentFilename);
+        let agentContent: string;
 
-        // Verify agent exists
-        try {
-          await fs.access(agentPath);
-        } catch {
-          return {
-            success: false,
-            message: `Agent file ${agentFilename} does not exist`,
-          };
+        if (USE_ADK_BACKEND) {
+          // Production: Only root_agent.yaml is supported
+          if (agentFilename !== 'root_agent.yaml') {
+            return {
+              success: false,
+              message: `In production, only root_agent.yaml can be modified.`,
+            };
+          }
+          const readResult = await readAgentViaBackend(projectName);
+          if (!readResult.success) {
+            return {
+              success: false,
+              message: readResult.error || 'Failed to read agent from backend',
+            };
+          }
+          agentContent = readResult.content!;
+        } else {
+          const agentPath = path.join(projectPath, agentFilename);
+
+          // Verify agent exists
+          try {
+            await fs.access(agentPath);
+          } catch {
+            return {
+              success: false,
+              message: `Agent file ${agentFilename} does not exist`,
+            };
+          }
+
+          agentContent = await fs.readFile(agentPath, 'utf-8');
         }
 
-        // Read agent YAML
-        const agentContent = await fs.readFile(agentPath, 'utf-8');
         const agentConfig = yaml.load(agentContent) as Record<string, unknown>;
 
         // Verify it's an LlmAgent
@@ -503,7 +627,19 @@ async function executeTool(
 
         // Write back
         const updatedYaml = yaml.dump(agentConfig, { lineWidth: -1 });
-        await fs.writeFile(agentPath, updatedYaml, 'utf-8');
+
+        if (USE_ADK_BACKEND) {
+          const saveResult = await saveAgentViaBackend(projectName, updatedYaml);
+          if (!saveResult.success) {
+            return {
+              success: false,
+              message: saveResult.error || 'Failed to save agent via backend',
+            };
+          }
+        } else {
+          const agentPath = path.join(projectPath, agentFilename);
+          await fs.writeFile(agentPath, updatedYaml, 'utf-8');
+        }
 
         return {
           success: true,
@@ -514,20 +650,41 @@ async function executeTool(
 
       case 'modify_agent': {
         const agentFilename = args.agentFilename as string;
-        const agentPath = path.join(projectPath, agentFilename);
 
-        // Verify agent exists
-        try {
-          await fs.access(agentPath);
-        } catch {
-          return {
-            success: false,
-            message: `Agent file ${agentFilename} does not exist`,
-          };
+        let agentContent: string;
+
+        if (USE_ADK_BACKEND) {
+          // Production: Only root_agent.yaml is supported
+          if (agentFilename !== 'root_agent.yaml') {
+            return {
+              success: false,
+              message: `In production, only root_agent.yaml can be modified.`,
+            };
+          }
+          const readResult = await readAgentViaBackend(projectName);
+          if (!readResult.success) {
+            return {
+              success: false,
+              message: readResult.error || 'Failed to read agent from backend',
+            };
+          }
+          agentContent = readResult.content!;
+        } else {
+          const agentPath = path.join(projectPath, agentFilename);
+
+          // Verify agent exists
+          try {
+            await fs.access(agentPath);
+          } catch {
+            return {
+              success: false,
+              message: `Agent file ${agentFilename} does not exist`,
+            };
+          }
+
+          agentContent = await fs.readFile(agentPath, 'utf-8');
         }
 
-        // Read agent YAML
-        const agentContent = await fs.readFile(agentPath, 'utf-8');
         const agentConfig = yaml.load(agentContent) as Record<string, unknown>;
 
         // Apply modifications
@@ -554,7 +711,19 @@ async function executeTool(
 
         // Write back
         const updatedYaml = yaml.dump(agentConfig, { lineWidth: -1 });
-        await fs.writeFile(agentPath, updatedYaml, 'utf-8');
+
+        if (USE_ADK_BACKEND) {
+          const saveResult = await saveAgentViaBackend(projectName, updatedYaml);
+          if (!saveResult.success) {
+            return {
+              success: false,
+              message: saveResult.error || 'Failed to save agent via backend',
+            };
+          }
+        } else {
+          const agentPath = path.join(projectPath, agentFilename);
+          await fs.writeFile(agentPath, updatedYaml, 'utf-8');
+        }
 
         return {
           success: true,
@@ -564,6 +733,14 @@ async function executeTool(
       }
 
       case 'create_python_tool': {
+        if (USE_ADK_BACKEND) {
+          // Production: Python tool creation not supported via backend
+          return {
+            success: false,
+            message: `Creating Python tools is not yet supported in production. Use built-in tools like google_search instead.`,
+          };
+        }
+
         const name = args.name as string;
         const code = args.code as string;
         const addToAgent = args.addToAgent as string | undefined;
@@ -645,8 +822,31 @@ async function executeTool(
 
       case 'read_agent': {
         const filename = args.filename as string;
-        const agentPath = path.join(projectPath, filename);
 
+        if (USE_ADK_BACKEND) {
+          // Production: Only root_agent.yaml is supported
+          if (filename !== 'root_agent.yaml') {
+            return {
+              success: false,
+              message: `In production, only root_agent.yaml can be read.`,
+            };
+          }
+          const readResult = await readAgentViaBackend(projectName);
+          if (!readResult.success) {
+            return {
+              success: false,
+              message: readResult.error || 'Failed to read agent from backend',
+            };
+          }
+          const config = yaml.load(readResult.content!) as Record<string, unknown>;
+          return {
+            success: true,
+            message: `Read agent ${filename}`,
+            data: { filename, yaml: readResult.content, config },
+          };
+        }
+
+        const agentPath = path.join(projectPath, filename);
         try {
           const content = await fs.readFile(agentPath, 'utf-8');
           const config = yaml.load(content) as Record<string, unknown>;
@@ -664,6 +864,14 @@ async function executeTool(
       }
 
       case 'delete_agent': {
+        if (USE_ADK_BACKEND) {
+          // Production: Deletion not yet supported via backend
+          return {
+            success: false,
+            message: `Deleting agents is not yet supported in production. Please use the web interface to delete agents.`,
+          };
+        }
+
         const filename = args.filename as string;
         const agentPath = path.join(projectPath, filename);
 
@@ -691,20 +899,40 @@ async function executeTool(
         const agentFilename = args.agentFilename as string;
         const tool = args.tool as string;
 
-        const agentPath = path.join(projectPath, agentFilename);
+        let agentContent: string;
 
-        // Verify agent exists
-        try {
-          await fs.access(agentPath);
-        } catch {
-          return {
-            success: false,
-            message: `Agent file ${agentFilename} does not exist`,
-          };
+        if (USE_ADK_BACKEND) {
+          // Production: Only root_agent.yaml is supported
+          if (agentFilename !== 'root_agent.yaml') {
+            return {
+              success: false,
+              message: `In production, only root_agent.yaml can be modified.`,
+            };
+          }
+          const readResult = await readAgentViaBackend(projectName);
+          if (!readResult.success) {
+            return {
+              success: false,
+              message: readResult.error || 'Failed to read agent from backend',
+            };
+          }
+          agentContent = readResult.content!;
+        } else {
+          const agentPath = path.join(projectPath, agentFilename);
+
+          // Verify agent exists
+          try {
+            await fs.access(agentPath);
+          } catch {
+            return {
+              success: false,
+              message: `Agent file ${agentFilename} does not exist`,
+            };
+          }
+
+          agentContent = await fs.readFile(agentPath, 'utf-8');
         }
 
-        // Read agent YAML
-        const agentContent = await fs.readFile(agentPath, 'utf-8');
         const agentConfig = yaml.load(agentContent) as Record<string, unknown>;
 
         // Verify it's an LlmAgent
@@ -738,7 +966,19 @@ async function executeTool(
 
         // Write back
         const updatedYaml = yaml.dump(agentConfig, { lineWidth: -1 });
-        await fs.writeFile(agentPath, updatedYaml, 'utf-8');
+
+        if (USE_ADK_BACKEND) {
+          const saveResult = await saveAgentViaBackend(projectName, updatedYaml);
+          if (!saveResult.success) {
+            return {
+              success: false,
+              message: saveResult.error || 'Failed to save agent via backend',
+            };
+          }
+        } else {
+          const agentPath = path.join(projectPath, agentFilename);
+          await fs.writeFile(agentPath, updatedYaml, 'utf-8');
+        }
 
         return {
           success: true,
@@ -748,6 +988,14 @@ async function executeTool(
       }
 
       case 'remove_sub_agent': {
+        if (USE_ADK_BACKEND) {
+          // Production: Sub-agent management not fully supported yet
+          return {
+            success: false,
+            message: `In production, sub-agent relationships must be managed inline in the root agent YAML. Use modify_agent to update the root_agent with sub_agents array.`,
+          };
+        }
+
         const parentFilename = args.parentFilename as string;
         const childFilename = args.childFilename as string;
 
@@ -964,16 +1212,14 @@ export async function POST(
     }
 
     // Initialize Gemini with function calling
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
+    if (!isGeminiConfigured()) {
       return NextResponse.json(
         { error: 'GEMINI_API_KEY environment variable not configured' },
         { status: 500 }
       );
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
+    const model = getGeminiClient().getGenerativeModel({
       model: 'gemini-2.0-flash',
       systemInstruction: SYSTEM_PROMPT,
       tools: [{ functionDeclarations: toolDefinitions }],
