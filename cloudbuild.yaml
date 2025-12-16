@@ -29,6 +29,20 @@ steps:
       - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/app-goforgeit/app:$COMMIT_SHA'
       - '--region=us-central1'
       - '--platform=managed'
+      - '--add-cloudsql-instances'
+      - 'personal-site-477313:us-central1:goforgeit-db'
+      - '--set-env-vars'
+      - 'DATABASE_URL=postgresql://app_user:wG2e+c3/h0jK@/goforgeit?host=/cloudsql/personal-site-477313:us-central1:goforgeit-db'
+      - '--set-env-vars'
+      - 'AUTH_SECRET=${_AUTH_SECRET}'
+      - '--set-env-vars'
+      - 'AUTH_URL=https://app.goforgeit.com'
+      - '--set-env-vars'
+      - 'GOOGLE_CLIENT_ID=${_GOOGLE_CLIENT_ID}'
+      - '--set-env-vars'
+      - 'GOOGLE_CLIENT_SECRET=${_GOOGLE_CLIENT_SECRET}'
+      - '--set-env-vars'
+      - 'ALLOWED_EMAILS=${_ALLOWED_EMAILS}'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/app-goforgeit/app:$COMMIT_SHA'
@@ -38,3 +52,9 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 timeout: '1200s'
+
+substitutions:
+  _AUTH_SECRET: ''
+  _GOOGLE_CLIENT_ID: ''
+  _GOOGLE_CLIENT_SECRET: ''
+  _ALLOWED_EMAILS: ''

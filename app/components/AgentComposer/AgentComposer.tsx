@@ -952,7 +952,7 @@ function AgentComposerInner({
                         onCreateTool={async (name, code) => {
                           // Create the tool via API
                           try {
-                            const response = await fetch(`/api/agents/${projectName}/tools/python`, {
+                            const response = await fetch(`/api/adk-agents/${projectName}/tools/python`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ name, code }),
@@ -978,7 +978,7 @@ function AgentComposerInner({
                           const tool = (nodeData.pythonTools || []).find(t => t.id === id);
                           if (!tool) return false;
                           try {
-                            const response = await fetch(`/api/agents/${projectName}/tools/python?filename=${encodeURIComponent(tool.filename)}`, {
+                            const response = await fetch(`/api/adk-agents/${projectName}/tools/python?filename=${encodeURIComponent(tool.filename)}`, {
                               method: 'DELETE',
                             });
                             return response.ok;
@@ -993,7 +993,7 @@ function AgentComposerInner({
                           const tool = (nodeData.pythonTools || []).find(t => t.name === toolName);
                           const filename = tool?.filename || `${toolName}.py`;
                           try {
-                            const response = await fetch(`/api/agents/${projectName}/tools/python/test`, {
+                            const response = await fetch(`/api/adk-agents/${projectName}/tools/python/test`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ filename, params }),

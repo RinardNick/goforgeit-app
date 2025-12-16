@@ -90,33 +90,38 @@ export async function validateAgentReferences(
 /**
  * Validate YAML schema using ADK's Pydantic validator
  * Calls /api/validate-agent which uses the Python script
- *
- * Note: In production, Python validation is disabled since the validator
- * script isn't available in the Next.js container. Basic YAML validation
- * still happens via reference checking.
  */
 export async function validateAgentSchema(
   yamlContent: string
 ): Promise<ValidationResult> {
-  // Skip Python-based schema validation - it requires the Python validator
-  // script which isn't available in the production Next.js container.
-  // The ADK backend handles actual validation when agents are used.
-  // For now, just do basic YAML syntax validation.
   try {
-    // Try to parse as YAML to catch syntax errors
-    const YAML = await import('yaml');
-    YAML.parse(yamlContent);
+    // Determine the base URL based on environment
+    const baseUrl = typeof window === 'undefined'
+      ? (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3050')
+      : '';
 
-    return {
-      valid: true,
-      errors: [],
-    };
+    // Call validation endpoint
+    const response = await fetch(`${baseUrl}/api/validate-agent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ yaml: yamlContent }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Validation endpoint returned ${response.status}`);
+    }
+
+    const validationResult = await response.json();
+    return validationResult;
   } catch (error: any) {
+    // Unexpected error
     return {
       valid: false,
       errors: [{
-        type: 'yaml_syntax_error',
-        message: `YAML syntax error: ${error.message}`,
+        type: 'schema_validation_error',
+        message: `Schema validation failed: ${error.message}`,
         field: undefined,
         value: undefined,
       }],

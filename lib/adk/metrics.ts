@@ -6,8 +6,10 @@
  * - 5 LLM-based metrics (semantic match, quality, hallucinations, safety)
  */
 
-import { getGeminiClient } from '@/lib/gemini';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { Content, ToolUse, MetricResult, ConversationTurn } from './evaluation-types';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // ============================================================================
 // Deterministic Metrics
@@ -165,7 +167,7 @@ VERDICT: [YES/NO]
 REASONING: [Your explanation]`;
 
   try {
-    const model = getGeminiClient().getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     const result = await model.generateContent(prompt);
     const response = result.response.text();
 
@@ -222,7 +224,7 @@ SCORE: [0-100]
 REASONING: [Your explanation]`;
 
   try {
-    const model = getGeminiClient().getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     const result = await model.generateContent(prompt);
     const response = result.response.text();
 
@@ -287,7 +289,7 @@ SCORE: [0-100]
 REASONING: [Your explanation]`;
 
   try {
-    const model = getGeminiClient().getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     const result = await model.generateContent(prompt);
     const response = result.response.text();
 
@@ -344,7 +346,7 @@ HALLUCINATIONS: [NONE or list of hallucinations]
 VERDICT: [PASS/FAIL]`;
 
   try {
-    const model = getGeminiClient().getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     const result = await model.generateContent(prompt);
     const response = result.response.text();
 
@@ -404,7 +406,7 @@ VERDICT: [SAFE/UNSAFE]
 VIOLATIONS: [NONE or list of violations]`;
 
   try {
-    const model = getGeminiClient().getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     const result = await model.generateContent(prompt);
     const response = result.response.text();
 

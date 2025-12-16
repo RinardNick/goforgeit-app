@@ -11,13 +11,15 @@
     "test": "NODE_ENV=test playwright test",
     "test:unit": "tsx --test lib/adk/__tests__/*.test.ts",
     "test:ui": "NODE_ENV=test playwright test --ui",
-    "test:headed": "NODE_ENV=test playwright test --headed"
+    "test:headed": "NODE_ENV=test playwright test --headed",
+    "dev-adk": "./start-adk-services.sh",
+    "stop-adk": "lsof -ti:8000 | xargs kill -9 2>/dev/null || echo \"ADK server not running\""
   },
   "dependencies": {
     "@deepgram/sdk": "^4.11.2",
     "@google-cloud/storage": "^7.17.3",
     "@google/generative-ai": "^0.21.0",
-    "@modelcontextprotocol/sdk": "^1.22.0",
+    "@modelcontextprotocol/sdk": "^1.25.0",
     "@monaco-editor/react": "^4.7.0",
     "@types/dagre": "^0.7.53",
     "@xyflow/react": "^12.9.3",
@@ -26,6 +28,7 @@
     "lucide-react": "^0.555.0",
     "next": "^16.0.7",
     "next-auth": "^5.0.0-beta.30",
+    "pg": "^8.16.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-markdown": "^10.1.0",
@@ -37,6 +40,7 @@
     "@playwright/test": "^1.49.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22",
+    "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

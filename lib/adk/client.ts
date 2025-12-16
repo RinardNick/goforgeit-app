@@ -6,21 +6,20 @@
  */
 
 // All requests now go through the ADK router abstraction layer
-// The router handles proxying to the ADK backend
+// The router handles proxying to the ADK backend (http://127.0.0.1:8000)
 const ADK_ROUTER_URL = '/api/adk-router';
-
-// For server-side, we go directly to ADK backend (via router or direct)
-// ADK_BACKEND_URL is set in Cloud Run; for local dev, use localhost:8000
-const ADK_BACKEND_URL_SERVER = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
+const ADK_ROUTER_URL_SERVER = process.env.NEXT_PUBLIC_APP_URL
+  ? `${process.env.NEXT_PUBLIC_APP_URL}/api/adk-router`
+  : 'http://localhost:3050/api/adk-router';
 
 // Use ADK router for all requests (both server-side and client-side)
 // The router provides a single control point for all ADK communication
 const getBaseUrl = () => {
   if (typeof window === 'undefined') {
-    // Server-side: go directly to ADK backend (no need to proxy to ourselves)
-    return ADK_BACKEND_URL_SERVER;
+    // Server-side: use absolute URL to call our own router
+    return ADK_ROUTER_URL_SERVER;
   }
-  // Client-side: use relative URL to our router
+  // Client-side: use relative URL
   return ADK_ROUTER_URL;
 };
 
