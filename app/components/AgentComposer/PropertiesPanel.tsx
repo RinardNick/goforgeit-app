@@ -17,9 +17,18 @@ const agentPaletteItems: { type: ADKAgentClass; label: string; icon: string }[] 
   { type: 'LoopAgent', label: 'Loop', icon: '🔄' },
 ];
 
+// Validation error type
+export interface ValidationError {
+  type: string;
+  message: string;
+  field?: string;
+  value?: string;
+}
+
 interface PropertiesPanelProps {
   selectedNode: Node;
   expandedToolSections: Record<string, Set<ToolType>>;
+  validationErrors?: ValidationError[];
   onClose: () => void;
   onUpdateData: (updates: Partial<AgentNodeData>) => void;
   onUpdateDataLocal: (updates: Partial<AgentNodeData>) => void;
@@ -32,6 +41,7 @@ interface PropertiesPanelProps {
 export function PropertiesPanel({
   selectedNode,
   expandedToolSections,
+  validationErrors = [],
   onClose,
   onUpdateData,
   onUpdateDataLocal,
@@ -77,6 +87,26 @@ export function PropertiesPanel({
           </svg>
         </button>
       </div>
+
+      {/* Validation Errors */}
+      {validationErrors.length > 0 && (
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-sm" data-testid="validation-errors">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span className="text-xs font-bold text-destructive uppercase tracking-wider">Validation Errors</span>
+          </div>
+          <ul className="space-y-1">
+            {validationErrors.map((error, index) => (
+              <li key={index} className="text-xs text-destructive/90 font-mono">
+                {error.field && <span className="font-bold">{error.field}: </span>}
+                {error.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="space-y-6 flex-1">
         {/* Name */}

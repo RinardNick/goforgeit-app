@@ -22,7 +22,7 @@ import AgentNode, { AgentNodeData, ADKAgentClass, ToolConfig } from './AgentNode
 import ContainerNode from './ContainerNode';
 import { ToolType } from './AddToolsDropdown';
 import { AgentPalette } from './AgentPalette';
-import { PropertiesPanel } from './PropertiesPanel';
+import { PropertiesPanel, ValidationError } from './PropertiesPanel';
 
 // Custom node types
 const nodeTypes = {
@@ -387,19 +387,28 @@ function AgentComposerInner({
       {!readOnly && <AgentPalette onDragStart={onDragStart} />}
 
       {/* Properties Panel */}
-      {!readOnly && selectedNode && (
-        <PropertiesPanel
-          selectedNode={selectedNode}
-          expandedToolSections={expandedToolSections}
-          onClose={onPaneClick}
-          onUpdateData={updateSelectedNodeData}
-          onUpdateDataLocal={updateSelectedNodeDataLocal}
-          onUpdateToolConfig={updateToolConfig}
-          onDelete={deleteSelectedNode}
-          onExpandToolSection={handleExpandToolSection}
-          onCollapseToolSection={handleCollapseToolSection}
-        />
-      )}
+      {!readOnly && selectedNode && (() => {
+        const nodeData = selectedNode.data as AgentNodeData;
+        const filename = nodeData.filename;
+        const selectedNodeValidationErrors: ValidationError[] =
+          filename && validationResults[filename] && !validationResults[filename].valid
+            ? validationResults[filename].errors
+            : [];
+        return (
+          <PropertiesPanel
+            selectedNode={selectedNode}
+            expandedToolSections={expandedToolSections}
+            validationErrors={selectedNodeValidationErrors}
+            onClose={onPaneClick}
+            onUpdateData={updateSelectedNodeData}
+            onUpdateDataLocal={updateSelectedNodeDataLocal}
+            onUpdateToolConfig={updateToolConfig}
+            onDelete={deleteSelectedNode}
+            onExpandToolSection={handleExpandToolSection}
+            onCollapseToolSection={handleCollapseToolSection}
+          />
+        );
+      })()}
 
       {/* Canvas */}
       <div className="flex-1 h-full" style={{ minHeight: '400px' }} data-testid="agent-canvas">
