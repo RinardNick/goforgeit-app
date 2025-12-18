@@ -10,6 +10,9 @@ SESSION_DB="$SCRIPT_DIR/adk_sessions.db"
 echo "🤖 Starting ADK services..."
 echo ""
 
+# Prevent wiping local agents during dev
+export SKIP_AGENT_SYNC=true
+
 # Sync agents first
 echo "📦 Syncing agents from Visual Builder..."
 cd "$SCRIPT_DIR/adk-service"
