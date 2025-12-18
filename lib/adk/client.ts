@@ -374,33 +374,50 @@ export async function executeADKAgent(
 
   // Create or get session
   let sessionId = options.sessionId;
+  let sessionRecreated = false;
+
   if (!sessionId) {
     const session = await createADKSession(appName, userId);
     sessionId = session.id;
   }
 
-  // Execute with streaming=false for simpler response handling
-  const events: ADKRunEvent[] = [];
-  let fullResponse = '';
-  const toolCalls: ADKExecutionResult['toolCalls'] = [];
-
-  const response = await fetch(`${getBaseUrl()}/run`, {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      ...options.headers
-    },
-    body: JSON.stringify({
-      app_name: appName,
-      user_id: userId,
-      session_id: sessionId,
-      new_message: {
-        role: 'user',
-        parts: [{ text: message }],
+  // Execution logic wrapped for retry
+  const performExecution = async (currentSessionId: string): Promise<Response> => {
+    return fetch(`${getBaseUrl()}/run`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...options.headers
       },
-      streaming: false,
-    }),
-  });
+      body: JSON.stringify({
+        app_name: appName,
+        user_id: userId,
+        session_id: currentSessionId,
+        new_message: {
+          role: 'user',
+          parts: [{ text: message }],
+        },
+        streaming: false,
+      }),
+    });
+  };
+
+  let response = await performExecution(sessionId);
+
+  // Auto-recovery for expired/missing sessions
+  if (!response.ok && response.status === 404) {
+    const errorText = await response.text();
+    if (errorText.includes('Session not found')) {
+      console.log(`[ADK Client] Session ${sessionId} not found. Recreating...`);
+      const newSession = await createADKSession(appName, userId);
+      sessionId = newSession.id;
+      sessionRecreated = true;
+      response = await performExecution(sessionId);
+    } else {
+      // Re-throw if it's a different 404
+      throw new Error(`ADK execution failed: ${errorText}`);
+    }
+  }
 
   if (!response.ok) {
     const error = await response.text();
@@ -409,6 +426,9 @@ export async function executeADKAgent(
 
   // Parse response - ADK returns JSON array directly when streaming=false
   const text = await response.text();
+  const events: ADKRunEvent[] = [];
+  let fullResponse = '';
+  const toolCalls: ADKExecutionResult['toolCalls'] = [];
 
   try {
     // Try parsing as JSON array first (non-streaming response)

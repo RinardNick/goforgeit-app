@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { ensureUserOrg } from '@/lib/db/utils';
+import { queryOne } from '@/lib/db/client';
 import {
   listProviderKeys,
   upsertProviderKey,
@@ -105,8 +106,12 @@ export async function PUT(req: NextRequest) {
       validated = true;
     }
 
-    // Get user ID for audit
-    const userId = session.user.id || session.user.email;
+    // Get user UUID for audit
+    const user = await queryOne<{ id: string }>(
+      'SELECT id FROM "User" WHERE email = $1',
+      [session.user.email]
+    );
+    const userId = user?.id || null;
 
     // Upsert the key
     const result = await upsertProviderKey(org.id, provider, apiKey, userId, label);

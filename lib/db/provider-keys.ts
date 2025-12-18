@@ -115,7 +115,7 @@ export async function upsertProviderKey(
   orgId: string,
   provider: Provider,
   apiKey: string,
-  userId: string,
+  userId: string | null,
   label?: string
 ): Promise<ProviderKeyInfo> {
   const encrypted = encryptApiKey(apiKey);
