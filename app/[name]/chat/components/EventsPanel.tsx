@@ -34,16 +34,16 @@ export function EventsPanel({
   agentConfig,
 }: EventsPanelProps) {
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden bg-background">
       {/* Filter Buttons */}
-      <div className="flex-shrink-0 p-3 border-b border-gray-100 bg-gray-50">
+      <div className="flex-shrink-0 p-3 border-b border-border bg-muted/30">
         <div className="flex gap-1">
           <button
             data-testid="filter-all"
             data-active={eventFilter === 'all'}
             onClick={() => setEventFilter('all')}
-            className={`px-2 py-1 text-xs rounded ${
-              eventFilter === 'all' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+            className={`px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition-all ${
+              eventFilter === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             }`}
           >
             All ({events.length})
@@ -52,8 +52,8 @@ export function EventsPanel({
             data-testid="filter-messages"
             data-active={eventFilter === 'messages'}
             onClick={() => setEventFilter('messages')}
-            className={`px-2 py-1 text-xs rounded ${
-              eventFilter === 'messages' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+            className={`px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition-all ${
+              eventFilter === 'messages' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             }`}
           >
             Messages
@@ -62,8 +62,8 @@ export function EventsPanel({
             data-testid="filter-tools"
             data-active={eventFilter === 'tools'}
             onClick={() => setEventFilter('tools')}
-            className={`px-2 py-1 text-xs rounded ${
-              eventFilter === 'tools' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+            className={`px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition-all ${
+              eventFilter === 'tools' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             }`}
           >
             Tools
@@ -73,91 +73,78 @@ export function EventsPanel({
 
       {filteredEvents.length === 0 ? (
         <div data-testid="events-empty-state" className="flex-1 flex flex-col items-center justify-center text-center p-4">
-          <p className="text-sm text-gray-500 font-medium">No events yet</p>
+          <p className="text-sm text-muted-foreground font-medium">No events yet</p>
         </div>
       ) : selectedEventIndex !== null && filteredEvents[selectedEventIndex] ? (
         /* Event Detail View */
-        <div className="flex-1 flex flex-col overflow-hidden p-3">
+        <div className="flex-1 flex flex-col overflow-hidden p-4">
           <div className="flex-shrink-0">
             <button
               onClick={() => setSelectedEventIndex(null)}
-              className="mb-3 text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              className="mb-4 text-[10px] font-mono font-bold uppercase tracking-widest text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
             >
               ← Back to list
             </button>
 
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-900">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-heading font-bold text-foreground uppercase tracking-tight">
                 Event {selectedEventIndex + 1} of {filteredEvents.length}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-[10px] font-mono text-muted-foreground/60">
                 {formatTimestamp(filteredEvents[selectedEventIndex].timestamp)}
               </span>
             </div>
 
             {/* Agent badges */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                🤖 {filteredEvents[selectedEventIndex].author}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-sm text-[10px] font-mono font-bold uppercase tracking-wide">
+                {filteredEvents[selectedEventIndex].author}
               </span>
               {filteredEvents[selectedEventIndex].actions?.transferToAgent && (
                 <>
-                  <span className="text-gray-400">→</span>
-                  <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                    🤖 {filteredEvents[selectedEventIndex].actions?.transferToAgent}
+                  <span className="text-muted-foreground/40">→</span>
+                  <span className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-sm text-[10px] font-mono font-bold uppercase tracking-wide">
+                    {filteredEvents[selectedEventIndex].actions?.transferToAgent}
                   </span>
                 </>
               )}
             </div>
 
             {/* Detail tabs */}
-            <div className="flex border-b border-gray-200 mb-3">
-              <button
-                onClick={() => setDetailTab('event')}
-                className={`px-3 py-2 text-xs font-medium border-b-2 ${
-                  detailTab === 'event' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'
-                }`}
-              >
-                Event
-              </button>
-              <button
-                onClick={() => setDetailTab('request')}
-                className={`px-3 py-2 text-xs font-medium border-b-2 ${
-                  detailTab === 'request' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'
-                }`}
-              >
-                Request
-              </button>
-              <button
-                onClick={() => setDetailTab('response')}
-                className={`px-3 py-2 text-xs font-medium border-b-2 ${
-                  detailTab === 'response' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'
-                }`}
-              >
-                Response
-              </button>
+            <div className="flex border-b border-border mb-4">
+              {(['event', 'request', 'response'] as DetailTab[]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setDetailTab(tab)}
+                  className={`px-3 py-2 text-[10px] font-mono font-bold uppercase tracking-widest border-b-2 transition-all duration-200 ${
+                    detailTab === tab ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Event detail content - scrollable area that fills remaining space */}
-          <div data-testid="event-details" className="flex-1 min-h-0 text-xs font-mono overflow-auto bg-gray-50 rounded-lg p-3">
+          {/* Event detail content */}
+          <div data-testid="event-details" className="flex-1 min-h-0 text-xs font-mono overflow-auto bg-muted/30 border border-border rounded-sm p-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
             {detailTab === 'event' && renderJson(filteredEvents[selectedEventIndex])}
             {detailTab === 'request' && renderRequestContent(filteredEvents[selectedEventIndex], invocations, agentConfig)}
             {detailTab === 'response' && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {filteredEvents[selectedEventIndex].modelVersion && (
-                  <div><span className="text-amber-600">model_version:</span> <span className="text-green-600">&quot;{filteredEvents[selectedEventIndex].modelVersion}&quot;</span></div>
+                  <div className="flex gap-2"><span className="text-primary/60 uppercase">model_version:</span> <span className="text-foreground font-medium">&quot;{filteredEvents[selectedEventIndex].modelVersion}&quot;</span></div>
                 )}
                 {filteredEvents[selectedEventIndex].content?.parts?.[0]?.text && (
-                  <div className="mt-2">
-                    <span className="text-amber-600">text:</span>
-                    <div className="text-green-600 ml-2 whitespace-pre-wrap">&quot;{filteredEvents[selectedEventIndex].content?.parts?.[0]?.text}&quot;</div>
+                  <div className="mt-3">
+                    <span className="text-primary/60 uppercase block mb-1">text:</span>
+                    <div className="text-foreground/90 bg-background/50 p-2 rounded-sm border border-border whitespace-pre-wrap leading-relaxed">&quot;{filteredEvents[selectedEventIndex].content?.parts?.[0]?.text}&quot;</div>
                   </div>
                 )}
                 {filteredEvents[selectedEventIndex].usageMetadata && (
-                  <div className="mt-2">
-                    <span className="text-amber-600">usage_metadata:</span>
-                    <div className="ml-2">{renderJson(filteredEvents[selectedEventIndex].usageMetadata)}</div>
+                  <div className="mt-3">
+                    <span className="text-primary/60 uppercase block mb-1">usage_metadata:</span>
+                    <div className="p-2 bg-background/50 rounded-sm border border-border">{renderJson(filteredEvents[selectedEventIndex].usageMetadata)}</div>
                   </div>
                 )}
               </div>
@@ -166,7 +153,7 @@ export function EventsPanel({
         </div>
       ) : (
         /* Events List */
-        <div className="flex-1 overflow-auto p-3 space-y-2">
+        <div className="flex-1 overflow-auto p-3 space-y-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {filteredEvents.map((event, index) => {
             const funcCall = event.content?.parts?.find((p: ADKEventPart) => p.functionCall)?.functionCall;
             const funcResp = event.content?.parts?.find((p: ADKEventPart) => p.functionResponse)?.functionResponse;
@@ -175,18 +162,18 @@ export function EventsPanel({
               <div
                 key={event.id}
                 data-testid={event.eventType === 'functionCall' ? 'event-tool-call' : 'event-item'}
-                className="group bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors relative"
+                className="group bg-card border border-border rounded-sm p-3 cursor-pointer hover:border-primary/50 transition-all relative shadow-sm"
                 onClick={() => setSelectedEventIndex(index)}
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 font-mono">{index}</span>
+                    <span className="text-[10px] text-muted-foreground/40 font-mono">{index}</span>
                     <span
                       data-testid={event.eventType === 'functionCall' || event.eventType === 'functionResponse' ? 'tool-name' : undefined}
-                      className={`px-2 py-0.5 rounded text-xs font-medium ${
-                        event.eventType === 'functionCall' ? 'bg-orange-100 text-orange-700' :
-                        event.eventType === 'functionResponse' ? 'bg-green-100 text-green-700' :
-                        'bg-blue-100 text-blue-700'
+                      className={`px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold uppercase tracking-wide border ${
+                        event.eventType === 'functionCall' ? 'bg-primary/5 text-primary border-primary/20' :
+                        event.eventType === 'functionResponse' ? 'bg-green-500/5 text-green-500 border-green-500/20' :
+                        'bg-muted text-foreground/70 border-border'
                       }`}
                     >
                       {event.eventType === 'functionCall' ? funcCall?.name :
@@ -194,11 +181,11 @@ export function EventsPanel({
                        event.author}
                     </span>
                   </div>
-                  <span data-testid="event-timestamp" className="text-xs text-gray-400">
+                  <span data-testid="event-timestamp" className="text-[10px] text-muted-foreground/40 font-mono">
                     {formatTimestamp(event.timestamp)}
                   </span>
                 </div>
-                <div data-testid="event-author" className="text-xs text-gray-500 truncate">
+                <div data-testid="event-author" className="text-xs text-muted-foreground truncate opacity-80 leading-relaxed font-sans">
                   {event.title}
                 </div>
               </div>

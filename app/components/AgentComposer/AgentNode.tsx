@@ -122,26 +122,26 @@ const agentClassConfig: Record<
   { color: string; bgColor: string; icon: string; description: string }
 > = {
   LlmAgent: {
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 border-blue-200',
+    color: 'text-primary',
+    bgColor: 'bg-card/90 border-border backdrop-blur-md',
     icon: '🤖',
     description: 'Single LLM-powered agent',
   },
   SequentialAgent: {
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 border-purple-200',
+    color: 'text-purple-600 dark:text-purple-400',
+    bgColor: 'bg-card/90 border-border backdrop-blur-md',
     icon: '⏭️',
     description: 'Executes sub-agents in order',
   },
   ParallelAgent: {
-    color: 'text-green-600',
-    bgColor: 'bg-green-50 border-green-200',
+    color: 'text-green-600 dark:text-green-400',
+    bgColor: 'bg-card/90 border-border backdrop-blur-md',
     icon: '⚡',
     description: 'Executes sub-agents concurrently',
   },
   LoopAgent: {
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50 border-orange-200',
+    color: 'text-orange-600 dark:text-orange-400',
+    bgColor: 'bg-card/90 border-border backdrop-blur-md',
     icon: '🔄',
     description: 'Iterates over sub-agents',
   },
@@ -204,39 +204,46 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
   return (
     <div
       className={`
-        relative px-4 py-3 rounded-lg border-2 shadow-sm min-w-[200px] max-w-[280px]
+        relative px-4 py-3 rounded-sm border shadow-lg min-w-[200px] max-w-[280px]
         ${config.bgColor}
-        ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
-        ${data.isRoot ? 'border-l-4 border-l-blue-500' : ''}
+        ${selected ? 'bg-card border-primary/50 shadow-lg shadow-primary/20' : 'border-border'}
+        ${data.isRoot ? 'border-l-4 border-l-primary' : ''}
+        transition-all duration-500 group overflow-hidden
       `}
       data-testid="agent-node"
       draggable
       onDragStart={handleDragStart}
     >
+      {/* Ignition Borders - Animate on Select or Hover */}
+      <div className={`absolute top-0 left-0 w-full h-[2px] bg-primary origin-center transition-transform duration-500 ease-out ${selected ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+      <div className={`absolute bottom-0 left-0 w-full h-[2px] bg-primary origin-center transition-transform duration-500 ease-out ${selected ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+      <div className={`absolute top-0 left-0 h-full w-[2px] bg-primary origin-center transition-transform duration-500 ease-out ${selected ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-100'}`} />
+      <div className={`absolute top-0 right-0 h-full w-[2px] bg-primary origin-center transition-transform duration-500 ease-out ${selected ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-100'}`} />
+
       {/* Input Handle */}
       <Handle
         type="target"
         position={Position.Top}
-        className="w-3 h-3 !bg-gray-400 border-2 border-white"
+        className={`w-3 h-3 border-2 transition-colors ${selected ? '!bg-primary border-background' : '!bg-card border-primary'}`}
       />
 
       {/* Header */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">{config.icon}</span>
+      <div className="flex items-center gap-2 mb-2 relative z-10">
+        <span className="text-lg opacity-90">{config.icon}</span>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate text-sm">{data.name}</h3>
-          <span className={`text-xs font-medium ${config.color}`}>{data.agentClass}</span>
+          <h3 className="font-bold font-heading text-foreground truncate text-sm tracking-wide">{data.name}</h3>
+          <span className={`text-[10px] font-mono font-medium ${config.color} uppercase`}>{data.agentClass}</span>
         </div>
         <div className="flex gap-1">
           {data.isRoot && (
-            <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary text-primary-foreground rounded-sm font-mono uppercase tracking-wider">
               Root
             </span>
           )}
           {data.hasValidationErrors && (
             <span
               data-testid="node-error-badge"
-              className="px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded flex items-center gap-0.5"
+              className="px-1.5 py-0.5 text-xs font-medium bg-destructive/10 text-destructive rounded-sm border border-destructive/20 flex items-center gap-0.5"
               title="Has validation errors"
             >
               !
@@ -245,13 +252,12 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
           {data.toolConfigs && Array.from(data.toolConfigs.values()).some(config => config.requireConfirmation) && (
             <span
               data-testid="agent-confirmation-badge"
-              className="px-1.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded flex items-center gap-0.5"
+              className="px-1.5 py-0.5 text-[10px] font-medium bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-sm border border-yellow-500/20 flex items-center gap-0.5"
               title="Has tools requiring confirmation"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              Confirm
             </span>
           )}
         </div>
@@ -259,14 +265,14 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
 
       {/* Model (for LlmAgent) */}
       {data.model && (
-        <div className="text-xs text-gray-500 mb-1 truncate">
-          Model: <span className="font-mono">{data.model}</span>
+        <div className="text-[10px] text-muted-foreground/60 mb-2 truncate font-mono">
+          MODEL: <span className="text-muted-foreground">{data.model}</span>
         </div>
       )}
 
       {/* Description */}
       {data.description && (
-        <p className="text-xs text-gray-600 line-clamp-2">{data.description}</p>
+        <p className="text-xs text-muted-foreground/80 line-clamp-2 mb-2 leading-relaxed">{data.description}</p>
       )}
 
       {/* Tools */}
@@ -279,30 +285,30 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
 
         if (toolsCount > 0) {
           return (
-            <div className="mt-2 pt-2 border-t border-gray-200">
+            <div className="mt-2 pt-2 border-t border-border">
               <div className="flex flex-wrap gap-1">
                 {data.tools?.map((tool, idx) => (
-                  <span key={`tool-${idx}`} className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded font-mono">
+                  <span key={`tool-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-muted/50 border border-border text-muted-foreground rounded-sm font-mono">
                     {tool}
                   </span>
                 ))}
                 {data.agentTools?.map((agentTool, idx) => (
-                  <span key={`agent-tool-${idx}`} className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded font-mono flex items-center gap-0.5">
+                  <span key={`agent-tool-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-300 rounded-sm font-mono flex items-center gap-0.5">
                     🤖 {agentTool.agentName}
                   </span>
                 ))}
                 {data.toolConfigs && Array.from(data.toolConfigs.keys()).map((toolName) => (
-                  <span key={`tool-config-${toolName}`} className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-mono">
+                  <span key={`tool-config-${toolName}`} className="text-[9px] px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 rounded-sm font-mono">
                     {toolName}
                   </span>
                 ))}
                 {data.mcpServers?.map((server, idx) => (
-                  <span key={`mcp-${idx}`} className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded font-mono">
+                  <span key={`mcp-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-300 rounded-sm font-mono">
                     MCP: {server.name}
                   </span>
                 ))}
                 {data.openApiTools?.map((tool, idx) => (
-                  <span key={`openapi-${idx}`} className="text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-mono">
+                  <span key={`openapi-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300 rounded-sm font-mono">
                     {tool.name}
                   </span>
                 ))}
@@ -315,8 +321,8 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
 
       {/* Sub-agents count */}
       {data.subAgents && data.subAgents.length > 0 && (
-        <div className="mt-2 pt-2 border-t border-gray-200">
-          <span className="text-xs text-gray-500">
+        <div className="mt-2 pt-2 border-t border-border">
+          <span className="text-[10px] text-muted-foreground/60 font-mono uppercase tracking-wider">
             {data.subAgents.length} sub-agent{data.subAgents.length > 1 ? 's' : ''}
           </span>
         </div>
@@ -326,14 +332,14 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="w-3 h-3 !bg-gray-400 border-2 border-white"
+        className={`w-3 h-3 border-2 transition-colors ${selected ? '!bg-primary border-background' : '!bg-card border-primary'}`}
       />
 
       {/* Plus button to add child agent */}
-      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2" ref={dropdownRef}>
+      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" ref={dropdownRef}>
         <button
           onClick={handlePlusClick}
-          className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors shadow-md"
+          className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-colors shadow-lg hover:scale-110"
           data-testid="add-child-button"
           title="Add child agent"
         >
@@ -345,14 +351,14 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
         {/* Agent type dropdown */}
         {showDropdown && (
           <div
-            className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]"
+            className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-popover border border-border rounded-sm shadow-xl py-1 z-50 min-w-[140px]"
             data-testid="agent-type-dropdown"
           >
             {agentTypeDropdownItems.map((item) => (
               <button
                 key={item.type}
                 onClick={() => handleSelectAgentType(item.type)}
-                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+                className="w-full px-3 py-2 text-left text-xs font-mono text-popover-foreground hover:bg-accent flex items-center gap-2"
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>

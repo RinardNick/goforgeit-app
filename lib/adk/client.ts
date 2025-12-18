@@ -10,7 +10,7 @@
 const ADK_ROUTER_URL = '/api/adk-router';
 const ADK_ROUTER_URL_SERVER = process.env.NEXT_PUBLIC_APP_URL
   ? `${process.env.NEXT_PUBLIC_APP_URL}/api/adk-router`
-  : 'http://localhost:3050/api/adk-router';
+  : 'http://localhost:3025/api/adk-router';
 
 // Use ADK router for all requests (both server-side and client-side)
 // The router provides a single control point for all ADK communication
@@ -367,6 +367,7 @@ export async function executeADKAgent(
   options: {
     userId?: string;
     sessionId?: string;
+    headers?: Record<string, string>;
   } = {}
 ): Promise<ADKExecutionResult> {
   const userId = options.userId || 'default-user';
@@ -385,7 +386,10 @@ export async function executeADKAgent(
 
   const response = await fetch(`${getBaseUrl()}/run`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...options.headers
+    },
     body: JSON.stringify({
       app_name: appName,
       user_id: userId,
@@ -505,6 +509,7 @@ export async function* executeADKAgentStream(
   options: {
     userId?: string;
     sessionId?: string;
+    headers?: Record<string, string>;
   } = {}
 ): AsyncGenerator<string, ADKExecutionResult, unknown> {
   const userId = options.userId || 'default-user';
@@ -521,6 +526,7 @@ export async function* executeADKAgentStream(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...options.headers
     },
     body: JSON.stringify({
       app_name: appName,

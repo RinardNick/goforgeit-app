@@ -32,7 +32,7 @@ export function ChatHeader({
       <div className="flex items-center gap-4">
         <button
           onClick={onNavigateBack}
-          className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -40,12 +40,12 @@ export function ChatHeader({
         </button>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
-            <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-              ADK Live
+            <h1 className="text-2xl font-heading font-bold text-foreground tracking-tight uppercase">{displayName}</h1>
+            <span className="px-2 py-0.5 text-[10px] font-mono font-medium bg-forgeGreen/10 text-forgeGreen border border-forgeGreen/20 rounded-full tracking-wider">
+              ADK LIVE
             </span>
           </div>
-          <p className="text-sm text-gray-500">Real-time AI Agent Chat</p>
+          <p className="text-sm text-muted-foreground font-light">Real-time AI Agent Chat</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -54,10 +54,10 @@ export function ChatHeader({
           onClick={() => setStreamingEnabled(!streamingEnabled)}
           data-testid="streaming-toggle"
           data-enabled={streamingEnabled ? 'true' : 'false'}
-          className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium ${
+          className={`px-3 py-2 rounded-sm transition-all duration-200 flex items-center gap-2 text-xs font-mono uppercase tracking-wide ${
             streamingEnabled
-              ? 'bg-green-600 text-white'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-300'
+              ? 'bg-forgeGreen text-white shadow-lg'
+              : 'text-muted-foreground hover:text-foreground hover:bg-accent border border-border'
           }`}
           title={streamingEnabled ? 'Streaming enabled' : 'Enable streaming'}
         >
@@ -76,10 +76,10 @@ export function ChatHeader({
             }
           }}
           data-testid="debug-panel-toggle"
-          className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium ${
+          className={`px-3 py-2 rounded-sm transition-all duration-200 flex items-center gap-2 text-xs font-mono uppercase tracking-wide ${
             showDebugPanel
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-300'
+              ? 'bg-primary text-primary-foreground shadow-lg'
+              : 'text-muted-foreground hover:text-foreground hover:bg-accent border border-border'
           }`}
           title={showDebugPanel ? 'Hide Debug Panel' : 'Show Debug Panel'}
         >
@@ -88,7 +88,7 @@ export function ChatHeader({
           </svg>
           Debug
         </button>
-        {/* Individual Panel Toggles (for test/programmatic access - use force:true in tests) */}
+        {/* ... hidden buttons ... */}
         <button
           onClick={() => {
             setShowDebugPanel(true);
@@ -136,7 +136,7 @@ export function ChatHeader({
         />
         <button
           onClick={onNewConversation}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-4 py-2 text-xs font-mono uppercase tracking-wide text-foreground border border-border rounded-sm hover:bg-accent transition-all duration-200"
         >
           New Conversation
         </button>

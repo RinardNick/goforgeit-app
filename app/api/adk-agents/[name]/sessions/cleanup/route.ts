@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listADKSessions, deleteADKSession, checkADKHealth } from '@/lib/adk';
-
-const DEFAULT_USER_ID = 'default-user';
+import { auth } from '@/auth';
 
 /**
  * DELETE /api/adk-agents/[name]/sessions/cleanup
@@ -27,6 +26,13 @@ export async function DELETE(
   }
 
   try {
+    // Check auth - use email as userId for session isolation
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = session.user.email;
+
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
     if (!isHealthy) {
@@ -40,11 +46,11 @@ export async function DELETE(
     }
 
     // List all sessions for this agent and delete them
-    const sessions = await listADKSessions(name, DEFAULT_USER_ID);
+    const sessions = await listADKSessions(name, userId);
     let deletedCount = 0;
 
-    for (const session of sessions) {
-      await deleteADKSession(name, DEFAULT_USER_ID, session.id);
+    for (const adkSession of sessions) {
+      await deleteADKSession(name, userId, adkSession.id);
       deletedCount++;
     }
 

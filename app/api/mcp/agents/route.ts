@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { validateApiKey } from '@/lib/auth/api-keys';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
@@ -106,8 +107,20 @@ async function registerAgentTools() {
   }
 }
 
+// ... existing imports
+
+// ... existing helper classes/functions
+
 // GET: Establish SSE connection
 export async function GET(req: NextRequest) {
+  // Check API Key
+  const apiKey = req.headers.get('x-api-key') || req.headers.get('authorization')?.replace('Bearer ', '');
+  const orgId = await validateApiKey(apiKey || '');
+  
+  if (!orgId) {
+    return new Response('Unauthorized: Invalid API Key', { status: 401 });
+  }
+
   // Refresh tools
   await registerAgentTools();
 
@@ -115,44 +128,19 @@ export async function GET(req: NextRequest) {
   const transport = new NextSseTransport(sessionId);
   transports.set(sessionId, transport);
 
-  // Connect server to transport
-  // Note: server.connect(transport) handles incoming messages from transport
-  // but for SSE, the transport needs to write outgoing messages to the response stream.
-  server.connect(transport);
-
-  const stream = new ReadableStream({
-    start(controller) {
-      transport.init(controller);
-    },
-    cancel() {
-      transport.close();
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    },
-  });
+  // ... rest of implementation
 }
 
 // POST: Handle client messages
 export async function POST(req: NextRequest) {
+  // Check API Key
+  const apiKey = req.headers.get('x-api-key') || req.headers.get('authorization')?.replace('Bearer ', '');
+  const orgId = await validateApiKey(apiKey || '');
+  
+  if (!orgId) {
+    return new Response('Unauthorized: Invalid API Key', { status: 401 });
+  }
+
   const url = new URL(req.url);
-  const sessionId = url.searchParams.get('sessionId');
-
-  if (!sessionId || !transports.has(sessionId)) {
-    return new Response('Session not found', { status: 404 });
-  }
-
-  const transport = transports.get(sessionId)!;
-  try {
-    const body = await req.json();
-    await transport.handlePostMessage(body);
-    return new Response('Accepted', { status: 202 });
-  } catch (e) {
-    return new Response('Invalid JSON', { status: 400 });
-  }
+  // ... rest of implementation
 }

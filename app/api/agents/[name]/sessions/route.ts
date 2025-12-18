@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createADKSession, listADKSessions, checkADKHealth } from '@/lib/adk';
-
-const DEFAULT_USER_ID = 'default-user';
+import { auth } from '@/auth';
 
 /**
  * GET /api/agents/[name]/sessions
@@ -16,6 +15,13 @@ export async function GET(
   const { name } = await params;
 
   try {
+    // Check auth - use email as userId for session isolation
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = session.user.email;
+
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
     if (!isHealthy) {
@@ -29,7 +35,7 @@ export async function GET(
     }
 
     // List sessions from the ADK backend
-    const sessions = await listADKSessions(name, DEFAULT_USER_ID);
+    const sessions = await listADKSessions(name, userId);
 
     // Convert to format expected by frontend (snake_case keys)
     const formattedSessions = sessions.map(s => ({
@@ -68,6 +74,13 @@ export async function POST(
   const { name } = await params;
 
   try {
+    // Check auth - use email as userId for session isolation
+    const authSession = await auth();
+    if (!authSession?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = authSession.user.email;
+
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
     if (!isHealthy) {
@@ -81,7 +94,7 @@ export async function POST(
     }
 
     // Create session at the ADK backend
-    const session = await createADKSession(name, DEFAULT_USER_ID);
+    const session = await createADKSession(name, userId);
 
     // Return in format expected by frontend (session_id in snake_case)
     return NextResponse.json({

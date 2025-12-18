@@ -83,10 +83,7 @@ export default function EvaluationsPage() {
         throw new Error(data.error || 'Failed to create evaluation');
       }
 
-      // Add new evalset to list
       setEvalsets((prev) => [...prev, data]);
-
-      // Close dialog and reset form
       setShowCreateDialog(false);
       setNewEvalsetName('');
       setNewEvalsetDescription('');
@@ -114,10 +111,7 @@ export default function EvaluationsPage() {
         throw new Error(data.error || 'Failed to delete evaluation');
       }
 
-      // Remove from local state
       setEvalsets((prev) => prev.filter((e) => e.eval_set_id !== evalsetToDelete));
-
-      // Close dialog
       setShowDeleteDialog(false);
       setEvalsetToDelete(null);
     } catch (err) {
@@ -135,10 +129,7 @@ export default function EvaluationsPage() {
     setImportError(null);
 
     try {
-      // Read file content
       const fileContent = await selectedFile.text();
-
-      // Send to import API
       const response = await fetch(`/api/agents/${agentName}/evaluations/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,18 +142,11 @@ export default function EvaluationsPage() {
         throw new Error(data.error || 'Failed to import evaluation');
       }
 
-      // Add imported evalset to list
       setEvalsets((prev) => [...prev, data.evalset]);
-
-      // Close dialog and reset
       setShowImportDialog(false);
       setSelectedFile(null);
-
-      // Show success message
       setImportSuccess(true);
       setTimeout(() => setImportSuccess(false), 3000);
-
-      // Refresh evalsets to ensure we have the latest
       await fetchEvalsets();
     } catch (err) {
       setImportError(err instanceof Error ? err.message : 'Failed to import evaluation');
@@ -172,25 +156,25 @@ export default function EvaluationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-sandstone" data-testid="evaluations-page">
+    <div className="min-h-screen bg-background" data-testid="evaluations-page">
       <Navigation />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-              <Link href="/" className="hover:text-gray-700">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <Link href="/" className="hover:text-foreground transition-colors">
                 ADK Agents
               </Link>
               <span>/</span>
-              <Link href={`/${agentName}/compose`} className="hover:text-gray-700">
+              <Link href={`/${agentName}/compose`} className="hover:text-foreground transition-colors">
                 {agentName}
               </Link>
               <span>/</span>
-              <span className="text-gray-900">Evaluations</span>
+              <span className="text-foreground font-medium">Evaluations</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Evaluations</h1>
-            <p className="mt-1 text-gray-500">
+            <h1 className="text-3xl font-heading font-bold text-foreground">Evaluations</h1>
+            <p className="mt-1 text-muted-foreground">
               Test your agent responses against expected outputs
             </p>
           </div>
@@ -202,7 +186,7 @@ export default function EvaluationsPage() {
                 setImportError(null);
               }}
               data-testid="import-evalset-btn"
-              className="px-4 py-2 bg-white text-amber-700 rounded-lg hover:bg-amber-50 border border-amber-300 transition-colors font-medium text-sm flex items-center gap-2"
+              className="px-4 py-2 bg-card text-foreground border border-border rounded-sm hover:bg-accent transition-colors font-medium text-sm flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -217,7 +201,7 @@ export default function EvaluationsPage() {
                 setCreateError(null);
               }}
               data-testid="create-evalset-btn"
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm flex items-center gap-2"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-colors font-medium text-sm flex items-center gap-2 shadow-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -229,15 +213,15 @@ export default function EvaluationsPage() {
 
         {/* Create Dialog */}
         {showCreateDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
             <div
               data-testid="create-evalset-dialog"
-              className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl"
+              className="bg-card border border-border rounded-sm p-8 w-full max-w-md shadow-2xl"
             >
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Create Evaluation</h2>
+              <h2 className="text-xl font-heading font-bold text-foreground mb-6">Create Evaluation</h2>
               <form onSubmit={handleCreateEvalset}>
                 <div className="mb-4">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-1">
                     Name
                   </label>
                   <input
@@ -247,14 +231,14 @@ export default function EvaluationsPage() {
                     value={newEvalsetName}
                     onChange={(e) => setNewEvalsetName(e.target.value)}
                     placeholder="Basic Response Tests"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-background border border-border text-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
                     required
                     disabled={creating}
                   />
                 </div>
 
-                <div className="mb-4">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-6">
+                  <label htmlFor="description" className="block text-sm font-medium text-muted-foreground mb-1">
                     Description (optional)
                   </label>
                   <textarea
@@ -264,7 +248,7 @@ export default function EvaluationsPage() {
                     onChange={(e) => setNewEvalsetDescription(e.target.value)}
                     placeholder="Tests for basic agent responses..."
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 bg-background border border-border text-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-colors resize-none"
                     disabled={creating}
                   />
                 </div>
@@ -277,7 +261,7 @@ export default function EvaluationsPage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateDialog(false)}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                    className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
                     disabled={creating}
                   >
                     Cancel
@@ -287,7 +271,7 @@ export default function EvaluationsPage() {
                     disabled={!newEvalsetName.trim()}
                     isLoading={creating}
                     loadingText="Creating..."
-                    className="text-sm text-white bg-amber-600 hover:bg-amber-700"
+                    className="bg-primary text-primary-foreground hover:opacity-90 rounded-sm px-6"
                     testId="confirm-create-evalset"
                     variant="primary"
                   >
@@ -301,15 +285,15 @@ export default function EvaluationsPage() {
 
         {/* Import Dialog */}
         {showImportDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
             <div
               data-testid="import-evalset-dialog"
-              className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl"
+              className="bg-card border border-border rounded-sm p-8 w-full max-w-md shadow-2xl"
             >
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Import Evaluation</h2>
+              <h2 className="text-xl font-heading font-bold text-foreground mb-6">Import Evaluation</h2>
               <form onSubmit={handleImportEvalset}>
-                <div className="mb-4">
-                  <label htmlFor="import-file" className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-6">
+                  <label htmlFor="import-file" className="block text-sm font-medium text-muted-foreground mb-2">
                     Upload .test.json File
                   </label>
                   <input
@@ -324,11 +308,11 @@ export default function EvaluationsPage() {
                         setImportError(null);
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
+                    className="w-full px-3 py-2 border border-border bg-background rounded-sm focus:ring-1 focus:ring-primary focus:border-primary file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 text-muted-foreground"
                     disabled={importing}
                   />
                   {selectedFile && (
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-foreground font-mono">
                       Selected: {selectedFile.name}
                     </p>
                   )}
@@ -346,7 +330,7 @@ export default function EvaluationsPage() {
                       setSelectedFile(null);
                       setImportError(null);
                     }}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                    className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
                     disabled={importing}
                   >
                     Cancel
@@ -356,7 +340,7 @@ export default function EvaluationsPage() {
                     disabled={!selectedFile}
                     isLoading={importing}
                     loadingText="Importing..."
-                    className="text-sm text-white bg-amber-600 hover:bg-amber-700"
+                    className="bg-primary text-primary-foreground hover:opacity-90 rounded-sm px-6"
                     testId="confirm-import-btn"
                     variant="primary"
                   >
@@ -370,18 +354,21 @@ export default function EvaluationsPage() {
 
         {/* Delete Confirmation Dialog */}
         {showDeleteDialog && evalsetToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <div
+              data-testid="delete-confirmation-dialog"
+              className="bg-card border border-border rounded-sm p-8 w-full max-w-md shadow-2xl"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center border border-destructive/20">
+                  <svg className="w-5 h-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Delete Evaluation</h2>
+                <h2 className="text-xl font-heading font-bold text-foreground">Delete Evaluation</h2>
               </div>
 
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground mb-8">
                 Are you sure you want to delete this evaluation? This will remove all test cases and run history.
               </p>
 
@@ -397,7 +384,7 @@ export default function EvaluationsPage() {
                     setEvalsetToDelete(null);
                     setDeleteError(null);
                   }}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                  className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
                   disabled={deleting}
                 >
                   Cancel
@@ -407,9 +394,9 @@ export default function EvaluationsPage() {
                   onClick={handleDeleteEvalset}
                   isLoading={deleting}
                   loadingText="Deleting..."
-                  className="text-sm text-white bg-red-600 hover:bg-red-700"
+                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-sm px-6"
                   testId="confirm-delete-evalset"
-                  variant="primary"
+                  variant="danger"
                 >
                   Delete
                 </LoadingButton>
@@ -420,11 +407,11 @@ export default function EvaluationsPage() {
 
         {/* Success Notification */}
         {importSuccess && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-sm flex items-center gap-3">
+            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-green-800 font-medium">Imported successfully</span>
+            <span className="text-green-500 font-medium">Imported successfully</span>
           </div>
         )}
 
@@ -436,8 +423,8 @@ export default function EvaluationsPage() {
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-            <span className="ml-3 text-gray-600">Loading evaluations...</span>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-3 text-muted-foreground">Loading evaluations...</span>
           </div>
         )}
 
@@ -445,13 +432,13 @@ export default function EvaluationsPage() {
         {!loading && !error && evalsets.length === 0 && (
           <div
             data-testid="evaluations-empty-state"
-            className="text-center py-12 bg-white rounded-xl border border-gray-200"
+            className="text-center py-12 bg-card rounded-sm border border-border border-dashed"
           >
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">No evaluations yet</h3>
-            <p className="mt-2 text-gray-500 max-w-md mx-auto">
+            <div className="w-16 h-16 mx-auto bg-accent rounded-full flex items-center justify-center mb-4 text-muted-foreground">
+               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+            </div>
+            <h3 className="mt-4 text-lg font-heading font-bold text-foreground">No evaluations yet</h3>
+            <p className="mt-2 text-muted-foreground max-w-md mx-auto">
               Create your first evaluation to test your agent&apos;s responses against expected outputs.
             </p>
             <button
@@ -461,7 +448,7 @@ export default function EvaluationsPage() {
                 setNewEvalsetDescription('');
                 setCreateError(null);
               }}
-              className="mt-4 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm"
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-colors font-medium text-sm"
             >
               Create First Evaluation
             </button>
@@ -480,34 +467,34 @@ export default function EvaluationsPage() {
                 <div
                   key={evalset.eval_set_id}
                   data-testid="evalset-card"
-                  className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+                  className="bg-card rounded-sm border border-border p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/50 group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-10 h-10 rounded-sm bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                           </svg>
                         </div>
                         {lastRunPassRate !== undefined && (
                           <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                             lastRunPassRate === 100
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-green-500/10 text-green-500 border border-green-500/20'
                               : lastRunPassRate >= 50
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
+                              ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
+                              : 'bg-destructive/10 text-destructive border border-destructive/20'
                           }`}>
                             {lastRunPassRate}% pass
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900">{evalset.name}</h3>
+                      <h3 className="text-lg font-heading font-bold text-foreground group-hover:text-primary transition-colors">{evalset.name}</h3>
                       {evalset.description && (
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{evalset.description}</p>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{evalset.description}</p>
                       )}
-                      <p className="text-sm text-gray-500 mt-2" data-testid="evalset-test-count">
-                        {evalset.eval_cases.length} conversation{evalset.eval_cases.length !== 1 ? 's' : ''}
+                      <p className="text-xs text-muted-foreground/60 mt-3 font-mono" data-testid="evalset-test-count">
+                        {evalset.eval_cases.length} CONVERSATION{evalset.eval_cases.length !== 1 ? 'S' : ''}
                       </p>
                     </div>
                     <button
@@ -518,7 +505,7 @@ export default function EvaluationsPage() {
                         setShowDeleteDialog(true);
                         setDeleteError(null);
                       }}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-muted-foreground/40 hover:text-destructive transition-colors"
                       title="Delete evaluation"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -527,10 +514,10 @@ export default function EvaluationsPage() {
                     </button>
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-6">
                     <Link
                       href={`/${agentName}/evaluations/${evalset.eval_set_id}`}
-                      className="block w-full px-3 py-2 bg-amber-50 text-amber-700 text-center rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors font-medium text-sm"
+                      className="block w-full px-3 py-2 bg-primary/10 text-primary text-center rounded-sm border border-primary/20 hover:bg-primary/20 transition-colors font-medium text-xs uppercase tracking-wide"
                     >
                       View Details
                     </Link>

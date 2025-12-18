@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 // This ensures all requests benefit from router interceptors and logging
 const ADK_ROUTER_URL = process.env.NEXT_PUBLIC_APP_URL
   ? `${process.env.NEXT_PUBLIC_APP_URL}/api/adk-router`
-  : 'http://localhost:3050/api/adk-router';
+  : 'http://localhost:3025/api/adk-router';
 
 async function proxyRequest(
   req: NextRequest,

@@ -1,16 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Globe, Trash2, Plus, Link } from 'lucide-react';
+import { Globe, Trash2, Plus, Link, X } from 'lucide-react';
 
 /**
  * OpenAPI Tool configuration for agents
- * Stored in YAML as:
- * tools:
- *   - name: OpenAPIToolset
- *     args:
- *       name: petstore_api
- *       spec_url: https://petstore3.swagger.io/api/v3/openapi.json
  */
 export interface OpenAPIToolConfig {
   id: string;
@@ -79,73 +73,76 @@ function AddOpenAPIDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="add-openapi-dialog">
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="px-4 py-3 border-b dark:border-zinc-700">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Add OpenAPI Tool</h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Connect an external REST API via OpenAPI specification
-          </p>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" data-testid="add-openapi-dialog">
+      <div className="bg-card rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-border">
+        <div className="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Register OpenAPI</h3>
+            <p className="text-xs text-muted-foreground font-light">
+              Connect external REST interface via protocol specification
+            </p>
+          </div>
+          <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
+            <X size={20} />
+          </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-5 space-y-5 bg-card">
           {/* Name Input */}
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              Tool Name
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
+              Identifier
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="petstore_api"
-              className={`w-full px-3 py-2 text-sm border rounded-md dark:bg-zinc-700 dark:text-white ${
-                errors.name ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-600'
+              placeholder="e.g., PETSTORE_API"
+              className={`w-full px-3 py-2.5 text-sm bg-background border rounded-sm text-foreground focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none font-mono ${
+                errors.name ? 'border-destructive' : 'border-border'
               }`}
               data-testid="openapi-name-input"
             />
             {errors.name && (
-              <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+              <p className="mt-1 text-[10px] text-destructive uppercase font-mono">{errors.name}</p>
             )}
-            <p className="mt-1 text-xs text-zinc-500">Lowercase letters, numbers, and underscores only</p>
           </div>
 
           {/* Spec URL Input */}
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              OpenAPI Spec URL
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
+              Specification Vector (URL)
             </label>
             <input
               type="url"
               value={specUrl}
               onChange={(e) => setSpecUrl(e.target.value)}
-              placeholder="https://petstore3.swagger.io/api/v3/openapi.json"
-              className={`w-full px-3 py-2 text-sm border rounded-md dark:bg-zinc-700 dark:text-white ${
-                errors.specUrl ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-600'
+              placeholder="https://api.provider.com/v3/openapi.json"
+              className={`w-full px-3 py-2.5 text-sm bg-background border rounded-sm text-foreground focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none font-mono ${
+                errors.specUrl ? 'border-destructive' : 'border-border'
               }`}
               data-testid="openapi-spec-url-input"
             />
             {errors.specUrl && (
-              <p className="mt-1 text-xs text-red-500">{errors.specUrl}</p>
+              <p className="mt-1 text-[10px] text-destructive uppercase font-mono">{errors.specUrl}</p>
             )}
-            <p className="mt-1 text-xs text-zinc-500">URL to JSON or YAML OpenAPI 3.x specification</p>
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t dark:border-zinc-700 flex justify-end gap-2">
+        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-md"
+            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
             data-testid="cancel-openapi-button"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md"
+            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-all shadow-lg"
             data-testid="save-openapi-button"
           >
-            Add Tool
+            Add Capability
           </button>
         </div>
       </div>
@@ -163,26 +160,28 @@ function OpenAPIToolCard({
 }) {
   return (
     <div
-      className="p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg border border-zinc-200 dark:border-zinc-600"
+      className="p-3 bg-primary/5 border border-primary/20 rounded-sm group hover:border-primary/40 transition-all"
       data-testid={`openapi-card-${tool.name}`}
     >
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2 min-w-0">
-          <Globe className="w-4 h-4 text-blue-500 flex-shrink-0" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-1.5 rounded-sm bg-primary/10 text-primary shadow-sm">
+            <Globe className="w-4 h-4" />
+          </div>
           <div className="min-w-0">
-            <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+            <p className="text-sm font-bold text-foreground font-heading truncate tracking-tight uppercase">
               {tool.name}
             </p>
-            <div className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
-              <Link className="w-3 h-3" />
-              <span className="truncate max-w-[200px]">{tool.specUrl}</span>
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60 font-mono mt-0.5">
+              <Link className="w-3 h-3 opacity-50" />
+              <span className="truncate max-w-[200px] opacity-80">{tool.specUrl}</span>
             </div>
           </div>
         </div>
         <button
           onClick={onDelete}
-          className="p-1 text-zinc-400 hover:text-red-500 rounded"
-          title="Delete"
+          className="p-1.5 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-sm transition-colors ml-2"
+          title="Remove Capability"
           data-testid="delete-openapi-button"
         >
           <Trash2 className="w-4 h-4" />
@@ -202,13 +201,11 @@ export function OpenAPIToolsPanel({
   return (
     <div className="space-y-3" data-testid="openapi-tools-section">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          OpenAPI Tools
-        </h4>
+        <label className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">OpenAPI Tools</label>
         <button
           onClick={() => setDialogOpen(true)}
-          className="p-1 text-zinc-400 hover:text-blue-500 rounded"
-          title="Add OpenAPI Tool"
+          className="p-1 bg-foreground text-background rounded-sm hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
+          title="Add OpenAPI Capability"
           data-testid="add-openapi-button"
         >
           <Plus className="w-4 h-4" />
@@ -217,16 +214,18 @@ export function OpenAPIToolsPanel({
 
       {openApiTools.length === 0 ? (
         <div
-          className="text-center py-4 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-600"
+          className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border rounded-sm bg-muted/20"
           data-testid="openapi-tools-empty-state"
         >
-          <Globe className="w-8 h-8 mx-auto text-zinc-400 mb-2" />
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">No OpenAPI tools configured</p>
+          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground/40 mb-2">
+            <Globe size={16} />
+          </div>
+          <p className="text-[10px] text-muted-foreground/60 uppercase font-mono mb-2">NO_API_EXTENSIONS</p>
           <button
             onClick={() => setDialogOpen(true)}
-            className="mt-2 text-xs text-blue-500 hover:text-blue-600"
+            className="text-xs font-bold text-primary hover:text-primary/80 hover:underline uppercase tracking-wide transition-colors"
           >
-            Add your first OpenAPI tool
+            Initialize Uplink
           </button>
         </div>
       ) : (
@@ -238,6 +237,13 @@ export function OpenAPIToolsPanel({
               onDelete={() => onDeleteOpenApiTool(tool.id)}
             />
           ))}
+        </div>
+      )}
+
+      {/* Footer Summary */}
+      {openApiTools.length > 0 && (
+        <div className="text-[9px] text-muted-foreground/40 font-mono pt-1.5 border-t border-border uppercase tracking-widest">
+          {openApiTools.length} ENDPOINT{openApiTools.length !== 1 ? 'S' : ''}_CONNECTED
         </div>
       )}
 

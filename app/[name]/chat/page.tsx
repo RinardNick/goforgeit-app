@@ -988,7 +988,7 @@ export default function ADKAgentChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-sandstone">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       <Navigation />
       <main className="px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -1006,9 +1006,9 @@ export default function ADKAgentChatPage() {
 
         {/* Session ID Badge */}
         {sessionId && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
+          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
             <span>Session:</span>
-            <code className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">
+            <code className="px-2 py-0.5 bg-muted border border-border rounded text-xs font-mono text-primary">
               {sessionId.slice(0, 8)}...
             </code>
           </div>
@@ -1019,22 +1019,22 @@ export default function ADKAgentChatPage() {
           {/* Chat Interface */}
           <div
             data-testid="chat-container"
-            className={`bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col ${
+            className={`bg-card rounded-sm border border-border shadow-lg overflow-hidden flex flex-col ${
               showDebugPanel ? 'flex-1' : 'w-full max-w-4xl mx-auto'
             }`}
           >
             {/* Messages Area */}
-            <div data-testid="chat-messages" className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div data-testid="chat-messages" className="flex-1 overflow-y-auto p-4 space-y-6 bg-card/30">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Chat with {displayName}</h3>
-                  <p className="text-gray-500 max-w-sm">
-                    This agent is powered by the real ADK backend. Send a message to start the conversation.
+                  <h3 className="text-xl font-heading font-bold text-foreground mb-2">ARCHITECT CHANNEL</h3>
+                  <p className="text-muted-foreground max-w-sm font-light">
+                    Sovereign agent {displayName} is active. Initialize communication sequence.
                   </p>
                 </div>
               ) : (
@@ -1047,12 +1047,12 @@ export default function ADKAgentChatPage() {
                       <div
                         key={message.id}
                         data-testid={`message-${message.id}`}
-                        className="space-y-2"
+                        className="space-y-3"
                       >
-                        {/* Tool call indicators - shown BEFORE the response as separate cards */}
+                        {/* Tool call indicators */}
                         {hasToolEvents && (
                           <div className="flex justify-start">
-                            <div className="ml-10 flex flex-col gap-1">
+                            <div className="ml-10 flex flex-col gap-1.5">
                               {inlineEvents.map((event) => {
                                 const funcCall = event.content?.parts?.find((p: ADKEventPart) => p.functionCall)?.functionCall;
                                 const funcResp = event.content?.parts?.find((p: ADKEventPart) => p.functionResponse)?.functionResponse;
@@ -1062,36 +1062,36 @@ export default function ADKAgentChatPage() {
                                   <button
                                     key={event.id}
                                     onClick={() => handleInlineEventClick(event.id)}
-                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border ${
+                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-[10px] font-mono font-medium transition-all duration-200 cursor-pointer border uppercase tracking-wider ${
                                       event.eventType === 'functionCall'
-                                        ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200'
+                                        ? 'bg-primary/5 text-primary hover:bg-primary/10 border-primary/20'
                                         : event.eventType === 'functionResponse'
-                                        ? 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200'
+                                        ? 'bg-green-500/5 text-green-600 dark:text-green-400 hover:bg-green-500/10 border-green-500/20'
                                         : isTransfer
-                                        ? 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200'
-                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
+                                        ? 'bg-purple-500/5 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 border-purple-500/20'
+                                        : 'bg-muted text-muted-foreground hover:bg-accent border-border'
                                     }`}
                                     title="Click to view event details"
                                   >
                                     {event.eventType === 'functionCall' && (
                                       <>
-                                        <span>⚡️</span>
-                                        <span>{funcCall?.name || 'function'}</span>
+                                        <span className="animate-pulse">⚡</span>
+                                        <span>CALL:{funcCall?.name || 'function'}</span>
                                       </>
                                     )}
                                     {event.eventType === 'functionResponse' && (
                                       <>
                                         <span>✓</span>
-                                        <span>{funcResp?.name || 'response'}</span>
+                                        <span>RESP:{funcResp?.name || 'response'}</span>
                                         {isTransfer && (
-                                          <span className="text-purple-600 ml-1">→ {event.actions?.transferToAgent}</span>
+                                          <span className="text-purple-600 dark:text-purple-400 ml-1">→ {event.actions?.transferToAgent}</span>
                                         )}
                                       </>
                                     )}
                                     {!event.eventType.includes('function') && isTransfer && (
                                       <>
                                         <span>🔄</span>
-                                        <span>→ {event.actions?.transferToAgent}</span>
+                                        <span>TRANS:{event.actions?.transferToAgent}</span>
                                       </>
                                     )}
                                   </button>
@@ -1107,29 +1107,29 @@ export default function ADKAgentChatPage() {
                           className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           {message.role === 'assistant' && (
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mr-2">
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mr-3 shadow-sm">
+                              <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                               </svg>
                             </div>
                           )}
                           <div
-                            className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                            className={`max-w-[85%] rounded-sm px-5 py-4 shadow-sm border ${
                               message.role === 'user'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 text-gray-900'
+                                ? 'bg-primary/10 border-primary/20 text-foreground'
+                                : 'bg-muted/50 border-border text-foreground'
                             }`}
                           >
                             {message.role === 'assistant' && (
-                              <div className="text-xs font-medium text-purple-600 mb-1">
+                              <div className="text-[10px] font-bold font-heading text-primary mb-2 uppercase tracking-widest border-b border-primary/10 pb-1">
                                 {displayName}
                               </div>
                             )}
 
-                            <p className="whitespace-pre-wrap">{message.content}</p>
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
                             <p
-                              className={`text-xs mt-1 ${
-                                message.role === 'user' ? 'text-blue-200' : 'text-gray-400'
+                              className={`text-[10px] mt-3 font-mono opacity-40 uppercase tracking-tighter ${
+                                message.role === 'user' ? 'text-right' : 'text-left'
                               }`}
                             >
                               {message.timestamp.toLocaleTimeString()}
@@ -1142,11 +1142,14 @@ export default function ADKAgentChatPage() {
 
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-gray-100 rounded-lg px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="bg-muted/50 border border-border rounded-sm px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex space-x-1">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                          <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Processing</span>
                         </div>
                       </div>
                     </div>
@@ -1199,72 +1202,34 @@ export default function ADKAgentChatPage() {
           {showDebugPanel && (
             <div
               data-testid="events-panel"
-              className="w-[500px] bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden"
+              className="w-[500px] bg-card rounded-sm border border-border shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Panel Tabs Header */}
-              <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <div className="border-b border-border bg-muted/30 backdrop-blur-md">
                 {/* Main Panel Tabs */}
-                <div className="flex">
-                  <button
-                    data-testid="debug-tab-sessions"
-                    onClick={() => setPanelTab('sessions')}
-                    className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                      panelTab === 'sessions'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Sessions ({sessions.length})
-                  </button>
-                  <button
-                    data-testid="debug-tab-trace"
-                    onClick={() => { setPanelTab('trace'); setSelectedEventIndex(null); }}
-                    className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                      panelTab === 'trace'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Trace
-                  </button>
-                  <button
-                    data-testid="debug-tab-events"
-                    onClick={() => { setPanelTab('events'); setSelectedEventIndex(null); }}
-                    className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                      panelTab === 'events'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Events ({events.length})
-                  </button>
-                  <button
-                    data-testid="debug-tab-state"
-                    onClick={() => setPanelTab('state')}
-                    className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                      panelTab === 'state'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    State ({sessionState.length})
-                  </button>
-                  <button
-                    data-testid="debug-tab-artifacts"
-                    onClick={() => setPanelTab('artifacts')}
-                    className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                      panelTab === 'artifacts'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Artifacts ({artifacts.length})
-                  </button>
+                <div className="flex overflow-x-auto">
+                  {(['sessions', 'trace', 'events', 'state', 'artifacts'] as PanelTab[]).map((tab) => (
+                    <button
+                      key={tab}
+                      data-testid={`debug-tab-${tab}`}
+                      onClick={() => {
+                        setPanelTab(tab);
+                        if (tab === 'trace' || tab === 'events') setSelectedEventIndex(null);
+                      }}
+                      className={`px-4 py-3 text-[10px] font-mono font-bold uppercase tracking-wider border-b-2 transition-all duration-200 whitespace-nowrap ${
+                        panelTab === tab
+                          ? 'border-primary text-primary bg-background/50'
+                          : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-accent'
+                      }`}
+                    >
+                      {tab} {tab === 'sessions' ? `(${sessions.length})` : tab === 'events' ? `(${events.length})` : tab === 'state' ? `(${sessionState.length})` : tab === 'artifacts' ? `(${artifacts.length})` : ''}
+                    </button>
+                  ))}
                   <div className="flex-1" />
                   <button
                     onClick={clearEvents}
                     data-testid="clear-events-button"
-                    className="px-3 py-3 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                    className="px-4 py-3 text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground hover:text-destructive transition-colors"
                   >
                     Clear
                   </button>

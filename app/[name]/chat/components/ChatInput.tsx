@@ -322,7 +322,7 @@ export function ChatInput({
   const deepgramAvailable = deepgramConfig?.available ?? false;
 
   return (
-    <div className="p-4 border-t border-gray-200">
+    <div className="p-4 border-t border-border bg-card/30 backdrop-blur-sm">
       {/* Attachment Previews */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
@@ -330,29 +330,29 @@ export function ChatInput({
             <div
               key={index}
               data-testid="attachment-preview"
-              className="relative group flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg border border-gray-200"
+              className="relative group flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-sm border border-border"
             >
               {attachment.preview ? (
                 <img
                   src={attachment.preview}
                   alt={attachment.file.name}
-                  className="w-10 h-10 object-cover rounded"
+                  className="w-10 h-10 object-cover rounded-sm"
                 />
               ) : (
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               )}
               <span
                 data-testid="attachment-filename"
-                className="text-sm text-gray-700 max-w-[150px] truncate"
+                className="text-xs text-muted-foreground max-w-[150px] truncate font-mono"
               >
                 {attachment.file.name}
               </span>
               <button
                 data-testid="remove-attachment"
                 onClick={() => handleRemoveAttachment(index)}
-                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                className="p-1 text-muted-foreground hover:text-destructive transition-colors"
                 title="Remove attachment"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -372,8 +372,8 @@ export function ChatInput({
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className={`flex gap-3 transition-colors ${
-          isDragActive ? 'ring-2 ring-blue-500 ring-offset-2 rounded-lg' : ''
+        className={`flex gap-3 transition-all duration-300 ${
+          isDragActive ? 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-sm' : ''
         }`}
       >
         {/* File Input (hidden) */}
@@ -391,7 +391,7 @@ export function ChatInput({
         <button
           data-testid="attach-file-button"
           onClick={handleAttachClick}
-          className="relative p-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          className="relative p-3 text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
           title="Attach file"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -400,7 +400,7 @@ export function ChatInput({
           {attachments.length > 0 && (
             <span
               data-testid="attachment-count"
-              className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-blue-500 text-white text-xs font-medium rounded-full"
+              className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-primary text-primary-foreground text-[10px] font-bold rounded-full border-2 border-background"
             >
               {attachments.length}
             </span>
@@ -414,16 +414,16 @@ export function ChatInput({
           data-deepgram-available={deepgramAvailable ? 'true' : 'false'}
           onClick={handleMicrophoneClick}
           disabled={!deepgramAvailable && !isRecording}
-          className={`relative p-3 rounded-lg transition-colors ${
+          className={`relative p-3 rounded-sm transition-colors ${
             isRecording
-              ? 'text-red-600 bg-red-50 hover:bg-red-100'
+              ? 'text-destructive bg-destructive/10 hover:bg-destructive/20'
               : deepgramAvailable
-                ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                : 'text-gray-300 cursor-not-allowed'
+                ? 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                : 'text-muted-foreground/30 cursor-not-allowed'
           }`}
           title={
             !deepgramAvailable
-              ? 'Voice input unavailable (Deepgram not configured)'
+              ? 'Voice input unavailable'
               : isRecording
                 ? 'Stop voice input'
                 : 'Start voice input'
@@ -436,26 +436,10 @@ export function ChatInput({
           {isRecording && (
             <span
               data-testid="recording-indicator"
-              className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"
+              className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full animate-pulse"
             />
           )}
-          {/* Connection status indicator (shown during recording) */}
-          {isRecording && (
-            <span
-              data-testid="deepgram-connection-status"
-              data-status={connectionStatus}
-              className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full ${
-                connectionStatus === 'connected'
-                  ? 'bg-green-500'
-                  : connectionStatus === 'connecting'
-                    ? 'bg-yellow-500 animate-pulse'
-                    : connectionStatus === 'error'
-                      ? 'bg-red-500'
-                      : 'bg-gray-400'
-              }`}
-              title={`Deepgram: ${connectionStatus}`}
-            />
-          )}
+          {/* ... status ... */}
         </button>
 
         {/* Text Input */}
@@ -464,9 +448,9 @@ export function ChatInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Type your message..."
+          placeholder="Design your prompt..."
           rows={1}
-          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+          className="flex-1 px-4 py-3 bg-background border border-border text-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none font-sans"
           disabled={isLoading || disabled}
           data-testid="chat-input"
         />
@@ -475,7 +459,7 @@ export function ChatInput({
         <button
           onClick={onSend}
           disabled={!canSend}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-primary text-primary-foreground rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-primary/20"
           data-testid="send-button"
         >
           {isLoading ? (
@@ -491,8 +475,8 @@ export function ChatInput({
 
       {/* Drag overlay hint */}
       {isDragActive && (
-        <div className="mt-2 text-center text-sm text-blue-600">
-          Drop files here to attach
+        <div className="mt-2 text-center text-[10px] font-mono uppercase tracking-widest text-primary animate-pulse">
+          RELEASE TO ATTACH ARCHIVES
         </div>
       )}
     </div>

@@ -102,28 +102,28 @@ function CreateToolDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden max-h-[90vh] flex flex-col border border-border"
         onClick={(e) => e.stopPropagation()}
         data-testid="create-python-tool-dialog"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between flex-shrink-0 bg-muted/30">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <FileCode size={20} className="text-green-600" />
             Create Python Tool
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        <div className="p-5 space-y-4 overflow-y-auto flex-1 bg-card">
           {/* Tool Name */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-mono">
               Tool Name
             </label>
             <input
@@ -131,21 +131,21 @@ function CreateToolDialog({
               value={toolName}
               onChange={(e) => setToolName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))}
               placeholder="my_custom_tool"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-mono"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-mono text-foreground"
               data-testid="python-tool-name-input"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-muted-foreground/60 mt-1">
               Use lowercase letters, numbers, and underscores
             </p>
           </div>
 
           {/* Python Code Editor */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-mono">
               Python Code
             </label>
             <div
-              className="border border-gray-200 rounded-lg overflow-hidden"
+              className="border border-border rounded-lg overflow-hidden"
               data-testid="python-code-editor"
             >
               <MonacoEditor
@@ -153,7 +153,7 @@ function CreateToolDialog({
                 language="python"
                 value={code}
                 onChange={(value) => setCode(value || '')}
-                theme="vs-light"
+                theme="vs-dark" // Use dark theme by default or dynamic if possible, defaulting to dark for Sovereign Forge
                 options={{
                   minimap: { enabled: false },
                   fontSize: 13,
@@ -165,25 +165,25 @@ function CreateToolDialog({
                 }}
               />
             </div>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-muted-foreground/60 mt-1">
               Define a function with type hints and a docstring. The docstring becomes the tool description.
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-3 py-2 rounded-lg text-sm">
               {error}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
+        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 flex-shrink-0 bg-muted/30">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </button>
@@ -259,28 +259,28 @@ function TestToolDialog({
   if (!isOpen || !tool) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-border"
         onClick={(e) => e.stopPropagation()}
         data-testid="test-python-tool-dialog"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Play size={20} className="text-blue-600" />
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Play size={20} className="text-primary" />
             Test: {tool.name}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 bg-card">
           {/* Description */}
           {tool.signature?.docstring && (
-            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+            <p className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border">
               {tool.signature.docstring}
             </p>
           )}
@@ -288,7 +288,7 @@ function TestToolDialog({
           {/* Parameter Inputs */}
           {tool.signature?.params.map((param) => (
             <div key={param.name}>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+              <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-mono">
                 {param.name} ({param.type}){!param.required && ' - optional'}
               </label>
               <input
@@ -296,7 +296,7 @@ function TestToolDialog({
                 value={params[param.name] || ''}
                 onChange={(e) => setParams({ ...params, [param.name]: e.target.value })}
                 placeholder={param.default ? `Default: ${param.default}` : `Enter ${param.name}`}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
                 data-testid={`test-param-${param.name}`}
               />
             </div>
@@ -305,15 +305,15 @@ function TestToolDialog({
           {/* Result Display */}
           {result && (
             <div
-              className={`p-3 rounded-lg text-sm ${
-                result.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+              className={`p-3 rounded-lg text-sm border ${
+                result.success ? 'bg-green-500/10 border-green-500/20' : 'bg-destructive/10 border-destructive/20'
               }`}
               data-testid="tool-test-result"
             >
-              <p className={`font-medium mb-1 ${result.success ? 'text-green-700' : 'text-red-700'}`}>
+              <p className={`font-medium mb-1 ${result.success ? 'text-green-600' : 'text-destructive'}`}>
                 {result.success ? 'Success' : 'Error'}
               </p>
-              <pre className="text-xs font-mono whitespace-pre-wrap overflow-auto max-h-40">
+              <pre className="text-xs font-mono whitespace-pre-wrap overflow-auto max-h-40 text-foreground">
                 {result.success ? JSON.stringify(result.result, null, 2) : result.error}
               </pre>
             </div>
@@ -321,11 +321,11 @@ function TestToolDialog({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-3">
+        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Close
           </button>
@@ -334,7 +334,7 @@ function TestToolDialog({
             onClick={handleRun}
             disabled={isRunning}
             data-testid="run-tool-test-button"
-            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors flex items-center gap-2 disabled:opacity-50"
           >
             <Play size={16} />
             {isRunning ? 'Running...' : 'Run Test'}
@@ -361,7 +361,7 @@ function PythonToolCard({
     <div
       data-testid={`python-tool-card-${tool.name}`}
       className={`border rounded-lg p-3 transition-colors ${
-        tool.enabled ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+        tool.enabled ? 'bg-green-500/10 border-green-500/20' : 'bg-muted/30 border-border'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -371,7 +371,7 @@ function PythonToolCard({
             type="checkbox"
             checked={tool.enabled}
             onChange={onToggle}
-            className="mt-1 w-4 h-4 text-green-600 rounded focus:ring-green-500"
+            className="mt-1 w-4 h-4 text-green-600 rounded focus:ring-green-500 bg-background border-border"
             data-testid="enable-python-tool-checkbox"
           />
 
@@ -379,19 +379,19 @@ function PythonToolCard({
             {/* Tool Name */}
             <div className="flex items-center gap-2">
               <Code size={14} className="text-green-600 flex-shrink-0" />
-              <span className="text-sm font-medium text-gray-900 truncate">{tool.name}</span>
+              <span className="text-sm font-medium text-foreground truncate font-mono">{tool.name}</span>
             </div>
 
             {/* Function Signature */}
             {tool.signature && (
-              <p className="text-xs text-gray-500 font-mono mt-1 truncate">
+              <p className="text-xs text-muted-foreground font-mono mt-1 truncate">
                 ({tool.signature.params.map((p) => `${p.name}: ${p.type}`).join(', ')})
               </p>
             )}
 
             {/* Docstring Preview */}
             {tool.signature?.docstring && (
-              <p className="text-xs text-gray-400 mt-1 line-clamp-2">
+              <p className="text-xs text-muted-foreground/80 mt-1 line-clamp-2">
                 {tool.signature.docstring}
               </p>
             )}
@@ -402,7 +402,7 @@ function PythonToolCard({
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={onTest}
-            className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+            className="p-1.5 text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors"
             title="Test tool"
             data-testid="test-python-tool-button"
           >
@@ -410,7 +410,7 @@ function PythonToolCard({
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
             title="Delete tool"
             data-testid="delete-python-tool-button"
           >
@@ -465,7 +465,7 @@ export default function CustomPythonToolsPanel({
     <div data-testid="custom-python-tools-section" className="space-y-3">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium text-gray-700">Custom Python Tools</label>
+        <label className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Custom Python Tools</label>
         <button
           onClick={() => setIsCreateDialogOpen(true)}
           data-testid="add-python-tool-btn"
@@ -481,15 +481,15 @@ export default function CustomPythonToolsPanel({
         {pythonTools.length === 0 ? (
           <div
             data-testid="custom-python-tools-empty-state"
-            className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50/50"
+            className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border rounded-lg bg-muted/20"
           >
-            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-2">
+            <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 mb-2">
               <Code size={16} />
             </div>
-            <p className="text-xs text-gray-500 mb-2">No custom Python tools</p>
+            <p className="text-xs text-muted-foreground mb-2">No custom Python tools</p>
             <button
               onClick={() => setIsCreateDialogOpen(true)}
-              className="text-xs font-medium text-green-600 hover:text-green-700 hover:underline"
+              className="text-xs font-medium text-green-600 hover:text-green-500 hover:underline"
             >
               Create your first Python tool
             </button>
@@ -509,7 +509,7 @@ export default function CustomPythonToolsPanel({
 
       {/* Footer Summary */}
       {pythonTools.length > 0 && (
-        <div className="text-[10px] text-gray-400 font-mono pt-1 border-t border-gray-100">
+        <div className="text-[10px] text-muted-foreground/40 font-mono pt-1 border-t border-border">
           {pythonTools.filter((t) => t.enabled).length}/{pythonTools.length} tool
           {pythonTools.length !== 1 ? 's' : ''} enabled
         </div>

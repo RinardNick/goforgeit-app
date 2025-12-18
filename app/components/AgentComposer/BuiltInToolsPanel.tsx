@@ -70,30 +70,30 @@ function AddBuiltInToolModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
       <div
         data-testid="builtin-tools-modal"
-        className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden border border-border"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Add Built-in Tools</h3>
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+          <h3 className="text-lg font-heading font-bold text-foreground">Add Built-in Tools</h3>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
           >
-            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Body - Tool Categories */}
-        <div className="px-5 py-4 overflow-y-auto max-h-[50vh] space-y-4">
+        <div className="px-5 py-4 overflow-y-auto max-h-[50vh] space-y-4 bg-card">
           {/* Search Tools */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Search Tools</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-mono">Search Tools</p>
             <div className="space-y-1">
               {BUILTIN_TOOLS.search.map(tool => (
                 <label
@@ -101,20 +101,20 @@ function AddBuiltInToolModal({
                   data-testid={`modal-tool-${tool.id}`}
                   className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                     tempSelected.includes(tool.id)
-                      ? 'bg-blue-50 border border-blue-200'
-                      : 'hover:bg-gray-50 border border-transparent'
+                      ? 'bg-primary/10 border border-primary/20'
+                      : 'hover:bg-accent border border-transparent'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={tempSelected.includes(tool.id)}
                     onChange={() => toggleTool(tool.id)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary rounded focus:ring-primary bg-card border-muted-foreground"
                   />
-                  <span className="text-lg">{tool.icon}</span>
+                  <span className="text-lg opacity-80">{tool.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{tool.name}</p>
-                    <p className="text-xs text-gray-500">{tool.description}</p>
+                    <p className="text-sm font-medium text-foreground">{tool.name}</p>
+                    <p className="text-xs text-muted-foreground">{tool.description}</p>
                   </div>
                 </label>
               ))}
@@ -123,7 +123,7 @@ function AddBuiltInToolModal({
 
           {/* Context Tools */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Context Tools</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-mono">Context Tools</p>
             <div className="space-y-1">
               {BUILTIN_TOOLS.context.map(tool => (
                 <label
@@ -131,20 +131,20 @@ function AddBuiltInToolModal({
                   data-testid={`modal-tool-${tool.id}`}
                   className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                     tempSelected.includes(tool.id)
-                      ? 'bg-blue-50 border border-blue-200'
-                      : 'hover:bg-gray-50 border border-transparent'
+                      ? 'bg-primary/10 border border-primary/20'
+                      : 'hover:bg-accent border border-transparent'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={tempSelected.includes(tool.id)}
                     onChange={() => toggleTool(tool.id)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary rounded focus:ring-primary bg-card border-muted-foreground"
                   />
-                  <span className="text-lg">{tool.icon}</span>
+                  <span className="text-lg opacity-80">{tool.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{tool.name}</p>
-                    <p className="text-xs text-gray-500">{tool.description}</p>
+                    <p className="text-sm font-medium text-foreground">{tool.name}</p>
+                    <p className="text-xs text-muted-foreground">{tool.description}</p>
                   </div>
                 </label>
               ))}
@@ -153,7 +153,7 @@ function AddBuiltInToolModal({
 
           {/* Agent Function Tools */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Agent Function Tools</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-mono">Agent Function Tools</p>
             <div className="space-y-1">
               {BUILTIN_TOOLS.agent.map(tool => (
                 <label
@@ -161,20 +161,20 @@ function AddBuiltInToolModal({
                   data-testid={`modal-tool-${tool.id}`}
                   className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                     tempSelected.includes(tool.id)
-                      ? 'bg-blue-50 border border-blue-200'
-                      : 'hover:bg-gray-50 border border-transparent'
+                      ? 'bg-primary/10 border border-primary/20'
+                      : 'hover:bg-accent border border-transparent'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={tempSelected.includes(tool.id)}
                     onChange={() => toggleTool(tool.id)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary rounded focus:ring-primary bg-card border-muted-foreground"
                   />
-                  <span className="text-lg">{tool.icon}</span>
+                  <span className="text-lg opacity-80">{tool.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{tool.name}</p>
-                    <p className="text-xs text-gray-500">{tool.description}</p>
+                    <p className="text-sm font-medium text-foreground">{tool.name}</p>
+                    <p className="text-xs text-muted-foreground">{tool.description}</p>
                   </div>
                 </label>
               ))}
@@ -183,21 +183,21 @@ function AddBuiltInToolModal({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
-          <p className="text-sm text-gray-500">
+        <div className="px-5 py-4 border-t border-border flex items-center justify-between bg-muted/30">
+          <p className="text-sm text-muted-foreground font-mono">
             {tempSelected.length} tool{tempSelected.length !== 1 ? 's' : ''} selected
           </p>
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button
               data-testid="confirm-builtin-tools"
               onClick={handleConfirm}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:opacity-90 rounded-lg transition-colors"
             >
               Confirm
             </button>
@@ -243,13 +243,13 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
   return (
     <div data-testid="builtin-tools-section">
       <div className="flex items-center justify-between mb-2">
-        <label className="block text-sm font-medium text-gray-700">Built-in Tools</label>
+        <label className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Built-in Tools</label>
         <button
           data-testid="add-builtin-tool-btn"
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+          className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-primary hover:text-primary-foreground hover:bg-primary rounded transition-colors uppercase tracking-wide border border-primary/20"
         >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Add
@@ -269,18 +269,18 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
               <div
                 key={toolId}
                 data-testid={`tool-card-${toolId}`}
-                className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+                className="border border-border rounded-sm overflow-hidden bg-card transition-all hover:border-primary/30"
               >
                 {/* Tool Header - Clickable to expand/collapse */}
                 <div
-                  className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 p-2 cursor-pointer hover:bg-accent/50 transition-colors"
                   onClick={() => toggleExpanded(toolId)}
                 >
-                  <span className="text-base">{tool.icon}</span>
+                  <span className="text-base opacity-80">{tool.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{tool.name}</p>
+                    <p className="text-xs font-mono font-medium text-foreground">{tool.name}</p>
                     {tool.description && (
-                      <p className="text-xs text-gray-500 truncate">{tool.description}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{tool.description}</p>
                     )}
                   </div>
 
@@ -288,7 +288,7 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                   {hasConfirmation && (
                     <span
                       data-testid="tool-confirmation-indicator"
-                      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20 rounded-sm"
                       title="Requires confirmation"
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,7 +300,7 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
 
                   {/* Expand/Collapse icon */}
                   <svg
-                    className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -315,7 +315,7 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                       e.stopPropagation();
                       removeTool(toolId);
                     }}
-                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                    className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
                     title="Remove tool"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,7 +326,7 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
 
                 {/* Expanded Configuration Panel */}
                 {isExpanded && (
-                  <div className="px-3 py-3 border-t border-gray-100 bg-gray-50 space-y-3">
+                  <div className="px-3 py-3 border-t border-border bg-muted/20 space-y-3">
                     {/* Require Confirmation Toggle */}
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input
@@ -339,18 +339,18 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                             confirmationPrompt: e.target.checked ? (config.confirmationPrompt || '') : undefined,
                           });
                         }}
-                        className="mt-0.5 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        className="mt-0.5 w-4 h-4 text-primary rounded focus:ring-primary bg-card border-muted-foreground"
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Require Confirmation</p>
-                        <p className="text-xs text-gray-500">Ask user to confirm before executing this tool</p>
+                        <p className="text-xs font-medium text-foreground">Require Confirmation</p>
+                        <p className="text-[10px] text-muted-foreground">Ask user to confirm before executing this tool</p>
                       </div>
                     </label>
 
                     {/* Confirmation Prompt Input (shown when confirmation is enabled) */}
                     {config.requireConfirmation && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-[10px] font-medium text-muted-foreground mb-1">
                           Confirmation Prompt
                         </label>
                         <input
@@ -359,9 +359,9 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                           value={config.confirmationPrompt || ''}
                           onChange={(e) => updateToolConfig(toolId, { confirmationPrompt: e.target.value })}
                           placeholder="e.g., Are you sure you want to search the web?"
-                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-2 py-1.5 text-xs bg-background border border-border rounded-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">
                           Custom message shown to the user when confirmation is required
                         </p>
                       </div>
@@ -370,8 +370,8 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                     {/* VertexAiSearchTool-specific: data_store_id configuration */}
                     {toolId === 'VertexAiSearchTool' && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Data Store ID <span className="text-red-500">*</span>
+                        <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                          Data Store ID <span className="text-destructive">*</span>
                         </label>
                         <input
                           type="text"
@@ -379,9 +379,9 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                           value={config.dataStoreId || ''}
                           onChange={(e) => updateToolConfig(toolId, { dataStoreId: e.target.value })}
                           placeholder="projects/PROJECT_ID/locations/global/collections/default_collection/dataStores/DATASTORE_ID"
-                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                          className="w-full px-2 py-1.5 text-xs bg-background border border-border rounded-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">
                           Full resource path to your Vertex AI Search datastore
                         </p>
                       </div>
@@ -391,8 +391,8 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                     {toolId === 'VertexAiRagRetrieval' && (
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
-                            RAG Corpora <span className="text-red-500">*</span>
+                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                            RAG Corpora <span className="text-destructive">*</span>
                           </label>
                           <input
                             type="text"
@@ -400,14 +400,14 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                             value={config.ragCorpora || ''}
                             onChange={(e) => updateToolConfig(toolId, { ragCorpora: e.target.value })}
                             placeholder="projects/PROJECT_ID/locations/LOCATION/ragCorpora/CORPUS_ID"
-                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                            className="w-full px-2 py-1.5 text-xs bg-background border border-border rounded-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono"
                           />
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-[10px] text-muted-foreground/60">
                             Full resource path to your Vertex AI RAG corpus
                           </p>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">
                             Similarity Top K
                           </label>
                           <input
@@ -418,14 +418,14 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                             placeholder="10"
                             min="1"
                             max="100"
-                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-2 py-1.5 text-xs bg-background border border-border rounded-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                           />
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-[10px] text-muted-foreground/60">
                             Number of top results to return (default: 10)
                           </p>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">
                             Vector Distance Threshold
                           </label>
                           <input
@@ -437,9 +437,9 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                             min="0"
                             max="1"
                             step="0.1"
-                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-2 py-1.5 text-xs bg-background border border-border rounded-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                           />
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-[10px] text-muted-foreground/60">
                             Similarity threshold (0-1, lower is more similar)
                           </p>
                         </div>
@@ -449,8 +449,8 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                     {/* FilesRetrieval-specific configuration */}
                     {toolId === 'FilesRetrieval' && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Input Directory <span className="text-red-500">*</span>
+                        <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                          Input Directory <span className="text-destructive">*</span>
                         </label>
                         <input
                           type="text"
@@ -458,9 +458,9 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                           value={config.inputDir || ''}
                           onChange={(e) => updateToolConfig(toolId, { inputDir: e.target.value })}
                           placeholder="./data/documents"
-                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                          className="w-full px-2 py-1.5 text-xs bg-background border border-border rounded-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">
                           Path to the directory containing files to retrieve from
                         </p>
                       </div>
@@ -469,8 +469,8 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                     {/* LongRunningFunctionTool-specific configuration */}
                     {toolId === 'LongRunningFunctionTool' && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Function Path <span className="text-red-500">*</span>
+                        <label className="block text-[10px] font-medium text-muted-foreground mb-1">
+                          Function Path <span className="text-destructive">*</span>
                         </label>
                         <input
                           type="text"
@@ -478,9 +478,9 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
                           value={config.funcPath || ''}
                           onChange={(e) => updateToolConfig(toolId, { funcPath: e.target.value })}
                           placeholder="my_module.long_running_task"
-                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                          className="w-full px-2 py-1.5 text-xs bg-background border border-border rounded-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-[10px] text-muted-foreground/60">
                           Python function path (module.function_name) for the async task
                         </p>
                       </div>
@@ -492,7 +492,7 @@ export function BuiltInToolsPanel({ selectedTools, toolConfigs, onToolsChange, o
           })}
         </div>
       ) : (
-        <p className="text-xs text-gray-400 italic">No built-in tools added</p>
+        <p className="text-xs text-muted-foreground/40 italic">No built-in tools added</p>
       )}
 
       {/* Modal */}

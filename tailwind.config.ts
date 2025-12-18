@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,13 +10,55 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Semantic Colors (Themable)
         background: "var(--background)",
         foreground: "var(--foreground)",
-        "vibrant-orange": "#f98006",
-        "sandstone": "#f8f7f5",
-        "charcoal": "#23190f",
-        "boulder-blue": "#3B82F6",
-        "slate-gray": "#94a3b8",
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+        },
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+
+        // Brand Palette (Fixed)
+        deepBlue: "#0A1931",
+        charcoal: "#2C3E50",
+        midnight: "#050C16",
+        electricOrange: "#FF6B00",
+        forgeGreen: "#00E676",
+        vitalisTeal: "#00BCD4",
+        warmWhite: "#FDFBF7",
+        silver: "#ECF0F1",
+      },
+      fontFamily: {
+        heading: ["var(--font-montserrat)", "sans-serif"],
+        sans: ["var(--font-inter)", "sans-serif"],
+        mono: ["monospace"], // Fallback
       },
       keyframes: {
         fadeIn: {
@@ -27,10 +70,15 @@ export default {
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
           '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
         },
+        pulseSlow: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.8' },
+        },
       },
       animation: {
         fadeIn: 'fadeIn 0.5s ease-out forwards',
         shake: 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+        'pulse-slow': 'pulseSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },

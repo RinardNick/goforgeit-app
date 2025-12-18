@@ -12,6 +12,7 @@
     "test:unit": "tsx --test lib/adk/__tests__/*.test.ts",
     "test:ui": "NODE_ENV=test playwright test --ui",
     "test:headed": "NODE_ENV=test playwright test --headed",
+    "migrate": "tsx scripts/run-migrations.ts",
     "dev-adk": "./start-adk-services.sh",
     "stop-adk": "lsof -ti:8000 | xargs kill -9 2>/dev/null || echo \"ADK server not running\""
   },
@@ -28,6 +29,7 @@
     "lucide-react": "^0.555.0",
     "next": "^16.0.7",
     "next-auth": "^5.0.0-beta.30",
+    "next-themes": "^0.4.6",
     "pg": "^8.16.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
@@ -43,6 +45,7 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "^15.0.3",
     "postcss": "^8",

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getADKSession, deleteADKSession, updateADKSession, checkADKHealth } from '@/lib/adk';
+import { auth } from '@/auth';
 import { z } from 'zod';
-
-const DEFAULT_USER_ID = 'default-user';
 
 // Schema for PATCH request validation
 const UpdateSessionSchema = z.object({
@@ -21,6 +20,13 @@ export async function DELETE(
   const { name, sessionId } = await params;
 
   try {
+    // Check auth - use email as userId for session isolation
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = session.user.email;
+
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
     if (!isHealthy) {
@@ -34,7 +40,7 @@ export async function DELETE(
     }
 
     // Delete session at the ADK backend
-    await deleteADKSession(name, DEFAULT_USER_ID, sessionId);
+    await deleteADKSession(name, userId, sessionId);
 
     return NextResponse.json({ success: true, sessionId });
   } catch (error) {
@@ -61,6 +67,13 @@ export async function GET(
   const { name, sessionId } = await params;
 
   try {
+    // Check auth - use email as userId for session isolation
+    const authSession = await auth();
+    if (!authSession?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = authSession.user.email;
+
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
     if (!isHealthy) {
@@ -74,7 +87,7 @@ export async function GET(
     }
 
     // Get session from the ADK backend
-    const session = await getADKSession(name, DEFAULT_USER_ID, sessionId);
+    const session = await getADKSession(name, userId, sessionId);
 
     if (!session) {
       return NextResponse.json(
@@ -120,6 +133,13 @@ export async function PATCH(
   const { name, sessionId } = await params;
 
   try {
+    // Check auth - use email as userId for session isolation
+    const authSession = await auth();
+    if (!authSession?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = authSession.user.email;
+
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
     if (!isHealthy) {
@@ -160,7 +180,7 @@ export async function PATCH(
     const { stateDelta } = validation.data;
 
     // Update session state at the ADK backend
-    const updatedSession = await updateADKSession(name, DEFAULT_USER_ID, sessionId, stateDelta);
+    const updatedSession = await updateADKSession(name, userId, sessionId, stateDelta);
 
     // Return updated session in format expected by frontend
     return NextResponse.json({

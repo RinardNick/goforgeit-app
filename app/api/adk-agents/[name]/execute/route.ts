@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeADKAgent, executeADKAgentStream, checkADKHealth } from '@/lib/adk';
+import { auth } from '@/auth';
 import { z } from 'zod';
 
 export const runtime = 'nodejs';
@@ -8,7 +9,6 @@ export const runtime = 'nodejs';
 const ExecuteADKAgentSchema = z.object({
   message: z.string().min(1, 'Message is required'),
   sessionId: z.string().optional(),
-  userId: z.string().optional(),
   streaming: z.boolean().optional().default(false),
 });
 
@@ -22,6 +22,13 @@ export async function POST(
 ) {
   try {
     const { name: agentName } = await params;
+
+    // Check auth - use email as userId for session isolation
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const userId = session.user.email;
 
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
@@ -60,7 +67,7 @@ export async function POST(
       );
     }
 
-    const { message, sessionId, userId, streaming } = validation.data;
+    const { message, sessionId, streaming } = validation.data;
 
     // Handle streaming mode
     if (streaming) {
@@ -70,7 +77,7 @@ export async function POST(
           try {
             const generator = executeADKAgentStream(agentName, message, {
               sessionId,
-              userId: userId || 'default-user',
+              userId,
             });
 
             let result;
@@ -112,7 +119,7 @@ export async function POST(
     // Execute the ADK agent (non-streaming)
     const result = await executeADKAgent(agentName, message, {
       sessionId,
-      userId: userId || 'default-user',
+      userId,
     });
 
     return NextResponse.json({

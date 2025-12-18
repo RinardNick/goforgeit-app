@@ -6,9 +6,19 @@ test.describe('MCP Agents Endpoint', () => {
   test('GET /api/mcp/agents should establish SSE connection', async () => {
     // We use native http to avoid Playwright buffering the infinite stream
     const response = await new Promise<http.IncomingMessage>((resolve, reject) => {
-      const req = http.get('http://localhost:3025/api/mcp/agents', (res) => {
+      const options = {
+        hostname: 'localhost',
+        port: 3025,
+        path: '/api/mcp/agents',
+        method: 'GET',
+        headers: {
+          'X-API-Key': 'test-api-key'
+        }
+      };
+      const req = http.request(options, (res) => {
         resolve(res);
       });
+      req.end();
       req.on('error', reject);
     });
     

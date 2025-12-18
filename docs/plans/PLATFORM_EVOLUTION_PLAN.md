@@ -59,10 +59,10 @@ graph TD
 **Goal:** Everything is an MCP server.
 
 1.  **Outbound MCP (Agents as Tools):**
-    *   Create a dynamic MCP endpoint (`/api/mcp/agents`) that exposes *every* built agent as a tool.
+    *   [x] Create a dynamic MCP endpoint (`/api/mcp/agents`) that exposes *every* built agent as a tool. (Completed)
     *   *Use Case:* User in Cursor/Claude Desktop can connect to this URL and say "Ask the Research Agent to find X".
 2.  **Inbound MCP (Builder as Tool):**
-    *   Expose the **Agent Builder** itself as an MCP tool.
+    *   [x] Expose the **Agent Builder** itself as an MCP tool. (Completed via `/api/agents/[name]/assistant`)
     *   *Tool:* `create_agent(name, prompt, tools)`
     *   *Tool:* `add_tool_to_agent(agent_name, tool_def)`
     *   *Use Case:* An external "Architect Agent" can programmatically build and deploy new agents on our platform.
@@ -70,10 +70,19 @@ graph TD
 ### Phase 3: Dynamic Tool Factory
 **Goal:** "Just-in-Time" Tool Creation using Advanced Coding Agents.
 
-1.  **Tool Registry UI:** A dedicated section in the Visual Builder to manage custom tools.
-2.  **The "Forge" Agent:** A specialized agent (using Gemini CLI or Claude Code capabilities) tasked with writing Python code for new tools.
-    *   *Workflow:* User says "I need a tool to fetch stock prices." -> Forge Agent writes `get_stock_price.py` -> Runs tests -> Registers it in `adk-service/tools`.
-3.  **Hot Reloading:** Ensure ADK picks up new tools without a full restart (or seamless restarts).
+1.  **The "Meta-Agent" Architecture (Dogfooding):**
+    *   **Concept:** Migrate the hardcoded "Builder Assistant" to be a genuine ADK Agent (`builder_agent.yaml`) running on the engine itself.
+    *   **Why:** Allows using the Visual Builder to improve the Builder, enables evaluations, and visual debugging of the building process.
+    *   **Safety:** Deploy this agent to a protected `system_core/` namespace to prevent it from accidentally modifying its own definition ("Lobotomy Risk") and locking users out.
+2.  **Genkit as the Tool Layer:**
+    *   Use Google Genkit to implement the robust *infrastructure tools* (`create_agent`, `write_file`, `run_shell`) that the Meta-Agent calls.
+    *   Implement a minimal "Rescue Agent" in Genkit as a fallback if the ADK engine fails.
+3.  **The "Forge" Sub-Agent:**
+    *   Create a specialized "Tool Maker" agent.
+    *   **Integration:** Add this as a *sub-agent* to the Builder Meta-Agent.
+    *   *Workflow:* User asks Builder for a stock tool -> Builder delegates to Forge -> Forge writes `get_stock_price.py` -> Builder registers it.
+4.  **Tool Registry UI:** A dedicated section in the Visual Builder to manage custom tools.
+5.  **Hot Reloading:** Ensure ADK picks up new tools without a full restart (or seamless restarts).
 
 ### Phase 4: True Platform Infrastructure (The "Real" Backend)
 *   [x] **4.1 Dedicated Database:** Provision `goforgeit-db` Cloud SQL instance and configure `app.goforgeit.com` to use it. (Completed Dec 16, 2025)
@@ -99,4 +108,6 @@ graph TD
 
 1.  [x] **Execute Phase 1:** Upgrade Dockerfile and switch DB to Postgres. (Completed Dec 15, 2025)
 2.  [x] **Prototype Phase 2:** Build a simple MCP server endpoint in Next.js that wraps one hardcoded agent. (Completed Dec 15, 2025 - Dynamic implementation!)
-3.  [ ] **Design Phase 4 DB:** Sketch the schema for `organizations`, `projects`, and `billing_ledger`.
+3.  [x] **Design Phase 4 DB:** Sketch the schema for `organizations`, `projects`, and `billing_ledger`. (Completed Dec 16, 2025)
+4.  [x] **Implement Phase 4 Logic:** Wire up Token Accounting to the `billing_ledger` table. (Completed Dec 16, 2025)
+5.  [ ] **Start Phase 3 Refactor:** Port the Builder Assistant's hardcoded loop to Genkit tools and create the `builder_agent.yaml`.

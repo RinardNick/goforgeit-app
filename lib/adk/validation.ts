@@ -97,7 +97,7 @@ export async function validateAgentSchema(
   try {
     // Determine the base URL based on environment
     const baseUrl = typeof window === 'undefined'
-      ? (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3050')
+      ? (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3025')
       : '';
 
     // Call validation endpoint

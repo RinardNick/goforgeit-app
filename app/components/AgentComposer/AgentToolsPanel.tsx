@@ -44,23 +44,23 @@ const ModeSelectionDialog = ({ open, onClose, onSelectExisting, onCreateNew, has
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-border"
         onClick={e => e.stopPropagation()}
         data-testid="agent-tool-mode-dialog"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Add Agent Tool</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+          <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Add Agent Tool</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Content - Two Options */}
-        <div className="p-5 space-y-3">
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="p-5 space-y-3 bg-card">
+          <p className="text-sm text-muted-foreground mb-4 font-light">
             Agent Tools allow this agent to delegate tasks to other specialized agents.
           </p>
 
@@ -70,20 +70,20 @@ const ModeSelectionDialog = ({ open, onClose, onSelectExisting, onCreateNew, has
             data-testid="select-existing-agent-btn"
             onClick={onSelectExisting}
             disabled={!hasAvailableAgents}
-            className="w-full flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50/50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white"
+            className="w-full flex items-start gap-3 p-4 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary shadow-sm">
               <Bot size={20} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">Select Existing Agent</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-sm font-bold text-foreground">Select Existing Agent</p>
+              <p className="text-xs text-muted-foreground mt-0.5 font-mono">
                 {hasAvailableAgents
                   ? 'Choose from agents already in this project'
                   : 'No other agents available in this project'}
               </p>
             </div>
-            <ChevronDown size={16} className="text-gray-400 -rotate-90 mt-2" />
+            <ChevronDown size={16} className="text-muted-foreground/40 -rotate-90 mt-2" />
           </button>
 
           {/* Option 2: Create New */}
@@ -91,18 +91,18 @@ const ModeSelectionDialog = ({ open, onClose, onSelectExisting, onCreateNew, has
             type="button"
             data-testid="create-new-agent-tool-btn"
             onClick={onCreateNew}
-            className="w-full flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50/50 transition-all text-left"
+            className="w-full flex items-start gap-3 p-4 border border-border rounded-lg hover:border-green-500/50 hover:bg-green-500/5 transition-all text-left"
           >
-            <div className="p-2 rounded-lg bg-green-100 text-green-600">
+            <div className="p-2 rounded-lg bg-green-500/10 text-green-500 shadow-sm">
               <Sparkles size={20} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">Create New Agent Tool</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-sm font-bold text-foreground">Create New Agent Tool</p>
+              <p className="text-xs text-muted-foreground mt-0.5 font-mono">
                 Create a new specialized agent to use as a tool
               </p>
             </div>
-            <ChevronDown size={16} className="text-gray-400 -rotate-90 mt-2" />
+            <ChevronDown size={16} className="text-muted-foreground/40 -rotate-90 mt-2" />
           </button>
         </div>
       </div>
@@ -137,32 +137,32 @@ const AddAgentToolDialog = ({ open, onClose, onBack, onSave, availableAgents, ex
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-border"
         onClick={e => e.stopPropagation()}
         data-testid="add-agent-tool-dialog"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
           <div className="flex items-center gap-2">
-            <button onClick={onBack} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
+            <button onClick={onBack} className="text-muted-foreground hover:text-foreground p-1 -ml-1 transition-colors">
               <ChevronDown size={16} className="rotate-90" />
             </button>
-            <h2 className="text-lg font-semibold text-gray-900">Select Existing Agent</h2>
+            <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Select Existing Agent</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 bg-card">
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
               Select Agent
             </label>
-            <p className="text-xs text-gray-400 mb-2">
+            <p className="text-xs text-muted-foreground/60 mb-3 font-light italic">
               Choose an agent from this project to use as a tool
             </p>
 
@@ -172,19 +172,19 @@ const AddAgentToolDialog = ({ open, onClose, onBack, onSave, availableAgents, ex
                 type="button"
                 data-testid="agent-tool-agent-select"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-left text-sm bg-white hover:border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all flex items-center justify-between"
+                className="w-full border border-border rounded-sm px-3 py-3 text-left text-sm bg-background hover:border-primary/50 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all flex items-center justify-between group shadow-sm"
               >
-                <span className={selectedAgent ? 'text-gray-900' : 'text-gray-400'}>
-                  {selectedAgent ? selectedAgent.replace('.yaml', '') : 'Select an agent...'}
+                <span className={`font-mono ${selectedAgent ? 'text-foreground' : 'text-muted-foreground/40'}`}>
+                  {selectedAgent ? selectedAgent.replace('.yaml', '') : 'SELECT_AGENT_MODULE...'}
                 </span>
-                <ChevronDown size={16} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-auto">
+                <div className="absolute z-10 mt-1 w-full bg-popover border border-border rounded-sm shadow-2xl max-h-48 overflow-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                   {selectableAgents.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-gray-400 italic">
-                      No available agents
+                    <div className="px-3 py-3 text-xs text-muted-foreground/40 italic font-mono uppercase">
+                      NO_AGENTS_AVAILABLE
                     </div>
                   ) : (
                     selectableAgents.map(agent => (
@@ -195,9 +195,9 @@ const AddAgentToolDialog = ({ open, onClose, onBack, onSave, availableAgents, ex
                           setSelectedAgent(agent);
                           setIsOpen(false);
                         }}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                        className="w-full px-3 py-2.5 text-left text-xs font-mono text-foreground hover:bg-accent flex items-center gap-2 border-b border-border/5 last:border-b-0 transition-colors"
                       >
-                        <Bot size={14} className="text-purple-500" />
+                        <Bot size={14} className="text-primary opacity-70" />
                         <span>{agent.replace('.yaml', '')}</span>
                       </button>
                     ))
@@ -208,24 +208,24 @@ const AddAgentToolDialog = ({ open, onClose, onBack, onSave, availableAgents, ex
           </div>
 
           {selectedAgent && (
-            <div className="bg-purple-50 border border-purple-100 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-purple-700">
+            <div className="bg-primary/5 border border-primary/20 rounded-sm p-4 animate-fadeIn">
+              <div className="flex items-center gap-2 text-primary">
                 <Bot size={16} />
-                <span className="text-sm font-medium">{selectedAgent.replace('.yaml', '')}</span>
+                <span className="text-sm font-bold font-mono uppercase tracking-wide">{selectedAgent.replace('.yaml', '')}</span>
               </div>
-              <p className="text-xs text-purple-600 mt-1">
-                This agent will be available as a tool for the LLM to call
+              <p className="text-[10px] text-muted-foreground mt-2 font-mono leading-relaxed opacity-80">
+                PROTOCOL: This agent will be registered as a valid capability for delegation by the current LLM process.
               </p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-3">
+        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30">
           <button
             type="button"
             onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
           >
             Back
           </button>
@@ -234,7 +234,7 @@ const AddAgentToolDialog = ({ open, onClose, onBack, onSave, availableAgents, ex
             data-testid="agent-tool-save-button"
             onClick={handleSave}
             disabled={!selectedAgent}
-            className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Add Agent Tool
           </button>
@@ -287,30 +287,30 @@ const CreateAgentToolDialog = ({ open, onClose, onBack, onSave, isLoading }: Cre
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleClose}>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={handleClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col border border-border"
         onClick={e => e.stopPropagation()}
         data-testid="create-agent-tool-dialog"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30 shrink-0">
           <div className="flex items-center gap-2">
-            <button onClick={onBack} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
+            <button onClick={onBack} className="text-muted-foreground hover:text-foreground p-1 -ml-1 transition-colors">
               <ChevronDown size={16} className="rotate-90" />
             </button>
-            <h2 className="text-lg font-semibold text-gray-900">Create New Agent Tool</h2>
+            <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Create Agent Module</h2>
           </div>
-          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        <div className="p-5 space-y-5 overflow-y-auto flex-1 bg-card scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {/* Name */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
               Agent Name *
             </label>
             <input
@@ -319,30 +319,30 @@ const CreateAgentToolDialog = ({ open, onClose, onBack, onSave, isLoading }: Cre
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g., search_specialist"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm text-foreground font-mono focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none"
             />
-            <p className="text-xs text-gray-400 mt-1">Use snake_case for naming</p>
+            <p className="text-[10px] text-muted-foreground/60 mt-1.5 font-mono uppercase tracking-tighter">IDENTIFIER_MUST_BE_SNAKE_CASE</p>
           </div>
 
           {/* Model */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-              Model
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
+              Process Model
             </label>
             <div className="relative">
               <button
                 type="button"
                 data-testid="new-agent-tool-model"
                 onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-left text-sm bg-white hover:border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all flex items-center justify-between"
+                className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-left text-sm text-foreground hover:border-primary/50 focus:ring-1 focus:ring-primary focus:border-primary transition-all flex items-center justify-between group shadow-sm"
               >
-                <span className="text-gray-900">
+                <span className="font-mono text-xs">
                   {MODELS.find(m => m.value === model)?.label || model}
                 </span>
-                <ChevronDown size={16} className={`text-gray-400 transition-transform ${modelDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={16} className={`text-muted-foreground transition-transform duration-200 ${modelDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {modelDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+                <div className="absolute z-10 mt-1 w-full bg-popover border border-border rounded-sm shadow-2xl overflow-hidden">
                   {MODELS.map(m => (
                     <button
                       key={m.value}
@@ -351,7 +351,7 @@ const CreateAgentToolDialog = ({ open, onClose, onBack, onSave, isLoading }: Cre
                         setModel(m.value);
                         setModelDropdownOpen(false);
                       }}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${model === m.value ? 'bg-blue-50 text-blue-700' : ''}`}
+                      className={`w-full px-3 py-2.5 text-left text-xs font-mono border-b border-border/5 last:border-b-0 hover:bg-accent transition-colors ${model === m.value ? 'text-primary bg-primary/5' : 'text-foreground'}`}
                     >
                       {m.label}
                     </button>
@@ -363,7 +363,7 @@ const CreateAgentToolDialog = ({ open, onClose, onBack, onSave, isLoading }: Cre
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
               Description
             </label>
             <input
@@ -371,45 +371,44 @@ const CreateAgentToolDialog = ({ open, onClose, onBack, onSave, isLoading }: Cre
               data-testid="new-agent-tool-description"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="A specialized agent for..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+              placeholder="Primary objective..."
+              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
             />
           </div>
 
           {/* Instruction */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-              System Instruction
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
+              Protocol Instruction
             </label>
             <textarea
               data-testid="new-agent-tool-instruction"
               value={instruction}
               onChange={e => setInstruction(e.target.value)}
-              placeholder="You are a specialized agent that..."
+              placeholder="You are a specialized agent programmed to..."
               rows={4}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none"
+              className="w-full bg-background border border-border rounded-sm px-3 py-2.5 text-xs text-foreground font-mono leading-relaxed focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-none transition-all"
             />
           </div>
 
           {/* Info */}
-          <div className="bg-green-50 border border-green-100 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-green-700">
+          <div className="bg-green-500/10 border border-green-500/20 rounded-sm p-4 animate-fadeIn">
+            <div className="flex items-center gap-2 text-green-500">
               <Sparkles size={16} />
-              <span className="text-sm font-medium">New Agent Tool</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest font-mono">New Component</span>
             </div>
-            <p className="text-xs text-green-600 mt-1">
-              This will create a new agent in your project that can be called as a tool by the parent agent.
-              You can edit it further by clicking on the agent card.
+            <p className="text-[10px] text-muted-foreground mt-2 font-mono leading-relaxed opacity-80">
+              This will initialize a new sovereign process within the current architecture. It can be further customized post-initialization.
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30 shrink-0">
           <button
             type="button"
             onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             disabled={isLoading}
           >
             Back
@@ -419,7 +418,7 @@ const CreateAgentToolDialog = ({ open, onClose, onBack, onSave, isLoading }: Cre
             data-testid="create-agent-tool-save-button"
             onClick={handleSave}
             disabled={!name.trim() || isLoading}
-            className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isLoading ? (
               <>
@@ -427,10 +426,10 @@ const CreateAgentToolDialog = ({ open, onClose, onBack, onSave, isLoading }: Cre
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Creating...
+                Processing...
               </>
             ) : (
-              'Create Agent Tool'
+              'Initialize'
             )}
           </button>
         </div>
@@ -450,7 +449,7 @@ const AgentToolCard = ({ tool, onDelete, onNavigate }: AgentToolCardProps) => {
   return (
     <div
       data-testid={`agent-tool-card-${tool.agentName}`}
-      className="flex items-center justify-between px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg group"
+      className="flex items-center justify-between px-3 py-2 bg-primary/5 border border-primary/20 rounded-sm group hover:border-primary/40 transition-all"
     >
       <button
         type="button"
@@ -458,14 +457,14 @@ const AgentToolCard = ({ tool, onDelete, onNavigate }: AgentToolCardProps) => {
         className="flex items-center gap-2 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
         title="Click to edit this agent"
       >
-        <div className="p-1.5 rounded-md bg-purple-100 text-purple-600">
+        <div className="p-1.5 rounded-sm bg-primary/10 text-primary shadow-sm">
           <Bot size={14} />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-sm font-medium text-gray-900 truncate">{tool.agentName}</span>
-          <span className="text-[10px] text-gray-400 font-mono truncate">{tool.agentPath}</span>
+          <span className="text-sm font-bold text-foreground font-heading truncate tracking-tight">{tool.agentName}</span>
+          <span className="text-[10px] text-muted-foreground/60 font-mono truncate uppercase">{tool.agentPath}</span>
         </div>
-        <ExternalLink size={12} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity ml-1 shrink-0" />
+        <ExternalLink size={12} className="text-primary/40 opacity-0 group-hover:opacity-100 transition-opacity ml-1 shrink-0" />
       </button>
       <button
         data-testid="delete-agent-tool-button"
@@ -473,7 +472,7 @@ const AgentToolCard = ({ tool, onDelete, onNavigate }: AgentToolCardProps) => {
           e.stopPropagation();
           onDelete();
         }}
-        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors ml-2"
+        className="p-1.5 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-sm transition-colors ml-2"
         title="Remove Agent Tool"
       >
         <Trash2 size={14} />
@@ -535,11 +534,11 @@ export default function AgentToolsPanel({
     <div data-testid="agent-tools-section" className="space-y-3">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium text-gray-700">Agent Tools</label>
+        <label className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Agent Tools</label>
         <button
           onClick={() => setDialogMode('select')}
           data-testid="add-agent-tool-button"
-          className="p-1 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors"
+          className="p-1 bg-foreground text-background rounded-sm hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
           title="Add Agent Tool"
         >
           <Plus size={14} />
@@ -551,17 +550,17 @@ export default function AgentToolsPanel({
         {agentTools.length === 0 ? (
           <div
             data-testid="agent-tools-empty-state"
-            className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50/50"
+            className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border rounded-sm bg-muted/20"
           >
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
+            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground/40 mb-2">
               <Bot size={16} />
             </div>
-            <p className="text-xs text-gray-500 mb-2">No agent tools configured</p>
+            <p className="text-[10px] text-muted-foreground/60 uppercase font-mono mb-2">NO_AGENT_MODULES</p>
             <button
               onClick={() => setDialogMode('select')}
-              className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
+              className="text-xs font-bold text-primary hover:text-primary/80 hover:underline uppercase tracking-wide transition-colors"
             >
-              Add your first agent tool
+              Initialize Module
             </button>
           </div>
         ) : (
@@ -578,8 +577,8 @@ export default function AgentToolsPanel({
 
       {/* Footer Summary */}
       {agentTools.length > 0 && (
-        <div className="text-[10px] text-gray-400 font-mono pt-1 border-t border-gray-100">
-          {agentTools.length} agent tool{agentTools.length !== 1 ? 's' : ''} configured
+        <div className="text-[9px] text-muted-foreground/40 font-mono pt-1.5 border-t border-border uppercase tracking-widest">
+          {agentTools.length} MODULE{agentTools.length !== 1 ? 'S' : ''}_CONNECTED
         </div>
       )}
 

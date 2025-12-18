@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeADKAgent, executeADKAgentStream, checkADKHealth } from '@/lib/adk';
 import { z } from 'zod';
+import { auth } from '@/auth';
+import { ensureUserOrg } from '@/lib/db/utils';
 
 export const runtime = 'nodejs';
 
@@ -8,7 +10,7 @@ export const runtime = 'nodejs';
 const ExecuteADKAgentSchema = z.object({
   message: z.string().min(1, 'Message is required'),
   sessionId: z.string().optional(),
-  userId: z.string().optional(),
+  // userId: z.string().optional(), // We ignore client-provided userId for security, use session instead
   streaming: z.boolean().optional().default(false),
 });
 
@@ -22,6 +24,16 @@ export async function POST(
 ) {
   try {
     const { name: agentName } = await params;
+
+    // Check auth
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Ensure org exists
+    const org = await ensureUserOrg(session.user.email);
+    const userId = session.user.email;
 
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
@@ -60,7 +72,13 @@ export async function POST(
       );
     }
 
-    const { message, sessionId, userId, streaming } = validation.data;
+    const { message, sessionId, streaming } = validation.data;
+
+    // Headers for billing/tracking
+    const headers = {
+      'x-org-id': org.id,
+      'x-user-id': userId,
+    };
 
     // Handle streaming mode
     if (streaming) {
@@ -70,7 +88,8 @@ export async function POST(
           try {
             const generator = executeADKAgentStream(agentName, message, {
               sessionId,
-              userId: userId || 'default-user',
+              userId,
+              headers,
             });
 
             let result;
@@ -112,7 +131,8 @@ export async function POST(
     // Execute the ADK agent (non-streaming)
     const result = await executeADKAgent(agentName, message, {
       sessionId,
-      userId: userId || 'default-user',
+      userId,
+      headers,
     });
 
     return NextResponse.json({

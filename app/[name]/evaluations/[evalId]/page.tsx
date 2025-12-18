@@ -785,7 +785,7 @@ export default function EvalsetDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-muted/30">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">Loading...</div>
@@ -796,7 +796,7 @@ export default function EvalsetDetailPage() {
 
   if (error || !evalset) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-muted/30">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorMessage message={error || 'Evaluation not found'} />
@@ -806,25 +806,25 @@ export default function EvalsetDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-            <Link href="/" className="hover:text-gray-700">Agents</Link>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <Link href="/" className="hover:text-foreground">Agents</Link>
             <span>/</span>
-            <Link href={`/${agentName}/evaluations`} className="hover:text-gray-700">
+            <Link href={`/${agentName}/evaluations`} className="hover:text-foreground">
               Evaluations
             </Link>
             <span>/</span>
-            <span className="text-gray-900">{evalset.name}</span>
+            <span className="text-foreground">{evalset.name}</span>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{evalset.name}</h1>
+              <h1 className="text-3xl font-bold text-foreground">{evalset.name}</h1>
               {evalset.description && (
-                <p className="mt-2 text-gray-600">{evalset.description}</p>
+                <p className="mt-2 text-muted-foreground">{evalset.description}</p>
               )}
             </div>
             <div className="flex gap-3">
@@ -834,7 +834,7 @@ export default function EvalsetDetailPage() {
                 isLoading={isRunning}
                 loadingText="Running..."
                 disabled={evalset.eval_cases.length === 0}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 variant="success"
               >
                 ▶ Run Evaluation
@@ -844,7 +844,7 @@ export default function EvalsetDetailPage() {
                 onClick={handleExport}
                 isLoading={exporting}
                 loadingText="Exporting..."
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90"
                 variant="primary"
               >
                 ⬇ Export
@@ -859,7 +859,7 @@ export default function EvalsetDetailPage() {
               {hasCustomConfig && (
                 <span
                   data-testid="using-custom-config-indicator"
-                  className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-full font-medium"
+                  className="px-3 py-1 text-sm bg-primary/10 text-primary rounded-full font-medium"
                 >
                   Using custom config
                 </span>
@@ -867,7 +867,7 @@ export default function EvalsetDetailPage() {
               <button
                 data-testid="add-conversation-btn"
                 onClick={handleAddConversation}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors font-medium"
               >
                 + Add Conversation
               </button>
@@ -877,16 +877,16 @@ export default function EvalsetDetailPage() {
 
         {/* Progress Tracking */}
         {isRunning && (
-          <div data-testid="evaluation-progress" className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div data-testid="evaluation-progress" className="mb-6 bg-primary/10 border border-blue-200 rounded-xl p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold text-blue-900">Running evaluation...</h3>
-              <span data-testid="progress-percentage" className="text-2xl font-bold text-blue-600">
+              <span data-testid="progress-percentage" className="text-2xl font-bold text-primary">
                 {Math.round(runProgress)}%
               </span>
             </div>
             <div className="w-full bg-blue-200 rounded-full h-3 mb-3">
               <div
-                className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                className="bg-primary h-3 rounded-full transition-all duration-500"
                 style={{ width: `${runProgress}%` }}
               />
             </div>
@@ -899,7 +899,7 @@ export default function EvalsetDetailPage() {
         {/* Run Status */}
         {(isRunning || evaluationComplete) && (
           <div className="mb-6">
-            <div data-testid="run-status" className="text-sm font-medium text-gray-700">
+            <div data-testid="run-status" className="text-sm font-medium text-foreground">
               {isRunning ? 'Running' : 'Completed'}
             </div>
           </div>
@@ -909,14 +909,14 @@ export default function EvalsetDetailPage() {
         {evalset.runs && evalset.runs.length > 0 && !isRunning && (
           <div className="flex gap-6 mb-6">
             {/* Run History Sidebar */}
-            <div data-testid="run-history-sidebar" className="w-80 flex-shrink-0 bg-white border border-gray-200 rounded-xl p-4">
+            <div data-testid="run-history-sidebar" className="w-80 flex-shrink-0 bg-card border border-border rounded-xl p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Run History</h3>
+                <h3 className="text-lg font-semibold text-foreground">Run History</h3>
                 {selectedRunsForComparison.length >= 2 && (
                   <button
                     data-testid="compare-runs-btn"
                     onClick={handleCompareRuns}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-3 py-1 text-sm bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                   >
                     Compare ({selectedRunsForComparison.length})
                   </button>
@@ -933,8 +933,8 @@ export default function EvalsetDetailPage() {
                       data-testid={`run-history-item-${index}`}
                       className={`relative flex items-start gap-2 p-3 rounded-lg transition-colors ${
                         isSelected
-                          ? 'bg-blue-50 border-2 border-blue-500'
-                          : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                          ? 'bg-primary/10 border-2 border-blue-500'
+                          : 'bg-muted/30 border border-border hover:bg-gray-100'
                       }`}
                     >
                       <input
@@ -942,7 +942,7 @@ export default function EvalsetDetailPage() {
                         data-testid={`run-checkbox-${index}`}
                         checked={isChecked}
                         onChange={() => handleToggleRunSelection(index)}
-                        className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        className="mt-1 w-4 h-4 text-primary rounded focus:ring-blue-500"
                         onClick={(e) => e.stopPropagation()}
                       />
                       <button
@@ -950,34 +950,34 @@ export default function EvalsetDetailPage() {
                         className="flex-1 text-left"
                       >
                       <div className="flex items-center justify-between mb-1">
-                        <span data-testid={`run-timestamp-${index}`} className="text-xs text-gray-600">
+                        <span data-testid={`run-timestamp-${index}`} className="text-xs text-muted-foreground">
                           {new Date(run.timestamp).toLocaleString()}
                         </span>
                         {isBaseline && (
-                          <span data-testid="baseline-badge" className="px-2 py-0.5 text-xs bg-amber-100 text-amber-800 rounded-full font-medium">
+                          <span data-testid="baseline-badge" className="px-2 py-0.5 text-xs bg-yellow-500/10 text-yellow-500 rounded-full font-medium">
                             Baseline
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
                         <span data-testid={`run-pass-rate-${index}`} className={`text-lg font-bold ${
-                          (run.overall_pass_rate || 0) >= 70 ? 'text-green-600' : 'text-red-600'
+                          (run.overall_pass_rate || 0) >= 70 ? 'text-green-500' : 'text-destructive'
                         }`}>
                           {run.overall_pass_rate ?? 0}%
                         </span>
-                        <span className="text-xs text-gray-500">pass rate</span>
+                        <span className="text-xs text-muted-foreground">pass rate</span>
                       </div>
                       {run.tags && run.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {run.tags.map((tag, tagIdx) => (
-                            <span key={tagIdx} className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            <span key={tagIdx} className="px-2 py-0.5 text-xs bg-primary/20 text-blue-800 rounded-full">
                               {tag}
                             </span>
                           ))}
                         </div>
                       )}
                       {run.metrics_summary && Object.keys(run.metrics_summary).length > 0 && (
-                        <div className="mt-2 text-xs text-gray-600">
+                        <div className="mt-2 text-xs text-muted-foreground">
                           {Object.keys(run.metrics_summary).join(', ').substring(0, 40)}...
                         </div>
                       )}
@@ -990,9 +990,9 @@ export default function EvalsetDetailPage() {
 
             {/* Main Results Panel */}
             <div className="flex-1">
-              <div data-testid="results-dashboard" className="bg-white border border-gray-200 rounded-xl p-6">
+              <div data-testid="results-dashboard" className="bg-card border border-border rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900">Evaluation Results</h2>
+                  <h2 className="text-2xl font-bold text-foreground">Evaluation Results</h2>
                   <div className="flex gap-2">
                     {editingRunTag === currentRun?.run_id ? (
                       <div className="flex gap-2 items-center">
@@ -1002,18 +1002,18 @@ export default function EvalsetDetailPage() {
                           value={runTagInput}
                           onChange={(e) => setRunTagInput(e.target.value)}
                           placeholder="Enter tag name"
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          className="px-3 py-2 border border-border rounded-lg text-sm"
                         />
                         <button
                           data-testid="save-run-tag-btn"
                           onClick={handleSaveRunTag}
-                          className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+                          className="px-3 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90"
                         >
                           Save Tag
                         </button>
                         <button
                           onClick={() => setEditingRunTag(null)}
-                          className="px-3 py-2 bg-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-400"
+                          className="px-3 py-2 bg-gray-300 text-foreground text-sm rounded-lg hover:bg-gray-400"
                         >
                           Cancel
                         </button>
@@ -1023,14 +1023,14 @@ export default function EvalsetDetailPage() {
                         <button
                           data-testid="add-run-tag-btn"
                           onClick={() => currentRun && handleAddRunTag(currentRun.run_id)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                         >
                           + Tag
                         </button>
                         <button
                           data-testid="set-baseline-btn"
                           onClick={() => currentRun && handleSetBaseline(currentRun.run_id)}
-                          className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                          className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                         >
                           Set Baseline
                         </button>
@@ -1054,7 +1054,7 @@ export default function EvalsetDetailPage() {
                         <button
                           data-testid="rerun-evaluation-btn"
                           onClick={handleRunEvaluation}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                         >
                           ↻ Re-run Evaluation
                         </button>
@@ -1071,12 +1071,12 @@ export default function EvalsetDetailPage() {
             {/* Overall Pass Rate */}
             <div className="mb-6">
               <div className="flex items-center gap-3">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Overall Pass Rate</h3>
-                  <p data-testid="overall-pass-rate" className="text-3xl font-bold text-green-600">
+                  <h3 className="text-lg font-semibold text-foreground">Overall Pass Rate</h3>
+                  <p data-testid="overall-pass-rate" className="text-3xl font-bold text-green-500">
                     {currentRun?.overall_pass_rate ?? 0}%
                   </p>
                 </div>
@@ -1085,9 +1085,9 @@ export default function EvalsetDetailPage() {
 
             {/* Metrics Summary */}
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Metrics Summary</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Metrics Summary</h3>
               {(() => {
-                if (!currentRun) return <p className="text-gray-500 text-sm">No run selected</p>;
+                if (!currentRun) return <p className="text-muted-foreground text-sm">No run selected</p>;
                 let metricsToShow = currentRun.metrics_summary || {};
 
                 // If metrics_summary is empty but we have results, calculate synthetic response_match_score
@@ -1105,7 +1105,7 @@ export default function EvalsetDetailPage() {
                 }
 
                 if (Object.keys(metricsToShow).length === 0) {
-                  return <p className="text-gray-500 text-sm">No metrics available</p>;
+                  return <p className="text-muted-foreground text-sm">No metrics available</p>;
                 }
 
                 return (
@@ -1139,19 +1139,19 @@ export default function EvalsetDetailPage() {
                   <div
                     key={metricName}
                     data-testid={`metric-card-${metricName}`}
-                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                    className="bg-muted/30 rounded-lg p-4 border border-border"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-sm font-medium text-gray-700">{displayNames[metricName] || metricName}</h4>
+                      <h4 className="text-sm font-medium text-foreground">{displayNames[metricName] || metricName}</h4>
                       <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                        isPassing ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        isPassing ? 'bg-green-500/10 text-green-800' : 'bg-destructive/10 text-red-800'
                       }`}>
                         {passRate}%
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span data-testid={`metric-gauge-${metricName}`} className="text-2xl font-bold text-gray-900">{score}</span>
-                      <span className="text-sm text-gray-500">avg</span>
+                      <span data-testid={`metric-gauge-${metricName}`} className="text-2xl font-bold text-foreground">{score}</span>
+                      <span className="text-sm text-muted-foreground">avg</span>
                     </div>
                     <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                       <div
@@ -1173,16 +1173,16 @@ export default function EvalsetDetailPage() {
             {currentRun && (
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Conversation Results</h3>
+                  <h3 className="text-lg font-semibold text-foreground">Conversation Results</h3>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       data-testid="filter-failed-tests"
                       checked={showFailedOnly}
                       onChange={(e) => setShowFailedOnly(e.target.checked)}
-                      className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                      className="w-4 h-4 text-destructive rounded focus:ring-red-500"
                     />
-                    <span className="text-sm text-gray-700">Show only failures</span>
+                    <span className="text-sm text-foreground">Show only failures</span>
                   </label>
                 </div>
 
@@ -1191,7 +1191,7 @@ export default function EvalsetDetailPage() {
                     const allResults = currentRun.results || [];
 
                     if (allResults.length === 0) {
-                      return <p className="text-gray-500 text-sm">No results available from evaluation run</p>;
+                      return <p className="text-muted-foreground text-sm">No results available from evaluation run</p>;
                     }
 
                     const results = showFailedOnly
@@ -1199,7 +1199,7 @@ export default function EvalsetDetailPage() {
                       : allResults;
 
                     if (results.length === 0 && showFailedOnly) {
-                      return <p className="text-gray-500 text-sm">No failed tests found</p>;
+                      return <p className="text-muted-foreground text-sm">No failed tests found</p>;
                     }
 
                     return results.map((result, idx) => {
@@ -1213,31 +1213,31 @@ export default function EvalsetDetailPage() {
                         <div
                           key={result.eval_id}
                           data-testid={`conversation-result-${actualIndex}`}
-                          className="bg-white border border-gray-200 rounded-lg overflow-hidden"
+                          className="bg-card border border-border rounded-lg overflow-hidden"
                         >
                           <button
                             onClick={() => setExpandedResultIndex(isExpanded ? null : actualIndex)}
-                            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                            className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                result.passed ? 'bg-green-100' : 'bg-red-100'
+                                result.passed ? 'bg-green-500/10' : 'bg-destructive/10'
                               }`}>
                                 {result.passed ? (
-                                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                   </svg>
                                 ) : (
-                                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                   </svg>
                                 )}
                               </div>
                               <div className="text-left">
-                                <div className="text-sm font-medium text-gray-900">
+                                <div className="text-sm font-medium text-foreground">
                                   Conversation {actualIndex + 1}
                                 </div>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-muted-foreground">
                                   {result.turns.length} turn{result.turns.length !== 1 ? 's' : ''}
                                 </div>
                               </div>
@@ -1253,18 +1253,18 @@ export default function EvalsetDetailPage() {
                           </button>
 
                           {isExpanded && evalCase && (
-                            <div data-testid="comparison-view" className="border-t border-gray-200 p-4 bg-gray-50">
+                            <div data-testid="comparison-view" className="border-t border-border p-4 bg-muted/30">
                               <div className="space-y-4">
                                 {result.turns.map((turn, turnIdx) => {
                                   const expectedTurn = evalCase.conversation[turnIdx];
                                   return (
-                                    <div key={turn.invocation_id} className="bg-white rounded-lg p-4 border border-gray-200">
-                                      <div className="text-xs font-medium text-gray-500 mb-3">Turn {turnIdx + 1}</div>
+                                    <div key={turn.invocation_id} className="bg-card rounded-lg p-4 border border-border">
+                                      <div className="text-xs font-medium text-muted-foreground mb-3">Turn {turnIdx + 1}</div>
 
                                       {/* User Message */}
                                       <div className="mb-3">
-                                        <div className="text-xs font-medium text-gray-500 mb-1">User:</div>
-                                        <div className="text-sm text-gray-900">
+                                        <div className="text-xs font-medium text-muted-foreground mb-1">User:</div>
+                                        <div className="text-sm text-foreground">
                                           {expectedTurn.user_content.parts[0].text}
                                         </div>
                                       </div>
@@ -1273,10 +1273,10 @@ export default function EvalsetDetailPage() {
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Expected Response */}
                                         <div>
-                                          <div className="text-xs font-medium text-gray-500 mb-1">Expected:</div>
+                                          <div className="text-xs font-medium text-muted-foreground mb-1">Expected:</div>
                                           <div
                                             data-testid="expected-response"
-                                            className="text-sm text-gray-900 bg-gray-50 rounded p-3 border border-gray-200"
+                                            className="text-sm text-foreground bg-muted/30 rounded p-3 border border-border"
                                           >
                                             {expectedTurn.final_response?.parts[0].text || 'No expected response'}
                                           </div>
@@ -1284,13 +1284,13 @@ export default function EvalsetDetailPage() {
 
                                         {/* Actual Response */}
                                         <div>
-                                          <div className="text-xs font-medium text-gray-500 mb-1">Actual:</div>
+                                          <div className="text-xs font-medium text-muted-foreground mb-1">Actual:</div>
                                           <div
                                             data-testid="actual-response"
                                             className={`text-sm rounded p-3 border ${
                                               turn.passed
-                                                ? 'bg-green-50 border-green-200 text-gray-900'
-                                                : 'bg-red-50 border-red-200 text-gray-900'
+                                                ? 'bg-green-50 border-green-200 text-foreground'
+                                                : 'bg-red-50 border-red-200 text-foreground'
                                             }`}
                                           >
                                             {turn.actual_response.parts[0].text}
@@ -1325,11 +1325,11 @@ export default function EvalsetDetailPage() {
         {/* Conversations List */}
         <div className="space-y-4">
           {evalset.eval_cases.length === 0 ? (
-            <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
-              <p className="text-gray-500 mb-4">No conversations yet</p>
+            <div className="bg-card rounded-xl border-2 border-dashed border-border p-12 text-center">
+              <p className="text-muted-foreground mb-4">No conversations yet</p>
               <button
                 onClick={handleAddConversation}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
               >
                 Create First Conversation
               </button>
@@ -1339,18 +1339,18 @@ export default function EvalsetDetailPage() {
               <div
                 key={evalCase.eval_id}
                 data-testid="conversation-card"
-                className="bg-white rounded-xl border border-gray-200 p-6"
+                className="bg-card rounded-xl border border-border p-6"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span data-testid="turn-indicator" className="text-sm font-medium text-gray-700">
+                      <span data-testid="turn-indicator" className="text-sm font-medium text-foreground">
                         {evalCase.conversation.length} turn{evalCase.conversation.length !== 1 ? 's' : ''}
                       </span>
                       {evalCase.conversation.some(t => t.intermediate_data?.tool_uses) && (
                         <span
                           data-testid="tool-trajectory-indicator"
-                          className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full"
+                          className="px-2 py-0.5 text-xs bg-primary/20 text-blue-800 rounded-full"
                         >
                           {evalCase.conversation.reduce((sum, t) => sum + (t.intermediate_data?.tool_uses?.length || 0), 0)} tools
                         </span>
@@ -1358,14 +1358,14 @@ export default function EvalsetDetailPage() {
                       {evalCase.conversation.some(t => t.intermediate_data?.intermediate_responses) && (
                         <span
                           data-testid="intermediate-response-indicator"
-                          className="px-2 py-0.5 text-xs bg-purple-100 text-purple-800 rounded-full"
+                          className="px-2 py-0.5 text-xs bg-primary/10 text-purple-800 rounded-full"
                         >
                           Multi-agent
                         </span>
                       )}
                     </div>
                     {evalCase.session_input?.user_id && (
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-muted-foreground">
                         User ID: <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">{evalCase.session_input.user_id}</code>
                       </div>
                     )}
@@ -1373,13 +1373,13 @@ export default function EvalsetDetailPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEditConversation(evalCase)}
-                      className="px-3 py-1 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="px-3 py-1 text-sm text-foreground border border-border rounded-lg hover:bg-muted/30"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteConversation(evalCase.eval_id)}
-                      className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
+                      className="px-3 py-1 text-sm text-destructive border border-red-300 rounded-lg hover:bg-red-50"
                     >
                       Delete
                     </button>
@@ -1390,14 +1390,14 @@ export default function EvalsetDetailPage() {
                 <div className="space-y-2">
                   {evalCase.conversation.slice(0, 2).map((turn, idx) => (
                     <div key={turn.invocation_id} className="text-sm">
-                      <div className="text-gray-900">
+                      <div className="text-foreground">
                         <span className="font-medium">Turn {idx + 1}:</span> {turn.user_content.parts[0].text.substring(0, 100)}
                         {turn.user_content.parts[0].text.length > 100 && '...'}
                       </div>
                     </div>
                   ))}
                   {evalCase.conversation.length > 2 && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       +{evalCase.conversation.length - 2} more turns
                     </div>
                   )}
@@ -1410,14 +1410,14 @@ export default function EvalsetDetailPage() {
         {/* Conversation Builder Modal */}
         {showConversationBuilder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="bg-card rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-foreground">
                   {editingConversationId ? 'Edit' : 'Create'} Conversation
                 </h2>
                 <button
                   onClick={() => setShowConversationBuilder(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-muted-foreground"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1428,11 +1428,11 @@ export default function EvalsetDetailPage() {
               {saveError && <ErrorMessage message={saveError} className="mb-4" />}
 
               {/* Session Config */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="mb-6 p-4 bg-muted/30 rounded-lg border border-border">
                 <button
                   data-testid="session-config-btn"
                   onClick={() => setShowSessionConfig(!showSessionConfig)}
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
+                  className="flex items-center gap-2 text-sm font-medium text-foreground mb-2"
                 >
                   <svg className={`w-4 h-4 transition-transform ${showSessionConfig ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1442,24 +1442,24 @@ export default function EvalsetDetailPage() {
                 {showSessionConfig && (
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">User ID</label>
                       <input
                         type="text"
                         data-testid="user-id-input"
                         value={currentUserId}
                         onChange={(e) => setCurrentUserId(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         placeholder="eval-user-123"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Initial State (JSON)</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Initial State (JSON)</label>
                       <textarea
                         data-testid="initial-state-input"
                         value={currentInitialState}
                         onChange={(e) => setCurrentInitialState(e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono text-sm"
+                        className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono text-sm"
                         placeholder='{"key": "value"}'
                       />
                     </div>
@@ -1470,14 +1470,14 @@ export default function EvalsetDetailPage() {
               {/* Turns */}
               <div className="space-y-4 mb-6">
                 {currentConversation.map((turn, index) => (
-                  <div key={turn.invocation_id} className="p-4 border border-gray-200 rounded-lg">
+                  <div key={turn.invocation_id} className="p-4 border border-border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium text-gray-900">Turn {index + 1}</h3>
+                      <h3 className="font-medium text-foreground">Turn {index + 1}</h3>
                       <div className="flex gap-2">
                         <button
                           data-testid="add-tool-trajectory-btn"
                           onClick={() => handleOpenToolTrajectory(index)}
-                          className="px-2 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
+                          className="px-2 py-1 text-xs text-primary border border-blue-300 rounded hover:bg-primary/10"
                         >
                           {turn.intermediate_data?.tool_uses?.length ? `${turn.intermediate_data.tool_uses.length} Tools` : '+ Tools'}
                         </button>
@@ -1491,7 +1491,7 @@ export default function EvalsetDetailPage() {
                         {currentConversation.length > 1 && (
                           <button
                             onClick={() => handleRemoveTurn(index)}
-                            className="px-2 py-1 text-xs text-red-600 border border-red-300 rounded hover:bg-red-50"
+                            className="px-2 py-1 text-xs text-destructive border border-red-300 rounded hover:bg-red-50"
                           >
                             Remove
                           </button>
@@ -1500,24 +1500,24 @@ export default function EvalsetDetailPage() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">User Message</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">User Message</label>
                         <textarea
                           data-testid={`user-message-input-${index}`}
                           value={turn.user_content.parts[0].text}
                           onChange={(e) => handleUpdateTurn(index, 'user', e.target.value)}
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                           placeholder="What is 2+2?"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Expected Response</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Expected Response</label>
                         <textarea
                           data-testid={`expected-response-input-${index}`}
                           value={turn.final_response?.parts[0].text || ''}
                           onChange={(e) => handleUpdateTurn(index, 'expected', e.target.value)}
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                           placeholder="2+2 equals 4"
                         />
                       </div>
@@ -1538,7 +1538,7 @@ export default function EvalsetDetailPage() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setShowConversationBuilder(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-foreground border border-border rounded-lg hover:bg-muted/30"
                 >
                   Cancel
                 </button>
@@ -1546,7 +1546,7 @@ export default function EvalsetDetailPage() {
                   testId="save-conversation-btn"
                   onClick={handleSaveConversation}
                   isLoading={saving}
-                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90"
                   variant="primary"
                 >
                   Save Conversation
@@ -1559,12 +1559,12 @@ export default function EvalsetDetailPage() {
         {/* Tool Trajectory Builder Modal */}
         {showToolTrajectoryBuilder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="bg-card rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Tool Trajectory</h2>
+                <h2 className="text-xl font-bold text-foreground">Tool Trajectory</h2>
                 <button
                   onClick={() => setShowToolTrajectoryBuilder(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-muted-foreground"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1574,24 +1574,24 @@ export default function EvalsetDetailPage() {
 
               <div className="space-y-4 mb-6">
                 {toolTrajectory.map((tool, index) => (
-                  <div key={tool.id} className="p-4 border border-gray-200 rounded-lg">
+                  <div key={tool.id} className="p-4 border border-border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-700">Tool {index + 1}</span>
+                      <span className="text-sm font-medium text-foreground">Tool {index + 1}</span>
                       <button
                         onClick={() => handleRemoveTool(index)}
-                        className="text-red-600 text-xs"
+                        className="text-destructive text-xs"
                       >
                         Remove
                       </button>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Tool Name</label>
+                        <label className="block text-xs font-medium text-foreground mb-1">Tool Name</label>
                         <select
                           data-testid={`tool-selector-${index}`}
                           value={tool.name}
                           onChange={(e) => handleUpdateTool(index, 'name', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           {availableTools.map(toolName => (
                             <option key={toolName} value={toolName}>{toolName}</option>
@@ -1599,13 +1599,13 @@ export default function EvalsetDetailPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Arguments (JSON)</label>
+                        <label className="block text-xs font-medium text-foreground mb-1">Arguments (JSON)</label>
                         <textarea
                           data-testid={`tool-args-input-${index}`}
                           value={JSON.stringify(tool.args, null, 2)}
                           onChange={(e) => handleUpdateTool(index, 'args', e.target.value)}
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs"
+                          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs"
                           placeholder='{"query": "test"}'
                         />
                       </div>
@@ -1617,7 +1617,7 @@ export default function EvalsetDetailPage() {
               <button
                 data-testid="add-tool-to-trajectory-btn"
                 onClick={handleAddTool}
-                className="w-full px-4 py-2 text-blue-600 border-2 border-dashed border-blue-300 rounded-lg hover:bg-blue-50 transition-colors mb-6"
+                className="w-full px-4 py-2 text-primary border-2 border-dashed border-blue-300 rounded-lg hover:bg-primary/10 transition-colors mb-6"
               >
                 + Add Tool
               </button>
@@ -1625,13 +1625,13 @@ export default function EvalsetDetailPage() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setShowToolTrajectoryBuilder(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-foreground border border-border rounded-lg hover:bg-muted/30"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveToolTrajectory}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90"
                 >
                   Save Tools
                 </button>
@@ -1643,12 +1643,12 @@ export default function EvalsetDetailPage() {
         {/* Intermediate Response Builder Modal */}
         {showIntermediateBuilder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="bg-card rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Intermediate Responses</h2>
+                <h2 className="text-xl font-bold text-foreground">Intermediate Responses</h2>
                 <button
                   onClick={() => setShowIntermediateBuilder(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-muted-foreground"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1658,24 +1658,24 @@ export default function EvalsetDetailPage() {
 
               <div className="space-y-4 mb-6">
                 {intermediateResponses.map((resp, index) => (
-                  <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                  <div key={index} className="p-4 border border-border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-700">Sub-agent {index + 1}</span>
+                      <span className="text-sm font-medium text-foreground">Sub-agent {index + 1}</span>
                       <button
                         onClick={() => handleRemoveIntermediateResponse(index)}
-                        className="text-red-600 text-xs"
+                        className="text-destructive text-xs"
                       >
                         Remove
                       </button>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Sub-agent Name</label>
+                        <label className="block text-xs font-medium text-foreground mb-1">Sub-agent Name</label>
                         <select
                           data-testid="sub-agent-selector"
                           value={resp[0]}
                           onChange={(e) => handleUpdateIntermediateResponse(index, 'agent', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         >
                           {availableSubAgents.map(agentName => (
                             <option key={agentName} value={agentName}>{agentName}</option>
@@ -1683,13 +1683,13 @@ export default function EvalsetDetailPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Expected Response</label>
+                        <label className="block text-xs font-medium text-foreground mb-1">Expected Response</label>
                         <textarea
                           data-testid="intermediate-response-text"
                           value={resp[1][0].text}
                           onChange={(e) => handleUpdateIntermediateResponse(index, 'text', e.target.value)}
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                           placeholder="Sub-agent response..."
                         />
                       </div>
@@ -1708,7 +1708,7 @@ export default function EvalsetDetailPage() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setShowIntermediateBuilder(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-foreground border border-border rounded-lg hover:bg-muted/30"
                 >
                   Cancel
                 </button>
@@ -1726,13 +1726,13 @@ export default function EvalsetDetailPage() {
         {/* Run Comparison Modal (Phase 18.7) */}
         {showComparisonView && evalset.runs && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div data-testid="comparison-view" className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div data-testid="comparison-view" className="bg-card rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Run Comparison</h2>
+                <h2 className="text-2xl font-bold text-foreground">Run Comparison</h2>
                 <button
                   data-testid="close-comparison-btn"
                   onClick={handleCloseComparison}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-muted-foreground"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1744,18 +1744,18 @@ export default function EvalsetDetailPage() {
               <div data-testid="metrics-comparison-table" className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b-2 border-gray-300">
-                      <th className="text-left p-3 font-semibold text-gray-900">Metric</th>
+                    <tr className="border-b-2 border-border">
+                      <th className="text-left p-3 font-semibold text-foreground">Metric</th>
                       {selectedRunsForComparison.map((runIndex, colIdx) => (
-                        <th key={runIndex} data-testid={`comparison-run-column-${colIdx}`} className="text-left p-3 font-semibold text-gray-900">
+                        <th key={runIndex} data-testid={`comparison-run-column-${colIdx}`} className="text-left p-3 font-semibold text-foreground">
                           Run {runIndex + 1}
-                          <div className="text-xs font-normal text-gray-500">
+                          <div className="text-xs font-normal text-muted-foreground">
                             {new Date(evalset.runs![runIndex].timestamp).toLocaleString()}
                           </div>
                         </th>
                       ))}
                       {selectedRunsForComparison.length >= 2 && (
-                        <th className="text-left p-3 font-semibold text-gray-900">Change</th>
+                        <th className="text-left p-3 font-semibold text-foreground">Change</th>
                       )}
                     </tr>
                   </thead>
@@ -1804,28 +1804,28 @@ export default function EvalsetDetailPage() {
                         const deltaPercent = Math.abs(delta * 100);
 
                         let deltaIndicator = '→';
-                        let deltaColor = 'text-gray-600';
+                        let deltaColor = 'text-muted-foreground';
                         if (delta > 0.01) {
                           deltaIndicator = '↑';
-                          deltaColor = 'text-green-600';
+                          deltaColor = 'text-green-500';
                         } else if (delta < -0.01) {
                           deltaIndicator = '↓';
-                          deltaColor = 'text-red-600';
+                          deltaColor = 'text-destructive';
                         }
 
                         return (
-                          <tr key={metricName} data-testid={`metric-row-${metricName}`} className="border-b border-gray-200">
-                            <td className="p-3 font-medium text-gray-900">
+                          <tr key={metricName} data-testid={`metric-row-${metricName}`} className="border-b border-border">
+                            <td className="p-3 font-medium text-foreground">
                               {displayNames[metricName] || metricName}
                             </td>
                             {metricValues.map((metricData, colIdx) => (
                               <td key={colIdx} className="p-3">
                                 {metricData ? (
                                   <div>
-                                    <div className="text-lg font-semibold text-gray-900">
+                                    <div className="text-lg font-semibold text-foreground">
                                       {(metricData.avg_score * 100).toFixed(1)}%
                                     </div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs text-muted-foreground">
                                       Pass: {Math.round(metricData.pass_rate)}%
                                     </div>
                                   </div>
@@ -1867,17 +1867,17 @@ export default function EvalsetDetailPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div
               data-testid="metrics-config-modal"
-              className="bg-white rounded-xl p-6 w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto"
+              className="bg-card rounded-xl p-6 w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold text-gray-900">Configure Evaluation Metrics</h2>
+                  <h2 className="text-2xl font-bold text-foreground">Configure Evaluation Metrics</h2>
                   <span
                     data-testid="config-status-badge"
                     className={`px-3 py-1 text-sm rounded-full ${
                       hasCustomConfig
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-gray-100 text-gray-700'
+                        ? 'bg-primary/10 text-primary'
+                        : 'bg-gray-100 text-foreground'
                     }`}
                   >
                     {hasCustomConfig ? 'Using Custom Config' : 'Using Defaults'}
@@ -1885,7 +1885,7 @@ export default function EvalsetDetailPage() {
                 </div>
                 <button
                   onClick={() => setShowMetricsConfig(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-muted-foreground transition-colors"
                   aria-label="Close modal"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1895,27 +1895,27 @@ export default function EvalsetDetailPage() {
               </div>
 
               {/* Templates */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Quick Templates</h3>
+              <div className="mb-6 p-4 bg-muted/30 rounded-lg border border-border">
+                <h3 className="text-sm font-semibold text-foreground mb-3">Quick Templates</h3>
                 <div className="flex gap-2">
                   <button
                     data-testid="template-strict"
                     onClick={() => applyTemplate('strict')}
-                    className="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-primary bg-purple-50 border border-purple-200 rounded-lg hover:bg-primary/10 transition-colors"
                   >
                     Strict (0.9+)
                   </button>
                   <button
                     data-testid="template-balanced"
                     onClick={() => applyTemplate('balanced')}
-                    className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-blue-700 bg-primary/10 border border-blue-200 rounded-lg hover:bg-primary/20 transition-colors"
                   >
                     Balanced (0.7-0.8)
                   </button>
                   <button
                     data-testid="template-lenient"
                     onClick={() => applyTemplate('lenient')}
-                    className="px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-500/10 transition-colors"
                   >
                     Lenient (0.5-0.6)
                   </button>
@@ -1928,7 +1928,7 @@ export default function EvalsetDetailPage() {
                   <div
                     key={metric.id}
                     data-testid={`metric-card-${metric.id}`}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+                    className="border border-border rounded-lg p-4 hover:border-border transition-colors"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -1938,17 +1938,17 @@ export default function EvalsetDetailPage() {
                             data-testid={`metric-toggle-${metric.id}`}
                             checked={metric.enabled}
                             onChange={() => handleToggleMetric(metric.id)}
-                            className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                            className="w-4 h-4 text-purple-600 border-border rounded focus:ring-purple-500"
                           />
-                          <h3 className="font-semibold text-gray-900">{metric.name}</h3>
+                          <h3 className="font-semibold text-foreground">{metric.name}</h3>
                           {!metric.enabled && (
-                            <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                            <span className="px-2 py-0.5 text-xs bg-gray-100 text-muted-foreground rounded">
                               Disabled
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500 font-mono mb-1">{metric.id}</p>
-                        <p className="text-sm text-gray-600">{metric.description}</p>
+                        <p className="text-sm text-muted-foreground font-mono mb-1">{metric.id}</p>
+                        <p className="text-sm text-muted-foreground">{metric.description}</p>
                       </div>
                     </div>
 
@@ -1956,10 +1956,10 @@ export default function EvalsetDetailPage() {
                     {metric.enabled && (
                       <div className="mt-4">
                         <div className="flex items-center justify-between mb-2">
-                          <label htmlFor={`threshold-${metric.id}`} className="text-sm font-medium text-gray-700">
+                          <label htmlFor={`threshold-${metric.id}`} className="text-sm font-medium text-foreground">
                             Threshold
                           </label>
-                          <span className="text-sm font-semibold text-gray-900">{metric.threshold.toFixed(2)}</span>
+                          <span className="text-sm font-semibold text-foreground">{metric.threshold.toFixed(2)}</span>
                         </div>
                         <input
                           id={`threshold-${metric.id}`}
@@ -1978,13 +1978,13 @@ export default function EvalsetDetailPage() {
                     {/* Rubric Editor (Phase 18.9.6) */}
                     {metric.enabled && metric.supportsRubric && (
                       <div className="mt-4">
-                        <label className="text-sm font-medium text-gray-700">Custom Rubric</label>
+                        <label className="text-sm font-medium text-foreground">Custom Rubric</label>
                         <textarea
                           data-testid={`rubric-editor-${metric.id}`}
                           value={metric.rubric || ''}
                           onChange={(e) => handleRubricChange(metric.id, e.target.value)}
                           placeholder="Write custom evaluation criteria..."
-                          className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm"
+                          className="w-full mt-1 p-2 border border-border rounded-lg text-sm"
                           rows={4}
                         />
                       </div>
@@ -1994,8 +1994,8 @@ export default function EvalsetDetailPage() {
               </div>
 
               {/* JSON Preview (Phase 18.9.10) */}
-              <div className="mt-6 border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Configuration Preview</h3>
+              <div className="mt-6 border border-border rounded-lg p-4 bg-muted/30">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Configuration Preview</h3>
                 <pre
                   data-testid="json-preview"
                   className="text-xs font-mono text-gray-800 overflow-x-auto whitespace-pre-wrap break-words"
@@ -2026,7 +2026,7 @@ export default function EvalsetDetailPage() {
                 </div>
                 {saveMessage && (
                   <span className={`text-sm font-medium ${
-                    saveMessage.includes('Error') ? 'text-red-600' : 'text-green-600'
+                    saveMessage.includes('Error') ? 'text-destructive' : 'text-green-500'
                   }`}>
                     {saveMessage}
                   </span>

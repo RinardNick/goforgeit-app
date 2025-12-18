@@ -17,23 +17,23 @@ const containerConfig: Record<
   { color: string; bgColor: string; borderColor: string; icon: string; description: string }
 > = {
   SequentialAgent: {
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-300',
+    color: 'text-purple-400',
+    bgColor: 'bg-charcoal/90 backdrop-blur-md',
+    borderColor: 'border-white/10',
     icon: '⏭️',
     description: 'Executes sub-agents in order',
   },
   ParallelAgent: {
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-300',
+    color: 'text-forgeGreen',
+    bgColor: 'bg-charcoal/90 backdrop-blur-md',
+    borderColor: 'border-white/10',
     icon: '⚡',
     description: 'Executes sub-agents concurrently',
   },
   LoopAgent: {
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-300',
+    color: 'text-orange-400',
+    bgColor: 'bg-charcoal/90 backdrop-blur-md',
+    borderColor: 'border-white/10',
     icon: '🔄',
     description: 'Iterates over sub-agents',
   },
@@ -129,30 +129,36 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
   return (
     <div
       className={`
-        rounded-lg border-2 shadow-sm min-w-[280px]
-        ${config.bgColor} ${config.borderColor}
-        ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
-        ${data.isRoot ? 'border-l-4 border-l-blue-500' : ''}
+        rounded-sm border-2 shadow-lg min-w-[280px] relative overflow-hidden
+        ${selected ? 'bg-charcoal border-electricOrange/50 shadow-[0_0_25px_rgba(255,107,0,0.3)]' : `${config.bgColor} border-white/10`}
+        ${data.isRoot ? 'border-l-4 border-l-electricOrange' : ''}
+        transition-all duration-500 group
       `}
       data-testid={`container-node-${testIdSuffix}`}
     >
+      {/* Ignition Borders - Animate on Select or Hover */}
+      <div className={`absolute top-0 left-0 w-full h-[2px] bg-electricOrange origin-center transition-transform duration-500 ease-out ${selected ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+      <div className={`absolute bottom-0 left-0 w-full h-[2px] bg-electricOrange origin-center transition-transform duration-500 ease-out ${selected ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+      <div className={`absolute top-0 left-0 h-full w-[2px] bg-electricOrange origin-center transition-transform duration-500 ease-out ${selected ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-100'}`} />
+      <div className={`absolute top-0 right-0 h-full w-[2px] bg-electricOrange origin-center transition-transform duration-500 ease-out ${selected ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-100'}`} />
+
       {/* Input Handle */}
       <Handle
         type="target"
         position={Position.Top}
-        className="w-3 h-3 !bg-gray-400 border-2 border-white"
+        className={`w-3 h-3 border-2 transition-colors ${selected ? '!bg-electricOrange border-white' : '!bg-charcoal border-electricOrange'}`}
       />
 
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200">
+      <div className="px-4 py-3 border-b border-white/10 relative z-10">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{config.icon}</span>
+          <span className="text-lg opacity-90">{config.icon}</span>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate text-sm">{data.name}</h3>
-            <span className={`text-xs font-medium ${config.color}`}>{data.agentClass}</span>
+            <h3 className="font-bold font-heading text-warmWhite truncate text-sm tracking-wide">{data.name}</h3>
+            <span className={`text-[10px] font-mono font-medium ${config.color} uppercase`}>{data.agentClass}</span>
           </div>
           {data.isRoot && (
-            <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-electricOrange text-white rounded-sm font-mono uppercase tracking-wider">
               Root
             </span>
           )}
@@ -160,7 +166,7 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
 
         {/* Description */}
         {data.description && (
-          <p className="text-xs text-gray-600 mt-1 line-clamp-2">{data.description}</p>
+          <p className="text-xs text-silver/80 mt-1 line-clamp-2 leading-relaxed">{data.description}</p>
         )}
       </div>
 
@@ -178,13 +184,13 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
           data.childAgents.map((child, index) => (
             <div
               key={child.name || index}
-              className="px-3 py-2 bg-white rounded border border-gray-200 shadow-sm group"
+              className="px-3 py-2 bg-white/5 rounded-sm border border-white/5 shadow-sm group hover:border-white/20 transition-colors"
               data-testid="container-child-agent"
             >
               <div className="flex items-center gap-2">
                 {/* Drag handle */}
                 <span
-                  className="cursor-grab text-gray-400 hover:text-gray-600"
+                  className="cursor-grab text-silver/40 hover:text-white"
                   data-testid="child-drag-handle"
                   title="Drag to reorder"
                 >
@@ -192,12 +198,12 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
                     <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm6-12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm0 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
                   </svg>
                 </span>
-                <span className="text-sm">
+                <span className="text-sm opacity-80">
                   {child.agentClass === 'LlmAgent' ? '🤖' :
                    child.agentClass === 'SequentialAgent' ? '⏭️' :
                    child.agentClass === 'ParallelAgent' ? '⚡' : '🔄'}
                 </span>
-                <span className="text-xs font-medium text-gray-700 truncate flex-1">{child.name}</span>
+                <span className="text-xs font-medium text-warmWhite truncate flex-1">{child.name}</span>
                 {/* Remove button */}
                 {child.filename && data.onRemoveFromContainer && data.filename && (
                   <button
@@ -205,7 +211,7 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
                       e.stopPropagation();
                       data.onRemoveFromContainer!(data.filename!, child.filename!);
                     }}
-                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 text-silver/40 hover:text-red-400 transition-opacity"
                     data-testid="remove-from-container-button"
                     title="Remove from container"
                   >
@@ -216,7 +222,7 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
                 )}
               </div>
               {child.description && (
-                <p className="text-xs text-gray-500 mt-1 truncate">{child.description}</p>
+                <p className="text-[10px] text-silver/60 mt-1 truncate">{child.description}</p>
               )}
             </div>
           ))
@@ -226,7 +232,7 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handlePlusClick}
-            className="w-8 h-8 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 flex items-center justify-center hover:border-blue-500 hover:text-blue-500 transition-colors"
+            className="w-8 h-8 rounded-sm border-2 border-dashed border-white/10 text-silver/40 flex items-center justify-center hover:border-electricOrange/50 hover:text-electricOrange transition-colors"
             data-testid="container-add-button"
             title="Add sub-agent"
           >
@@ -238,14 +244,14 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
           {/* Agent type dropdown */}
           {showDropdown && (
             <div
-              className="absolute top-10 left-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]"
+              className="absolute top-10 left-0 bg-charcoal border border-white/10 rounded-sm shadow-xl py-1 z-50 min-w-[140px]"
               data-testid="agent-type-dropdown"
             >
               {agentTypeDropdownItems.map((item) => (
                 <button
                   key={item.type}
                   onClick={() => handleSelectSubAgentType(item.type)}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+                  className="w-full px-3 py-2 text-left text-xs font-mono text-silver hover:bg-white/5 hover:text-white flex items-center gap-2"
                 >
                   <span>{item.icon}</span>
                   <span>{item.label}</span>
@@ -258,7 +264,7 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
 
       {/* Loop indicator for LoopAgent */}
       {agentClass === 'LoopAgent' && (
-        <div className="px-4 py-2 border-t border-gray-200 text-xs text-gray-500">
+        <div className="px-4 py-2 border-t border-white/10 text-xs text-silver/60 font-mono">
           <span className="inline-flex items-center gap-1">
             🔄 Loop until complete
           </span>
@@ -269,7 +275,7 @@ function ContainerNode({ id, data, selected }: ContainerNodeProps) {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="w-3 h-3 !bg-gray-400 border-2 border-white"
+        className={`w-3 h-3 border-2 transition-colors ${selected ? '!bg-electricOrange border-white' : '!bg-charcoal border-electricOrange'}`}
       />
     </div>
   );

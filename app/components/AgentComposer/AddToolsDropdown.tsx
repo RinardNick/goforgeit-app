@@ -43,7 +43,7 @@ export function AddToolsDropdown({ onSelectToolType, disabledTypes = [] }: AddTo
       <button
         data-testid="add-tools-btn"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground bg-muted/50 hover:bg-accent border border-border border-dashed rounded-lg transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -57,7 +57,7 @@ export function AddToolsDropdown({ onSelectToolType, disabledTypes = [] }: AddTo
       {isOpen && (
         <div
           data-testid="add-tools-menu"
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+          className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden"
         >
           {availableTypes.map((toolType) => (
             <button
@@ -67,12 +67,12 @@ export function AddToolsDropdown({ onSelectToolType, disabledTypes = [] }: AddTo
                 onSelectToolType(toolType.type);
                 setIsOpen(false);
               }}
-              className="w-full flex items-start gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+              className="w-full flex items-start gap-3 px-3 py-2.5 text-left hover:bg-accent transition-colors border-b border-border last:border-b-0"
             >
-              <span className="text-lg mt-0.5">{toolType.icon}</span>
+              <span className="text-lg mt-0.5 opacity-80">{toolType.icon}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{toolType.label}</p>
-                <p className="text-xs text-gray-500">{toolType.description}</p>
+                <p className="text-sm font-medium text-foreground">{toolType.label}</p>
+                <p className="text-xs text-muted-foreground">{toolType.description}</p>
               </div>
             </button>
           ))}

@@ -85,13 +85,18 @@ async function proxyToADK(
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('text/event-stream')) {
       // Call afterProxy hook for SSE responses
-      await afterProxy({
+      // IMPORTANT: Clone response so interceptor can read stream without consuming original
+      const responseClone = response.clone();
+      
+      // Fire and forget (don't await) so we don't delay the stream start
+      afterProxy({
         req,
         path: adkPath,
         method: req.method,
-        response,
+        response: responseClone,
         durationMs,
-      });
+        requestBody: typeof body === 'string' ? body : undefined,
+      }).catch(err => console.error('[ADK Router] afterProxy hook failed:', err));
 
       return new Response(response.body, {
         status: response.status,
@@ -121,12 +126,19 @@ async function proxyToADK(
     });
 
     // Call afterProxy hook
+    // Create a fresh Response object because the original body was consumed above
+    const freshResponse = new Response(responseBody, {
+      status: response.status,
+      headers: responseHeaders,
+    });
+
     await afterProxy({
       req,
       path: adkPath,
       method: req.method,
-      response,
+      response: freshResponse,
       durationMs,
+      requestBody: typeof body === 'string' ? body : undefined,
     });
 
     return new NextResponse(responseBody, {

@@ -47,57 +47,46 @@ export function ComposeHeader({
   onBack,
 }: ComposeHeaderProps) {
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3">
+    <div className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-3 z-40 relative">
       <div className="max-w-full flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </button>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900">{displayName}</h1>
-              <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                Visual Composer
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-heading font-bold text-foreground tracking-tight uppercase">{displayName}</h1>
+              <span className="px-2 py-0.5 text-[10px] font-mono font-medium text-primary bg-primary/10 border border-primary/20 rounded-full tracking-wider">
+                COMPOSER
               </span>
             </div>
             {filesCount > 1 && (
-              <p className="text-sm text-gray-500">{filesCount} agent files</p>
+              <p className="text-xs text-muted-foreground/60 font-mono mt-0.5">{filesCount} agent files</p>
             )}
           </div>
         </div>
 
         {/* View Mode Toggle */}
         <div className="flex items-center gap-2">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => onViewModeChange('visual')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === 'visual' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Visual
-            </button>
-            <button
-              onClick={() => onViewModeChange('split')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === 'split' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Split
-            </button>
-            <button
-              onClick={() => onViewModeChange('yaml')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === 'yaml' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              YAML
-            </button>
+          <div className="flex bg-muted rounded-sm p-1 border border-border">
+            {(['visual', 'split', 'yaml'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => onViewModeChange(mode)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-all duration-200 uppercase tracking-wide ${
+                  viewMode === mode 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -106,10 +95,10 @@ export function ComposeHeader({
           <button
             data-testid="ai-assistant-toggle"
             onClick={onAIAssistantToggle}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+            className={`px-3 py-1.5 text-xs font-medium rounded-sm border transition-all duration-200 flex items-center gap-2 uppercase tracking-wide ${
               showAIAssistant
-                ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                ? 'bg-green-500/10 border-green-500 text-green-600 dark:text-green-400 shadow-sm'
+                : 'bg-transparent border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +109,7 @@ export function ComposeHeader({
 
           <Link
             href={`/${agentName}/chat`}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-muted-foreground border border-border rounded-sm hover:bg-accent hover:text-foreground uppercase tracking-wide transition-colors"
           >
             Test Agent
           </Link>
@@ -128,7 +117,7 @@ export function ComposeHeader({
           {hasChanges && (
             <button
               onClick={onDiscard}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-muted-foreground border border-border rounded-sm hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 uppercase tracking-wide transition-colors"
             >
               Discard
             </button>
@@ -139,9 +128,13 @@ export function ComposeHeader({
             disabled={!hasChanges}
             isLoading={saving}
             loadingText="Saving..."
-            className="text-sm"
+            className={`px-4 py-1.5 text-xs font-medium rounded-sm uppercase tracking-wide transition-all duration-300 ${
+                !hasChanges 
+                ? 'bg-muted text-muted-foreground/50 cursor-not-allowed' 
+                : 'bg-primary text-primary-foreground hover:opacity-90 shadow-lg'
+            }`}
             testId="save-button"
-            variant="primary"
+            variant="custom"
           >
             Save
           </LoadingButton>
@@ -150,28 +143,22 @@ export function ComposeHeader({
 
       {/* Status indicators */}
       {hasChanges && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-amber-600">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01" />
-          </svg>
-          Unsaved changes
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full bg-card border-b border-l border-r border-primary/30 text-primary text-[10px] px-3 py-0.5 rounded-b-sm font-mono tracking-wider shadow-sm">
+          UNSAVED CHANGES
         </div>
       )}
       {saveSuccess && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          Saved successfully
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full bg-card border-b border-l border-r border-green-500/30 text-green-600 text-[10px] px-3 py-0.5 rounded-b-sm font-mono tracking-wider shadow-sm">
+          SAVED SUCCESSFULLY
         </div>
       )}
       {error && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-red-600">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-2 flex items-center gap-2 text-xs font-mono text-destructive bg-destructive/10 p-1 px-2 rounded-sm border border-destructive/30">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01" />
           </svg>
           {error}
-          <button onClick={onErrorDismiss} className="underline">Dismiss</button>
+          <button onClick={onErrorDismiss} className="underline ml-2 hover:text-foreground">Dismiss</button>
         </div>
       )}
     </div>

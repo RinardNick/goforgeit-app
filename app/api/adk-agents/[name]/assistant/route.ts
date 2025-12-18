@@ -975,3 +975,88 @@ Step 3: Connect children to their parents using add_sub_agent
 Step 4: Call task_complete with a summary
 
 ### Example - Creating
+`;
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ name: string }> }
+) {
+  try {
+    const { name: projectName } = await params;
+    const body = await req.json();
+    const validation = AssistantRequestSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.message }, { status: 400 });
+    }
+
+    const { message, context, history = [] } = validation.data;
+    const apiKey = process.env.GOOGLE_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'GOOGLE_API_KEY not configured' }, { status: 500 });
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      systemInstruction: SYSTEM_PROMPT,
+      tools: [{ functionDeclarations: toolDefinitions }],
+    });
+
+    const chat = model.startChat({
+        history: history.map(msg => ({
+            role: msg.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: msg.content }]
+        }))
+    });
+
+    let result = await chat.sendMessage(message);
+    let response = await result.response;
+    const executedActions: ExecutedAction[] = [];
+    
+    let functionCalls = response.functionCalls();
+
+    while (functionCalls && functionCalls.length > 0) {
+        const toolParts: any[] = [];
+        
+        for (const call of functionCalls) {
+            const toolName = call.name;
+            const args = call.args;
+            
+            const toolResult = await executeTool(projectName, toolName, args as any);
+            executedActions.push({
+                tool: toolName,
+                args: args as any,
+                result: toolResult
+            });
+            
+            toolParts.push({
+                functionResponse: {
+                    name: toolName,
+                    response: {
+                        name: toolName,
+                        content: toolResult
+                    }
+                }
+            });
+        }
+        
+        result = await chat.sendMessage(toolParts);
+        response = await result.response;
+        functionCalls = response.functionCalls();
+    }
+
+    return NextResponse.json({
+        response: response.text(),
+        actions: executedActions
+    });
+
+  } catch (error) {
+    console.error('Error in assistant:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}

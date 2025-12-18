@@ -832,7 +832,7 @@ export default function ADKAgentComposePage() {
   }, [hasChanges]);
 
   return (
-    <div className="min-h-screen bg-sandstone flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
 
       <ComposeHeader

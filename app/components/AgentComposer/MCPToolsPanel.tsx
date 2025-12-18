@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Plus, Server, Terminal, Globe, X, RefreshCw, Trash2, Settings2, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Server, Terminal, Globe, X, RefreshCw, Trash2, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 // --- Types ---
 export type ServerType = 'stdio' | 'sse';
@@ -43,18 +43,18 @@ interface MCPToolsPanelProps {
 // --- Status Badge ---
 const StatusBadge = ({ status }: { status: ConnectionStatus }) => {
   const config = {
-    connected: { icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-50', label: 'Connected' },
-    disconnected: { icon: AlertCircle, color: 'text-gray-400', bg: 'bg-gray-100', label: 'Disconnected' },
-    error: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50', label: 'Error' },
-    connecting: { icon: Loader2, color: 'text-blue-500', bg: 'bg-blue-50', label: 'Connecting' },
+    connected: { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10', label: 'ONLINE' },
+    disconnected: { icon: AlertCircle, color: 'text-muted-foreground/40', bg: 'bg-muted', label: 'OFFLINE' },
+    error: { icon: AlertCircle, color: 'text-destructive', bg: 'bg-destructive/10', label: 'ERROR' },
+    connecting: { icon: Loader2, color: 'text-primary', bg: 'bg-primary/10', label: 'SYNC' },
   };
 
   const { icon: Icon, color, bg, label } = config[status];
 
   return (
-    <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${bg} ${color}`}>
+    <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[9px] font-bold font-mono border border-current opacity-80 ${bg} ${color}`}>
       <Icon size={10} className={status === 'connecting' ? 'animate-spin' : ''} />
-      <span className="uppercase tracking-wide">{label}</span>
+      <span className="tracking-widest">{label}</span>
     </div>
   );
 };
@@ -69,23 +69,23 @@ interface KeyValueEditorProps {
 
 const KeyValueEditor = ({ label, items, onChange, placeholder }: KeyValueEditorProps) => {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex justify-between items-center">
-        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</label>
+        <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest font-mono">{label}</label>
         <button
           type="button"
           onClick={() => onChange([...items, { key: '', value: '' }])}
-          className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-wide flex items-center gap-1 transition-colors"
         >
-          <Plus size={12} /> Add
+          <Plus size={12} /> Add Entry
         </button>
       </div>
       <div className="space-y-2">
         {items.map((item, idx) => (
           <div key={idx} className="flex gap-2">
             <input
-              placeholder={placeholder?.key || 'Key'}
-              className="flex-1 min-w-0 bg-white border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              placeholder={placeholder?.key || 'KEY'}
+              className="flex-1 min-w-0 bg-background border border-border rounded-sm px-2 py-1.5 text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary outline-none"
               value={item.key}
               onChange={(e) => {
                 const newItems = [...items];
@@ -94,8 +94,8 @@ const KeyValueEditor = ({ label, items, onChange, placeholder }: KeyValueEditorP
               }}
             />
             <input
-              placeholder={placeholder?.value || 'Value'}
-              className="flex-1 min-w-0 bg-white border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              placeholder={placeholder?.value || 'VALUE'}
+              className="flex-1 min-w-0 bg-background border border-border rounded-sm px-2 py-1.5 text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary outline-none"
               value={item.value}
               onChange={(e) => {
                 const newItems = [...items];
@@ -106,7 +106,7 @@ const KeyValueEditor = ({ label, items, onChange, placeholder }: KeyValueEditorP
             <button
               type="button"
               onClick={() => onChange(items.filter((_, i) => i !== idx))}
-              className="text-gray-400 hover:text-red-500 transition-colors px-1"
+              className="text-muted-foreground/40 hover:text-destructive transition-colors px-1"
             >
               <X size={14} />
             </button>
@@ -145,7 +145,6 @@ const AddServerDialog = ({ open, onClose, onSave }: AddServerDialogProps) => {
     if (!name.trim()) newErrors.name = 'Server name is required';
     if (activeTab === 'stdio' && !command.trim()) newErrors.command = 'Command is required';
     if (activeTab === 'sse' && !url.trim()) newErrors.url = 'URL is required';
-    if (activeTab === 'sse' && url && !url.startsWith('http')) newErrors.url = 'URL must start with http:// or https://';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -187,178 +186,180 @@ const AddServerDialog = ({ open, onClose, onSave }: AddServerDialogProps) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+        className="bg-card rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-border"
         onClick={e => e.stopPropagation()}
         data-testid="add-mcp-server-dialog"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Add MCP Server</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+          <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Register MCP Node</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-5 bg-card">
           {/* Server Name */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-              Server Name
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
+              Process Identifier
             </label>
             <input
               data-testid="mcp-server-name-input"
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all ${
-                errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'
+              className={`w-full bg-background border rounded-sm px-3 py-2.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all ${
+                errors.name ? 'border-destructive bg-destructive/5' : 'border-border'
               }`}
-              placeholder="e.g., Filesystem Tools"
+              placeholder="e.g., FILESYSTEM_CONTROLLER"
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
                 if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
               }}
             />
-            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+            {errors.name && <p className="text-[10px] text-destructive mt-1 uppercase font-mono tracking-tighter">{errors.name}</p>}
           </div>
 
           {/* Type Tabs */}
-          <div className="flex bg-gray-100 p-1 rounded-lg">
+          <div className="flex bg-muted rounded-sm p-1 border border-border shadow-inner">
             <button
               type="button"
               data-testid="mcp-type-tab-stdio"
               onClick={() => setActiveTab('stdio')}
-              className={`flex-1 flex items-center justify-center gap-2 text-sm py-2 rounded-md font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 text-[10px] py-2 rounded-sm font-bold uppercase tracking-widest transition-all ${
                 activeTab === 'stdio'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-primary text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Terminal size={14} /> Local (Stdio)
+              <Terminal size={14} /> LOCAL_STDIO
             </button>
             <button
               type="button"
               data-testid="mcp-type-tab-sse"
               onClick={() => setActiveTab('sse')}
-              className={`flex-1 flex items-center justify-center gap-2 text-sm py-2 rounded-md font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 text-[10px] py-2 rounded-sm font-bold uppercase tracking-widest transition-all ${
                 activeTab === 'sse'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-primary text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Globe size={14} /> Remote (SSE)
+              <Globe size={14} /> REMOTE_SSE
             </button>
           </div>
 
           {/* Stdio Configuration */}
           {activeTab === 'stdio' && (
-            <div className="space-y-4" data-testid="mcp-stdio-config">
+            <div className="space-y-5" data-testid="mcp-stdio-config">
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-                  Command
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
+                  Runtime Command
                 </label>
                 <input
                   data-testid="mcp-stdio-command-input"
-                  className={`w-full font-mono border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none ${
-                    errors.command ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                  className={`w-full font-mono bg-background border rounded-sm px-3 py-2.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none ${
+                    errors.command ? 'border-destructive bg-destructive/5' : 'border-border'
                   }`}
-                  placeholder="npx, python, node, etc."
+                  placeholder="npx, python3, etc."
                   value={command}
                   onChange={(e) => {
                     setCommand(e.target.value);
                     if (errors.command) setErrors(prev => ({ ...prev, command: undefined }));
                   }}
                 />
-                {errors.command && <p className="text-xs text-red-500 mt-1">{errors.command}</p>}
+                {errors.command && <p className="text-[10px] text-destructive mt-1 uppercase font-mono tracking-tighter">{errors.command}</p>}
               </div>
 
               {/* Arguments */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Arguments</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-mono">Process Arguments</label>
                   <button
                     type="button"
                     data-testid="mcp-stdio-add-arg-button"
                     onClick={() => setArgs([...args, ''])}
-                    className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-wide flex items-center gap-1 transition-colors"
                   >
-                    <Plus size={12} /> Add
+                    <Plus size={12} /> Add Param
                   </button>
                 </div>
-                {args.map((arg, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <input
-                      data-testid={`mcp-stdio-arg-${idx}`}
-                      className="flex-1 min-w-0 font-mono border border-gray-200 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-500"
-                      placeholder={`Argument ${idx + 1}`}
-                      value={arg}
-                      onChange={(e) => {
-                        const newArgs = [...args];
-                        newArgs[idx] = e.target.value;
-                        setArgs(newArgs);
-                      }}
-                    />
-                    <button
-                      onClick={() => setArgs(args.filter((_, i) => i !== idx))}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  {args.map((arg, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        data-testid={`mcp-stdio-arg-${idx}`}
+                        className="flex-1 min-w-0 font-mono bg-background border border-border rounded-sm px-2 py-1.5 text-xs text-foreground outline-none focus:border-primary"
+                        placeholder={`ARG_${idx}`}
+                        value={arg}
+                        onChange={(e) => {
+                          const newArgs = [...args];
+                          newArgs[idx] = e.target.value;
+                          setArgs(newArgs);
+                        }}
+                      />
+                      <button
+                        onClick={() => setArgs(args.filter((_, i) => i !== idx))}
+                        className="text-muted-foreground/40 hover:text-destructive px-1"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
                 {args.length === 0 && (
-                  <p className="text-xs text-gray-400 italic">No arguments configured</p>
+                  <p className="text-[10px] text-muted-foreground/40 italic font-mono uppercase">NO_PARAMS_CONFIGURED</p>
                 )}
               </div>
 
               <KeyValueEditor
-                label="Environment Variables"
+                label="Environment Context"
                 items={envVars}
                 onChange={setEnvVars}
-                placeholder={{ key: 'Variable name', value: 'Value' }}
+                placeholder={{ key: 'VAR_NAME', value: 'VALUE' }}
               />
             </div>
           )}
 
           {/* SSE Configuration */}
           {activeTab === 'sse' && (
-            <div className="space-y-4" data-testid="mcp-sse-config">
+            <div className="space-y-5" data-testid="mcp-sse-config">
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
-                  Endpoint URL
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
+                  Endpoint Vector
                 </label>
                 <input
                   data-testid="mcp-sse-url-input"
-                  className={`w-full border rounded px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none ${
-                    errors.url ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                  className={`w-full font-mono bg-background border rounded-sm px-3 py-2.5 text-sm text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none ${
+                    errors.url ? 'border-destructive bg-destructive/5' : 'border-border'
                   }`}
-                  placeholder="http://localhost:3000/mcp"
+                  placeholder="https://node.forge.io/mcp"
                   value={url}
                   onChange={(e) => {
                     setUrl(e.target.value);
                     if (errors.url) setErrors(prev => ({ ...prev, url: undefined }));
                   }}
                 />
-                {errors.url && <p className="text-xs text-red-500 mt-1">{errors.url}</p>}
+                {errors.url && <p className="text-[10px] text-destructive mt-1 uppercase font-mono tracking-tighter">{errors.url}</p>}
               </div>
 
               <KeyValueEditor
-                label="Headers"
+                label="Protocol Headers"
                 items={headers}
                 onChange={setHeaders}
-                placeholder={{ key: 'Header name', value: 'Header value' }}
+                placeholder={{ key: 'HEADER_KEY', value: 'HEADER_VAL' }}
               />
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-3">
+        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </button>
@@ -366,9 +367,9 @@ const AddServerDialog = ({ open, onClose, onSave }: AddServerDialogProps) => {
             type="button"
             data-testid="mcp-server-save-button"
             onClick={handleSave}
-            className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-all shadow-lg"
           >
-            Connect Server
+            Connect Node
           </button>
         </div>
       </div>
@@ -391,110 +392,114 @@ const ServerCard = ({ server, onToggleTool, onDelete, onRefresh }: ServerCardPro
   return (
     <div
       data-testid={`mcp-server-card-${server.id}`}
-      className={`bg-white border rounded-lg overflow-hidden transition-all ${
-        expanded ? 'border-blue-200 shadow-sm' : 'border-gray-200 hover:border-gray-300'
+      className={`bg-card border rounded-sm overflow-hidden transition-all shadow-sm ${
+        expanded ? 'border-primary/50 shadow-md' : 'border-border hover:border-primary/30'
       }`}
     >
       {/* Header */}
       <div
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center justify-between p-3 cursor-pointer select-none"
+        className="flex items-center justify-between p-3 cursor-pointer select-none bg-card hover:bg-muted/20 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className={`p-1.5 rounded-md ${
-            server.type === 'stdio' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'
+          <div className={`p-1.5 rounded-sm shadow-inner ${
+            server.type === 'stdio' ? 'bg-primary/10 text-primary' : 'bg-blue-500/10 text-blue-500'
           }`}>
             {server.type === 'stdio' ? <Terminal size={14} /> : <Globe size={14} />}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-semibold text-gray-900 truncate">{server.name}</span>
-            <span className="text-[10px] text-gray-400 font-mono truncate max-w-[120px]">
+            <span className="text-sm font-bold text-foreground truncate font-heading tracking-tight">{server.name}</span>
+            <span className="text-[10px] text-muted-foreground/60 font-mono truncate max-w-[120px] uppercase opacity-70">
               {server.type === 'stdio' ? server.command : server.url}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <StatusBadge status={server.status} />
-          {expanded ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
+          <div className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}>
+            <ChevronDown size={14} className="text-muted-foreground/40" />
+          </div>
         </div>
       </div>
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="px-3 pb-3 border-t border-dashed border-gray-100">
+        <div className="px-3 pb-3 border-t border-dashed border-border/50 bg-muted/10">
           {/* Actions Bar */}
-          <div className="flex justify-end gap-1 py-2 mb-2">
+          <div className="flex justify-end gap-1 py-2 mb-2 border-b border-border/10">
             <button
               onClick={(e) => { e.stopPropagation(); onRefresh(); }}
               data-testid={`mcp-server-refresh-${server.id}`}
-              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-              title="Reconnect & Refresh Tools"
+              className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-sm transition-all"
+              title="Reconnect Node"
             >
               <RefreshCw size={14} />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
               data-testid={`mcp-server-delete-${server.id}`}
-              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
-              title="Remove Server"
+              className="p-1.5 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-sm transition-all"
+              title="Terminate Connection"
             >
               <Trash2 size={14} />
             </button>
           </div>
 
           {/* Tools List */}
-          <div className="space-y-1">
-            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              Available Tools {server.tools.length > 0 && `(${enabledCount}/${server.tools.length} enabled)`}
+          <div className="space-y-2">
+            <div className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mb-2 font-mono">
+              Discovery {server.tools.length > 0 && `(${enabledCount}/${server.tools.length} ENABLED)`}
             </div>
 
             {server.status === 'connecting' && (
-              <div className="py-4 flex flex-col items-center justify-center text-gray-400">
-                <Loader2 size={16} className="animate-spin mb-2" />
-                <span className="text-xs">Discovering tools...</span>
+              <div className="py-6 flex flex-col items-center justify-center text-muted-foreground/40 font-mono">
+                <Loader2 size={16} className="animate-spin mb-3 text-primary opacity-60" />
+                <span className="text-[10px] uppercase tracking-tighter">Initializing_Discovery...</span>
               </div>
             )}
 
             {server.status === 'error' && (
-              <div className="p-2 bg-red-50 rounded border border-red-100 text-xs text-red-600">
-                <div className="flex items-center gap-1.5 font-medium mb-1">
-                  <AlertCircle size={12} /> Connection Error
+              <div className="p-3 bg-destructive/5 rounded-sm border border-destructive/20 text-xs text-destructive animate-fadeIn">
+                <div className="flex items-center gap-2 font-bold mb-1 uppercase tracking-tight">
+                  <AlertCircle size={14} /> CONNECTION_FAILURE
                 </div>
-                <p className="text-red-500">{server.errorMessage || 'Failed to connect to server'}</p>
+                <p className="font-mono text-[10px] opacity-80 leading-relaxed">{server.errorMessage || 'PROTOCOL_ERROR: FAILED_TO_CONNECT'}</p>
               </div>
             )}
 
             {server.status === 'connected' && server.tools.length === 0 && (
-              <div className="py-4 text-xs text-gray-400 italic text-center">
-                No tools discovered from this server
+              <div className="py-4 text-[10px] text-muted-foreground/40 italic font-mono uppercase text-center border border-dashed border-border rounded-sm">
+                NO_CAPABILITIES_DISCOVERED
               </div>
             )}
 
-            {server.tools.map((tool) => (
-              <label
-                key={tool.name}
-                data-testid={`mcp-tool-toggle-${server.id}-${tool.name}`}
-                className="flex items-start gap-2.5 p-2 rounded-md hover:bg-gray-50 cursor-pointer group transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={tool.enabled}
-                  onChange={() => onToggleTool(tool.name)}
-                  className="mt-0.5 w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium text-gray-700 group-hover:text-gray-900">
-                    {tool.name}
-                  </div>
-                  {tool.description && (
-                    <div className="text-[10px] text-gray-500 line-clamp-2 mt-0.5">
-                      {tool.description}
+            <div className="space-y-1">
+                {server.tools.map((tool) => (
+                <label
+                    key={tool.name}
+                    data-testid={`mcp-tool-toggle-${server.id}-${tool.name}`}
+                    className="flex items-start gap-3 p-2.5 rounded-sm hover:bg-accent cursor-pointer group transition-all border border-transparent hover:border-primary/10"
+                >
+                    <input
+                    type="checkbox"
+                    checked={tool.enabled}
+                    onChange={() => onToggleTool(tool.name)}
+                    className="mt-0.5 w-3.5 h-3.5 text-primary border-border bg-background rounded-sm focus:ring-primary"
+                    />
+                    <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-foreground font-mono group-hover:text-primary transition-colors">
+                        {tool.name}
                     </div>
-                  )}
-                </div>
-              </label>
-            ))}
+                    {tool.description && (
+                        <div className="text-[10px] text-muted-foreground leading-relaxed mt-1 opacity-70">
+                        {tool.description}
+                        </div>
+                    )}
+                    </div>
+                </label>
+                ))}
+            </div>
           </div>
         </div>
       )}
@@ -522,12 +527,12 @@ export default function MCPToolsPanel({
     <div data-testid="mcp-tools-section" className="space-y-3">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium text-gray-700">MCP Tools</label>
+        <label className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">MCP Nodes</label>
         <button
           onClick={() => setIsAddModalOpen(true)}
           data-testid="add-mcp-server-button"
-          className="p-1 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors"
-          title="Add MCP Server"
+          className="p-1 bg-foreground text-background rounded-sm hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
+          title="Add MCP Node"
         >
           <Plus size={14} />
         </button>
@@ -538,17 +543,17 @@ export default function MCPToolsPanel({
         {servers.length === 0 ? (
           <div
             data-testid="mcp-empty-state"
-            className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50/50"
+            className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border rounded-sm bg-muted/20"
           >
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
+            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground/40 mb-2">
               <Server size={16} />
             </div>
-            <p className="text-xs text-gray-500 mb-2">No MCP servers configured</p>
+            <p className="text-[10px] text-muted-foreground/60 font-mono uppercase mb-2">NO_MCP_CONNECTIONS</p>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
+              className="text-xs font-bold text-primary hover:text-primary/80 hover:underline uppercase tracking-wide transition-colors"
             >
-              Add your first server
+              Establish Uplink
             </button>
           </div>
         ) : (
@@ -566,9 +571,9 @@ export default function MCPToolsPanel({
 
       {/* Footer Summary */}
       {servers.length > 0 && (
-        <div className="flex justify-between items-center text-[10px] text-gray-400 font-mono pt-1 border-t border-gray-100">
-          <span>{connectedCount} server{connectedCount !== 1 ? 's' : ''} connected</span>
-          <span>{enabledToolsCount} tool{enabledToolsCount !== 1 ? 's' : ''} enabled</span>
+        <div className="flex justify-between items-center text-[9px] text-muted-foreground/40 font-mono pt-1.5 border-t border-border uppercase tracking-widest">
+          <span>{connectedCount}/{servers.length} NODES_ACTIVE</span>
+          <span>{enabledToolsCount} CAPABILITIES</span>
         </div>
       )}
 
