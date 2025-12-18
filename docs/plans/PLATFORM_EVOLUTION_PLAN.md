@@ -67,14 +67,14 @@ graph TD
     *   *Tool:* `add_tool_to_agent(agent_name, tool_def)`
     *   *Use Case:* An external "Architect Agent" can programmatically build and deploy new agents on our platform.
 
-### Phase 3: Dynamic Tool Factory
+### Phase 3: Dynamic Tool Factory (In Progress)
 **Goal:** "Just-in-Time" Tool Creation using Advanced Coding Agents.
 
-1.  **The "Meta-Agent" Architecture (Dogfooding):**
+1.  [x] **The "Meta-Agent" Architecture (Dogfooding):** (Completed Dec 18, 2025)
     *   **Concept:** Migrate the hardcoded "Builder Assistant" to be a genuine ADK Agent (`builder_agent.yaml`) running on the engine itself.
     *   **Why:** Allows using the Visual Builder to improve the Builder, enables evaluations, and visual debugging of the building process.
     *   **Safety:** Deploy this agent to a protected `system_core/` namespace to prevent it from accidentally modifying its own definition ("Lobotomy Risk") and locking users out.
-2.  **Genkit as the Tool Layer:**
+2.  [x] **Genkit as the Tool Layer:** (Completed Dec 18, 2025)
     *   Use Google Genkit to implement the robust *infrastructure tools* (`create_agent`, `write_file`, `run_shell`) that the Meta-Agent calls.
     *   Implement a minimal "Rescue Agent" in Genkit as a fallback if the ADK engine fails.
 3.  **The "Forge" Sub-Agent:**
@@ -118,4 +118,5 @@ graph TD
 2.  [x] **Prototype Phase 2:** Build a simple MCP server endpoint in Next.js that wraps one hardcoded agent. (Completed Dec 15, 2025)
 3.  [x] **Design Phase 4 DB:** Sketch the schema for `organizations`, `projects`, and `billing_ledger`. (Completed Dec 16, 2025)
 4.  [x] **Implement Phase 4 & 4.5:** Full billing infrastructure, dashboard, and project hierarchy. (Completed Dec 17, 2025)
-5.  [ ] **Start Phase 3 Refactor:** Port the Builder Assistant's hardcoded loop to Genkit tools and create the `builder_agent.yaml`.
+5.  [x] **Start Phase 3 Refactor:** Port the Builder Assistant's hardcoded loop to Genkit tools and create the `builder_agent.yaml`. (Completed Dec 18, 2025)
+6.  [ ] **Implement Forge Sub-Agent:** Create the specialized tool-maker agent and integrate it with the Builder Meta-Agent.

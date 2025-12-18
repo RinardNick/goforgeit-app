@@ -36,6 +36,9 @@ else
   echo "ℹ️  Using PostgreSQL session storage"
 fi
 
+# Export MCP URL for builder_agent
+export SYSTEM_TOOLS_MCP_URL="http://localhost:3025/api/mcp/system-tools/sse"
+
 # Start ADK Web Service
 echo "🌐 Starting ADK Web Service (port 8000)..."
 adk web \
