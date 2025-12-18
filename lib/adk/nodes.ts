@@ -309,27 +309,36 @@ export function getNodeType(agentClass: ADKAgentClass | string): string {
 
 /**
  * Apply dagre layout to nodes and edges
+ * Preserves saved positions for nodes that have them, uses dagre only for new nodes
  */
 function applyDagreLayout(
   nodes: Node[],
   edges: Edge[],
   savedPositions?: Record<string, { x: number; y: number }> | null
 ): void {
-  // If all nodes have saved positions, use them
-  if (savedPositions) {
-    let allHavePositions = true;
-    for (const node of nodes) {
-      const filename = (node.data as AgentNodeData).filename;
-      if (filename && savedPositions[filename]) {
-        node.position = { ...savedPositions[filename] };
-      } else {
-        allHavePositions = false;
-      }
-    }
-    if (allHavePositions && nodes.length > 0) {
-      return; // Use saved positions
+  // Apply saved positions to nodes that have them
+  const nodesNeedingLayout: Node[] = [];
+
+  for (const node of nodes) {
+    const filename = (node.data as AgentNodeData).filename;
+    if (filename && savedPositions?.[filename]) {
+      // Use saved position
+      node.position = { ...savedPositions[filename] };
+    } else {
+      // This node needs dagre layout
+      nodesNeedingLayout.push(node);
     }
   }
+
+  // If all nodes have saved positions, we're done
+  if (nodesNeedingLayout.length === 0 && nodes.length > 0) {
+    return;
+  }
+
+  // If no saved positions at all, run dagre on everything
+  const nodesToLayout = savedPositions && nodesNeedingLayout.length < nodes.length
+    ? nodesNeedingLayout
+    : nodes;
 
   // Create dagre graph
   const dagreGraph = new dagre.graphlib.Graph();
@@ -344,7 +353,7 @@ function applyDagreLayout(
     marginy: 50,
   });
 
-  // Add nodes to dagre graph
+  // Add ALL nodes to dagre graph (needed for proper relative positioning)
   const nodeWidth = 280;
   const nodeHeight = 150;
 
@@ -360,8 +369,8 @@ function applyDagreLayout(
   // Run the layout algorithm
   dagre.layout(dagreGraph);
 
-  // Apply the calculated positions to nodes
-  for (const node of nodes) {
+  // Apply positions ONLY to nodes that need layout (don't overwrite saved positions)
+  for (const node of nodesToLayout) {
     const nodeWithPosition = dagreGraph.node(node.id);
     if (nodeWithPosition) {
       // dagre returns center positions, convert to top-left

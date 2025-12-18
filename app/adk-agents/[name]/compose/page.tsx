@@ -65,7 +65,10 @@ export default function ADKAgentComposePage() {
   // resetOriginal: if true, resets change tracking (use for initial load, after save)
   //                if false, preserves unsaved changes (use for AI Assistant refresh)
   const loadFiles = useCallback(async (resetOriginal = true) => {
-    setLoading(true);
+    // Only show loading spinner on initial load, not during refreshes
+    if (resetOriginal) {
+      setLoading(true);
+    }
     try {
       const response = await fetch(`/api/adk-agents/${agentName}/files`);
       const data = await response.json();
@@ -107,7 +110,9 @@ export default function ADKAgentComposePage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load files');
     } finally {
-      setLoading(false);
+      if (resetOriginal) {
+        setLoading(false);
+      }
     }
   }, [agentName, toolAgentContext]);
 
