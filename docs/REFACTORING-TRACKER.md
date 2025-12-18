@@ -87,7 +87,7 @@ The hook would need significant expansion to replace the page-level logic.
 - [x] Create shared StatusBadge component
 - [x] Create shared KeyValueEditor component
 - [x] Create shared ConfirmDialog component
-- [ ] Extract common styling patterns
+- [x] Extract common styling patterns (Dialog.tsx shared components)
 
 ---
 
@@ -105,7 +105,8 @@ The hook would need significant expansion to replace the page-level logic.
 | useEvaluationRun hook integration | ~310 | 2025-12-18 |
 | AgentComposer decomposition | ~482 | 2025-12-18 |
 | AgentToolsPanel decomposition | ~455 | 2025-12-18 |
-| **Total** | **~6388 lines** | |
+| Shared Dialog components | ~60 | 2025-12-18 |
+| **Total** | **~6448 lines** | |
 
 ---
 
@@ -322,6 +323,29 @@ The hook would need significant expansion to replace the page-level logic.
 
 ---
 
+### 2025-12-18: Shared Dialog Components
+
+**Changes:**
+- Created shared Dialog components for consistent dialog styling across tool panels
+- DialogOverlay - Backdrop and centering (removes ~3 lines per dialog)
+- DialogCard - Container with consistent styling (removes ~2 lines per dialog)
+- DialogHeader - Header with title, close, and optional back button (removes ~8 lines per dialog)
+- DialogFooter - Footer with consistent styling (removes ~2 lines per dialog)
+- DialogBody - Body with optional scrollable mode (removes ~2 lines per dialog)
+- DialogButton - Button with primary/secondary variants
+- Updated ModeSelectionDialog, AddAgentToolDialog, CreateAgentToolDialog to use shared components
+
+**Files Created:**
+- `app/components/AgentComposer/shared/Dialog.tsx` (130 lines)
+
+**Files Modified:**
+- `app/components/AgentComposer/shared/index.ts` - Added Dialog exports
+- `app/components/AgentComposer/ModeSelectionDialog.tsx` - Uses shared Dialog (81→68 lines)
+- `app/components/AgentComposer/AddAgentToolDialog.tsx` - Uses shared Dialog (136→105 lines)
+- `app/components/AgentComposer/CreateAgentToolDialog.tsx` - Uses shared Dialog (194→178 lines)
+
+---
+
 ## 📋 Next Steps
 
-1. **Extract common styling patterns** - Shared dialog overlay, header, footer patterns
+*All refactoring tasks complete!*

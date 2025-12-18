@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, ChevronDown, Sparkles } from 'lucide-react';
+import { ChevronDown, Sparkles } from 'lucide-react';
+import { DialogOverlay, DialogCard, DialogHeader, DialogBody, DialogFooter, DialogButton } from './shared';
 
 // New agent data for creating a new agent as tool
 export interface NewAgentToolData {
@@ -50,30 +51,11 @@ export function CreateAgentToolDialog({ open, onClose, onBack, onSave, isLoading
     onClose();
   };
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={handleClose}>
-      <div
-        className="bg-card rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col border border-border"
-        onClick={e => e.stopPropagation()}
-        data-testid="create-agent-tool-dialog"
-      >
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30 shrink-0">
-          <div className="flex items-center gap-2">
-            <button onClick={onBack} className="text-muted-foreground hover:text-foreground p-1 -ml-1 transition-colors">
-              <ChevronDown size={16} className="rotate-90" />
-            </button>
-            <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Create Agent Module</h2>
-          </div>
-          <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-5 space-y-5 overflow-y-auto flex-1 bg-card scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+    <DialogOverlay open={open} onClose={handleClose}>
+      <DialogCard maxWidth="lg" maxHeight testId="create-agent-tool-dialog">
+        <DialogHeader title="Create Agent Module" onClose={handleClose} onBack={onBack} />
+        <DialogBody scrollable>
           {/* Name */}
           <div>
             <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
@@ -167,18 +149,9 @@ export function CreateAgentToolDialog({ open, onClose, onBack, onSave, isLoading
               This will initialize a new sovereign process within the current architecture. It can be further customized post-initialization.
             </p>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30 shrink-0">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            disabled={isLoading}
-          >
-            Back
-          </button>
+        </DialogBody>
+        <DialogFooter>
+          <DialogButton onClick={onBack} disabled={isLoading}>Back</DialogButton>
           <button
             type="button"
             data-testid="create-agent-tool-save-button"
@@ -198,8 +171,8 @@ export function CreateAgentToolDialog({ open, onClose, onBack, onSave, isLoading
               'Initialize'
             )}
           </button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogCard>
+    </DialogOverlay>
   );
 }

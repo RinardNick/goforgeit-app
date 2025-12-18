@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Bot, ChevronDown } from 'lucide-react';
+import { Bot, ChevronDown } from 'lucide-react';
+import { DialogOverlay, DialogCard, DialogHeader, DialogBody, DialogFooter, DialogButton } from './shared';
 
 interface AddAgentToolDialogProps {
   open: boolean;
@@ -26,30 +27,11 @@ export function AddAgentToolDialog({ open, onClose, onBack, onSave, availableAge
     onClose();
   };
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-      <div
-        className="bg-card rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-border"
-        onClick={e => e.stopPropagation()}
-        data-testid="add-agent-tool-dialog"
-      >
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
-          <div className="flex items-center gap-2">
-            <button onClick={onBack} className="text-muted-foreground hover:text-foreground p-1 -ml-1 transition-colors">
-              <ChevronDown size={16} className="rotate-90" />
-            </button>
-            <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Select Existing Agent</h2>
-          </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-5 space-y-4 bg-card">
+    <DialogOverlay open={open} onClose={onClose}>
+      <DialogCard testId="add-agent-tool-dialog">
+        <DialogHeader title="Select Existing Agent" onClose={onClose} onBack={onBack} />
+        <DialogBody>
           <div>
             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 font-mono">
               Select Agent
@@ -110,28 +92,14 @@ export function AddAgentToolDialog({ open, onClose, onBack, onSave, availableAge
               </p>
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30">
-          <button
-            type="button"
-            onClick={onBack}
-            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            data-testid="agent-tool-save-button"
-            onClick={handleSave}
-            disabled={!selectedAgent}
-            className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-widest bg-primary text-primary-foreground rounded-sm hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+        </DialogBody>
+        <DialogFooter>
+          <DialogButton onClick={onBack}>Back</DialogButton>
+          <DialogButton variant="primary" onClick={handleSave} disabled={!selectedAgent} testId="agent-tool-save-button">
             Add Agent Tool
-          </button>
-        </div>
-      </div>
-    </div>
+          </DialogButton>
+        </DialogFooter>
+      </DialogCard>
+    </DialogOverlay>
   );
 }

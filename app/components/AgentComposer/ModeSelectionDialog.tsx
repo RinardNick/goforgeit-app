@@ -1,6 +1,7 @@
 'use client';
 
-import { X, Bot, ChevronDown, Sparkles } from 'lucide-react';
+import { Bot, ChevronDown, Sparkles } from 'lucide-react';
+import { DialogOverlay, DialogCard, DialogHeader, DialogBody } from './shared';
 
 interface ModeSelectionDialogProps {
   open: boolean;
@@ -11,25 +12,11 @@ interface ModeSelectionDialogProps {
 }
 
 export function ModeSelectionDialog({ open, onClose, onSelectExisting, onCreateNew, hasAvailableAgents }: ModeSelectionDialogProps) {
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-      <div
-        className="bg-card rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden border border-border"
-        onClick={e => e.stopPropagation()}
-        data-testid="agent-tool-mode-dialog"
-      >
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
-          <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">Add Agent Tool</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Content - Two Options */}
-        <div className="p-5 space-y-3 bg-card">
+    <DialogOverlay open={open} onClose={onClose}>
+      <DialogCard testId="agent-tool-mode-dialog">
+        <DialogHeader title="Add Agent Tool" onClose={onClose} />
+        <DialogBody>
           <p className="text-sm text-muted-foreground mb-4 font-light">
             Agent Tools allow this agent to delegate tasks to other specialized agents.
           </p>
@@ -74,8 +61,8 @@ export function ModeSelectionDialog({ open, onClose, onSelectExisting, onCreateN
             </div>
             <ChevronDown size={16} className="text-muted-foreground/40 -rotate-90 mt-2" />
           </button>
-        </div>
-      </div>
-    </div>
+        </DialogBody>
+      </DialogCard>
+    </DialogOverlay>
   );
 }
