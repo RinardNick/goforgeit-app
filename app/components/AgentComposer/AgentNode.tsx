@@ -336,7 +336,7 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
       />
 
       {/* Plus button to add child agent */}
-      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" ref={dropdownRef}>
+      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2" ref={dropdownRef}>
         <button
           onClick={handlePlusClick}
           className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-colors shadow-lg hover:scale-110"
