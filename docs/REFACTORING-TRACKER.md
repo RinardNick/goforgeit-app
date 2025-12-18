@@ -8,8 +8,8 @@ This document tracks the refactoring work to reduce code duplication and improve
 
 | File | Original | Current | Status | Issues |
 |------|----------|---------|--------|--------|
-| evaluations/[evalId]/page.tsx | 2041 | **1203** | ✅ Done | 5 modals + useMetricsConfig hook |
-| adk-agents/.../[evalId]/page.tsx | 2041 | **1203** | ✅ Done | Using shared modals + useMetricsConfig |
+| evaluations/[evalId]/page.tsx | 2041 | **1023** | ✅ Done | 5 modals + 2 hooks extracted |
+| adk-agents/.../[evalId]/page.tsx | 2041 | **1023** | ✅ Done | Using shared modals + hooks |
 | chat/page.tsx | 1380 | **1349** | ✅ Partial | Components shared, ~2300 lines saved in dedup |
 | adk-agents/.../chat/page.tsx | 1345 | **1384** | ✅ Partial | Using shared components from /components/chat |
 | lib/adk/nodes.ts | 1103 | **1004** | ✅ Split | Types moved to node-types.ts (167 lines) |
@@ -99,7 +99,8 @@ The hook would need significant expansion to replace the page-level logic.
 | Compose components consolidation | ~730 | 2025-12-18 |
 | MCPToolsPanel shared components | ~76 | 2025-12-18 |
 | useMetricsConfig hook integration | ~575 | 2025-12-18 |
-| **Total** | **~4781 lines** | |
+| useConversationBuilder hook integration | ~360 | 2025-12-18 |
+| **Total** | **~5141 lines** | |
 
 ---
 
@@ -239,6 +240,27 @@ The hook would need significant expansion to replace the page-level logic.
 - Modal: openMetricsConfig, closeMetricsConfig
 - Actions: toggleMetric, setThreshold, setRubric, applyTemplate
 - API: loadConfig, saveConfig, resetConfig
+
+---
+
+### 2025-12-18: useConversationBuilder Hook Extraction & Integration
+
+**Commits:**
+- `e13a6bd` - Extract and integrate useConversationBuilder hook
+
+**Changes:**
+- Created `lib/hooks/useConversationBuilder.ts` hook for conversation editing
+- Extracts ~360 lines of conversation builder state and handlers from evaluation pages
+- Handles conversation CRUD, turn management, tool trajectory, intermediate responses
+- Supports both `/api/agents` and `/api/adk-agents` routes via apiBasePath parameter
+
+**Files Created:**
+- `lib/hooks/useConversationBuilder.ts` - Conversation builder hook
+- `lib/hooks/__tests__/useConversationBuilder.test.ts` - 27 unit tests
+
+**Files Modified:**
+- `app/[name]/evaluations/[evalId]/page.tsx` - 1203→1023 lines
+- `app/adk-agents/[name]/evaluations/[evalId]/page.tsx` - 1203→1023 lines
 
 ---
 
