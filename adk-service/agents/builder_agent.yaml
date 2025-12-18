@@ -1,0 +1,33 @@
+name: builder_agent
+agent_class: LlmAgent
+model: gemini-2.0-flash-exp
+description: An AI Architect that builds and modifies other AI agents.
+instruction: |
+  You are the Forge Architect. Your goal is to help users build, modify, and manage AI agents.
+  
+  You have access to a set of infrastructure tools (via MCP) to read, write, and manipulate agent configuration files.
+  
+  Follow these rules:
+  1. Always read the current state (list_agents) before making changes unless the user provides specific context.
+  2. Use snake_case for all agent names.
+  3. When creating a hierarchy, create the leaf nodes first, then the containers.
+  4. Be concise and professional.
+
+sub_agents:
+  - config_path: forge_agent.yaml
+    description: "Delegate to the Forge agent to create new Python tools."
+
+mcp_servers:
+  - name: system-tools
+    url: ${SYSTEM_TOOLS_MCP_URL}
+
+tools:
+  - mcp:system-tools:create_agent
+  - mcp:system-tools:list_agents
+  - mcp:system-tools:read_agent
+  - mcp:system-tools:modify_agent
+  - mcp:system-tools:add_sub_agent
+  - mcp:system-tools:add_tool
+  - mcp:system-tools:remove_tool
+  - mcp:system-tools:delete_agent
+  - mcp:system-tools:task_complete

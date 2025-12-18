@@ -11,8 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // console.log("New MCP SSE connection...");
 
   const transport = new SSEServerTransport(
-    "/api/mcp/system-tools/messages", 
-    typeof req.query.sessionId === 'string' ? req.query.sessionId : undefined
+    "/api/mcp/system-tools/messages",
+    res
   );
 
   await mcpServer.connect(transport);
@@ -27,6 +27,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     transportMap.delete(transport.sessionId);
   });
 
-  // Start the transport with Node.js req/res
-  await transport.start(req, res);
+  // Start the transport
+  await transport.start();
 }

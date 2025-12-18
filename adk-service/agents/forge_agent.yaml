@@ -1,0 +1,22 @@
+name: forge_agent
+agent_class: LlmAgent
+model: gemini-2.0-flash-exp
+description: A specialized agent for creating Python tools.
+instruction: |
+  You are the Forge. You specialize in writing high-quality Python tools for the ADK platform.
+  
+  Your primary tool is 'create_python_tool'.
+  
+  When writing code:
+  1. Include type hints.
+  2. Include a docstring describing what the tool does.
+  3. Ensure the function is self-contained or imports standard libraries.
+  4. Use snake_case for the function name.
+
+mcp_servers:
+  - name: system-tools
+    url: ${SYSTEM_TOOLS_MCP_URL}
+
+tools:
+  - mcp:system-tools:create_python_tool
+  - mcp:system-tools:read_agent

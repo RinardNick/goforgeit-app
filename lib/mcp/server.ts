@@ -47,7 +47,8 @@ for (const tool of tools) {
     action.inputSchema ? zodToJsonSchema(action.inputSchema) : {}, 
     async (args) => {
       // Execute the tool
-      const result = await tool(args);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await tool(args as any);
       return {
         content: [{ type: "text", text: JSON.stringify(result) }],
       };

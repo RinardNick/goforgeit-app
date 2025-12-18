@@ -12,10 +12,20 @@ export interface EvaluationRun {
   metrics_summary?: Record<string, { avg_score: number; pass_rate: number }>;
 }
 
+export interface EvalTurnResult {
+  invocation_id: string;
+  actual_response?: {
+    parts: Array<{ text: string }>;
+  };
+  actual_tool_calls?: unknown[];
+  metrics?: unknown[];
+  passed?: boolean;
+}
+
 export interface EvalResult {
   eval_id: string;
   passed: boolean;
-  turns: unknown[];
+  turns: EvalTurnResult[];
 }
 
 export interface EvalSetWithRuns {

@@ -678,7 +678,7 @@ export default function EvalsetDetailPage() {
                                                 : 'bg-red-50 border-red-200 text-gray-900'
                                             }`}
                                           >
-                                            {turn.actual_response.parts[0].text}
+                                            {turn.actual_response?.parts[0]?.text || 'No response'}
                                           </div>
                                         </div>
                                       </div>

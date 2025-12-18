@@ -138,7 +138,7 @@ export function useConversationBuilder({
       if (field === 'user') {
         updated[index] = {
           ...updated[index],
-          user_content: { parts: [{ text: value }] },
+          user_content: { parts: [{ text: value }], role: 'user' },
         };
       } else {
         updated[index] = {
