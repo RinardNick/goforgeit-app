@@ -15,18 +15,14 @@ import {
   useEdgesState,
   useReactFlow,
   BackgroundVariant,
-  Panel,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import AgentNode, { AgentNodeData, ADKAgentClass, ToolConfig } from './AgentNode';
 import ContainerNode from './ContainerNode';
-import { MCPServerConfig } from './AgentNode';
-import { NewAgentToolData, DialogMode } from './AgentToolsPanel';
 import { ToolType } from './AddToolsDropdown';
-import { BuiltInToolsPanel } from './BuiltInToolsPanel';
-import { AddToolsDropdown } from './AddToolsDropdown';
-import { getAvailableModels } from '@/lib/pricing';
+import { AgentPalette } from './AgentPalette';
+import { PropertiesPanel } from './PropertiesPanel';
 
 // Custom node types
 const nodeTypes = {
@@ -41,17 +37,6 @@ function getNodeType(agentClass: ADKAgentClass): string {
   }
   return 'agent';
 }
-
-// Available models from pricing source of truth
-const availableModels = getAvailableModels();
-
-// Agent palette items for drag-and-drop
-const agentPaletteItems: { type: ADKAgentClass; label: string; icon: string }[] = [
-  { type: 'LlmAgent', label: 'LLM Agent', icon: '🤖' },
-  { type: 'SequentialAgent', label: 'Sequential', icon: '⏭️' },
-  { type: 'ParallelAgent', label: 'Parallel', icon: '⚡' },
-  { type: 'LoopAgent', label: 'Loop', icon: '🔄' },
-];
 
 interface AgentComposerProps {
   projectName: string;
@@ -95,11 +80,7 @@ function AgentComposerInner({
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const reactFlowInstance = useReactFlow();
 
-  // Unified Debug Panel state
-  const [mcpServerStates, setMcpServerStates] = useState<
-    Record<string, { status: 'connected' | 'disconnected' | 'error' | 'connecting'; tools: Array<{ name: string; description: string; enabled: boolean }>; errorMessage?: string }>
-  >({});
-
+  // Tool sections expansion state
   const [expandedToolSections, setExpandedToolSections] = useState<Record<string, Set<ToolType>>>({});
 
   const onAddChildAgentRef = useRef(onAddChildAgent);
@@ -373,257 +354,43 @@ function AgentComposerInner({
     }
   }, []);
 
+  // Handler functions for tool sections
+  const handleExpandToolSection = useCallback((nodeId: string, type: ToolType) => {
+    setExpandedToolSections(prev => {
+      const currentSet = prev[nodeId] || new Set<ToolType>();
+      const newSet = new Set(currentSet);
+      newSet.add(type);
+      return { ...prev, [nodeId]: newSet };
+    });
+  }, []);
+
+  const handleCollapseToolSection = useCallback((nodeId: string, type: ToolType) => {
+    setExpandedToolSections(prev => {
+      const currentSet = prev[nodeId] || new Set<ToolType>();
+      const newSet = new Set(currentSet);
+      newSet.delete(type);
+      return { ...prev, [nodeId]: newSet };
+    });
+  }, []);
+
   return (
     <div className="flex h-full bg-background" onKeyDown={onKeyDown} tabIndex={0} data-testid="agent-composer">
       {/* Agent Palette */}
-      {!readOnly && (
-        <div className="w-56 bg-card/30 border-r border-border p-4 flex flex-col backdrop-blur-sm" data-testid="agent-palette">
-          <h3 className="font-heading font-bold text-foreground mb-3 uppercase text-xs tracking-wider">Components</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4 font-mono">DRAG TO CANVAS</p>
-          <div className="space-y-2">
-            {agentPaletteItems.map((item) => (
-              <div
-                key={item.type}
-                draggable
-                onDragStart={(e) => onDragStart(e, item.type)}
-                data-testid={`palette-${item.type.toLowerCase().replace('agent', '-agent')}`}
-                className="flex items-center gap-3 px-3 py-2 bg-accent border border-accent rounded-sm cursor-grab hover:bg-accent/80 hover:border-primary/30 hover:text-primary transition-all duration-200 group"
-              >
-                <span className="text-lg opacity-80 group-hover:opacity-100">{item.icon}</span>
-                <span className="text-xs font-mono text-muted-foreground group-hover:text-foreground">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {!readOnly && <AgentPalette onDragStart={onDragStart} />}
 
       {/* Properties Panel */}
       {!readOnly && selectedNode && (
-        <div className="w-80 bg-card/30 border-l border-border p-4 flex flex-col overflow-y-auto backdrop-blur-sm" data-testid="properties-panel">
-          <div className="flex items-center justify-between mb-6 border-b border-border pb-2">
-            <h3 className="font-heading font-bold text-foreground uppercase text-xs tracking-wider">Configuration</h3>
-            <button onClick={onPaneClick} className="p-1 text-muted-foreground/60 hover:text-foreground rounded">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-          </div>
-
-          <div className="space-y-6 flex-1">
-            <div>
-              <label className="block text-[10px] font-bold text-muted-foreground/60 mb-1 uppercase tracking-wider">Name</label>
-              <input
-                type="text"
-                value={getNodeData(selectedNode).name}
-                onChange={(e) => updateSelectedNodeDataLocal({ name: e.target.value })}
-                onBlur={(e) => updateSelectedNodeData({ name: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-background border border-border text-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-colors font-mono"
-                placeholder="Agent name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-muted-foreground/60 mb-1 uppercase tracking-wider">Type</label>
-              <select
-                value={getNodeData(selectedNode).agentClass}
-                onChange={(e) => updateSelectedNodeData({
-                  agentClass: e.target.value as ADKAgentClass,
-                  model: e.target.value === 'LlmAgent' ? 'gemini-2.0-flash-exp' : undefined
-                })}
-                className="w-full px-3 py-2 text-sm bg-background border border-border text-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
-              >
-                {agentPaletteItems.map((item) => (
-                  <option key={item.type} value={item.type}>{item.icon} {item.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Model (for LlmAgent) */}
-            {getNodeData(selectedNode).agentClass === 'LlmAgent' && (
-              <div>
-                <label className="block text-[10px] font-bold text-muted-foreground/60 mb-1 uppercase tracking-wider">Model</label>
-                <select
-                  value={getNodeData(selectedNode).model || 'gemini-2.0-flash-exp'}
-                  onChange={(e) => updateSelectedNodeData({ model: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-background border border-border text-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-colors font-mono text-xs"
-                  data-testid="model-select"
-                >
-                  {availableModels.map((model) => (
-                    <option key={model.id} value={model.id}>{model.displayLabel}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Description (only for LlmAgent) */}
-            {getNodeData(selectedNode).agentClass === 'LlmAgent' && (
-              <div>
-                <label className="block text-[10px] font-bold text-muted-foreground/60 mb-1 uppercase tracking-wider">Description</label>
-                <textarea
-                  value={getNodeData(selectedNode).description || ''}
-                  onChange={(e) => updateSelectedNodeData({ description: e.target.value })}
-                  rows={2}
-                  className="w-full px-3 py-2 text-sm bg-background border border-border text-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-colors resize-none placeholder-muted-foreground/20"
-                  placeholder="Brief description of this agent"
-                />
-              </div>
-            )}
-
-            {/* Instruction (for LlmAgent) */}
-            {getNodeData(selectedNode).agentClass === 'LlmAgent' && (
-              <div>
-                <label className="block text-[10px] font-bold text-muted-foreground/60 mb-1 uppercase tracking-wider">Instruction</label>
-                <textarea
-                  value={getNodeData(selectedNode).instruction || ''}
-                  onChange={(e) => updateSelectedNodeData({ instruction: e.target.value })}
-                  rows={6}
-                  className="w-full px-3 py-2 text-xs bg-background border border-border text-muted-foreground rounded-sm focus:ring-1 focus:ring-primary focus:border-primary transition-colors resize-none font-mono placeholder-muted-foreground/20 leading-relaxed"
-                  placeholder="System instruction for this agent..."
-                  data-testid="agent-instruction"
-                />
-              </div>
-            )}
-
-            {/* Tools Section (for LlmAgent) */}
-            {getNodeData(selectedNode).agentClass === 'LlmAgent' && (() => {
-              const nodeId = selectedNode.id;
-              const nodeData = getNodeData(selectedNode);
-              const expandedSections = expandedToolSections[nodeId] || new Set<ToolType>();
-
-              // Determine which sections should be visible (has tools OR explicitly expanded)
-              const hasBuiltinTools = (nodeData.tools || []).length > 0;
-              const hasMcpTools = (nodeData.mcpServers || []).length > 0;
-              const hasAgentTools = (nodeData.agentTools || []).length > 0;
-              const hasOpenApiTools = (nodeData.openApiTools || []).length > 0;
-              const hasPythonTools = (nodeData.pythonTools || []).length > 0;
-
-              const showBuiltin = hasBuiltinTools || expandedSections.has('builtin');
-              const showMcp = hasMcpTools || expandedSections.has('mcp');
-              const showAgent = hasAgentTools || expandedSections.has('agent');
-              const showOpenApi = hasOpenApiTools || expandedSections.has('openapi');
-              const showPython = hasPythonTools || expandedSections.has('python');
-
-              const visibleTypes: ToolType[] = [];
-              if (showBuiltin) visibleTypes.push('builtin');
-              if (showMcp) visibleTypes.push('mcp');
-              if (showAgent) visibleTypes.push('agent');
-              if (showOpenApi) visibleTypes.push('openapi');
-              if (showPython) visibleTypes.push('python');
-
-              const handleAddToolType = (type: ToolType) => {
-                setExpandedToolSections(prev => {
-                  const currentSet = prev[nodeId] || new Set<ToolType>();
-                  const newSet = new Set(currentSet);
-                  newSet.add(type);
-                  return { ...prev, [nodeId]: newSet };
-                });
-              };
-
-              const handleRemoveSection = (type: ToolType) => {
-                setExpandedToolSections(prev => {
-                  const currentSet = prev[nodeId] || new Set<ToolType>();
-                  const newSet = new Set(currentSet);
-                  newSet.delete(type);
-                  return { ...prev, [nodeId]: newSet };
-                });
-              };
-
-              return (
-                <div className="space-y-4 pt-4 border-t border-border" data-testid="tools-section">
-                  <label className="block text-[10px] font-bold text-muted-foreground/60 mb-2 uppercase tracking-wider">Capabilities</label>
-                  
-                  {showBuiltin && (
-                    <div className="relative bg-accent border border-accent rounded-sm p-2">
-                      {!hasBuiltinTools && (
-                        <button
-                          onClick={() => handleRemoveSection('builtin')}
-                          className="absolute -top-2 -right-2 p-1 bg-card border border-border text-muted-foreground hover:text-destructive rounded-full z-10 shadow-sm"
-                          title="Remove section"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                      )}
-                      <BuiltInToolsPanel
-                        selectedTools={nodeData.tools || []}
-                        toolConfigs={nodeData.toolConfigs || new Map()}
-                        onToolsChange={(tools) => updateSelectedNodeData({ tools })}
-                        onToolConfigChange={updateToolConfig}
-                      />
-                    </div>
-                  )}
-
-                  <AddToolsDropdown
-                    onSelectToolType={handleAddToolType}
-                    disabledTypes={visibleTypes}
-                  />
-                </div>
-              );
-            })()}
-
-            {/* Model Configuration (for LlmAgent) */}
-            {getNodeData(selectedNode).agentClass === 'LlmAgent' && (
-              <div data-testid="model-config-section" className="pt-4 border-t border-border">
-                <label className="block text-[10px] font-bold text-muted-foreground/60 mb-2 uppercase tracking-wider">Parameters</label>
-                <div className="space-y-3 bg-accent border border-accent rounded-sm p-3">
-                  {/* Temperature Slider */}
-                  <div data-testid="temperature-slider">
-                    <div className="flex items-center justify-between mb-1">
-                      <label htmlFor="temperature" className="text-xs font-medium text-muted-foreground">
-                        Temperature
-                      </label>
-                      <span className="text-xs font-mono text-primary">
-                        {getNodeData(selectedNode).generation_config?.temperature ?? 1.0}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      id="temperature"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      value={getNodeData(selectedNode).generation_config?.temperature ?? 1.0}
-                      onChange={(e) => {
-                        const currentConfig = getNodeData(selectedNode).generation_config || {};
-                        updateSelectedNodeData({
-                          generation_config: { ...currentConfig, temperature: parseFloat(e.target.value) }
-                        });
-                      }}
-                      className="w-full h-1 bg-card rounded-lg appearance-none cursor-pointer accent-primary"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Root Agent Toggle */}
-            <div className="flex items-center gap-2 pt-2">
-              <input
-                type="checkbox"
-                id="isRoot"
-                checked={getNodeData(selectedNode).isRoot || false}
-                onChange={(e) => updateSelectedNodeData({ isRoot: e.target.checked })}
-                className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-offset-0"
-              />
-              <label htmlFor="isRoot" className="text-xs text-muted-foreground font-medium">Set as Root Agent</label>
-            </div>
-
-            {/* Filename (read-only info) */}
-            {getNodeData(selectedNode).filename && (
-              <div className="pt-2 border-t border-border mt-2">
-                <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-muted-foreground/40 font-mono uppercase">Filename</span>
-                    <span className="text-[10px] text-muted-foreground/60 font-mono">{getNodeData(selectedNode).filename}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={deleteSelectedNode}
-            className="mt-6 w-full px-3 py-2 text-xs font-bold text-destructive bg-destructive/10 border border-destructive/20 rounded-sm hover:bg-destructive/30 hover:border-destructive/40 transition-colors uppercase tracking-wider"
-            data-testid="delete-agent-button"
-          >
-            Delete Agent
-          </button>
-        </div>
+        <PropertiesPanel
+          selectedNode={selectedNode}
+          expandedToolSections={expandedToolSections}
+          onClose={onPaneClick}
+          onUpdateData={updateSelectedNodeData}
+          onUpdateDataLocal={updateSelectedNodeDataLocal}
+          onUpdateToolConfig={updateToolConfig}
+          onDelete={deleteSelectedNode}
+          onExpandToolSection={handleExpandToolSection}
+          onCollapseToolSection={handleCollapseToolSection}
+        />
       )}
 
       {/* Canvas */}

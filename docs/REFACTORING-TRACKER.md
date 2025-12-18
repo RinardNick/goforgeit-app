@@ -13,7 +13,7 @@ This document tracks the refactoring work to reduce code duplication and improve
 | chat/page.tsx | 1380 | **1349** | ✅ Partial | Components shared, ~2300 lines saved in dedup |
 | adk-agents/.../chat/page.tsx | 1345 | **1384** | ✅ Partial | Using shared components from /components/chat |
 | lib/adk/nodes.ts | 1103 | **1004** | ✅ Split | Types moved to node-types.ts (167 lines) |
-| AgentComposer.tsx | 908 | 908 | ❌ Not started | Monolithic visual builder |
+| AgentComposer.tsx | 908 | **426** | ✅ Done | PropertiesPanel + AgentPalette extracted |
 | AgentToolsPanel.tsx | 615 | 615 | ❌ Not started | Too many concerns |
 | MCPToolsPanel.tsx | 583 | **511** | ✅ Partial | StatusBadge/KeyValueEditor extracted |
 
