@@ -397,7 +397,7 @@ export default function EvalsetDetailPage() {
                           Save Tag
                         </button>
                         <button
-                          onClick={() => setEditingRunTag(null)}
+                          onClick={cancelRunTag}
                           className="px-3 py-2 bg-gray-300 text-foreground text-sm rounded-lg hover:bg-gray-400"
                         >
                           Cancel
@@ -407,14 +407,14 @@ export default function EvalsetDetailPage() {
                       <>
                         <button
                           data-testid="add-run-tag-btn"
-                          onClick={() => currentRun && handleAddRunTag(currentRun.run_id)}
+                          onClick={() => currentRun && addRunTag(currentRun.run_id)}
                           className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                         >
                           + Tag
                         </button>
                         <button
                           data-testid="set-baseline-btn"
-                          onClick={() => currentRun && handleSetBaseline(currentRun.run_id)}
+                          onClick={() => currentRun && evalset && setBaseline(currentRun.run_id, evalset)}
                           className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                         >
                           Set Baseline
@@ -841,7 +841,7 @@ export default function EvalsetDetailPage() {
         {/* Run Comparison Modal (Phase 18.7) */}
         <RunComparisonModal
           isOpen={showComparisonView && !!evalset.runs}
-          onClose={handleCloseComparison}
+          onClose={closeComparisonView}
           runs={evalset.runs || []}
           selectedRunsForComparison={selectedRunsForComparison}
         />

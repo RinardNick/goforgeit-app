@@ -8,8 +8,8 @@ This document tracks the refactoring work to reduce code duplication and improve
 
 | File | Original | Current | Status | Issues |
 |------|----------|---------|--------|--------|
-| evaluations/[evalId]/page.tsx | 2041 | **1023** | ✅ Done | 5 modals + 2 hooks extracted |
-| adk-agents/.../[evalId]/page.tsx | 2041 | **1023** | ✅ Done | Using shared modals + hooks |
+| evaluations/[evalId]/page.tsx | 2041 | **868** | ✅ Done | 5 modals + 3 hooks extracted |
+| adk-agents/.../[evalId]/page.tsx | 2041 | **868** | ✅ Done | Using shared modals + hooks |
 | chat/page.tsx | 1380 | **1349** | ✅ Partial | Components shared, ~2300 lines saved in dedup |
 | adk-agents/.../chat/page.tsx | 1345 | **1384** | ✅ Partial | Using shared components from /components/chat |
 | lib/adk/nodes.ts | 1103 | **1004** | ✅ Split | Types moved to node-types.ts (167 lines) |
@@ -38,7 +38,7 @@ Analysis completed. Routes differ in multi-tenancy features:
 | Update compose pages to use shared components | ✅ Complete |
 
 ### 2. Split Evaluation Pages (HIGH - 2000+ lines)
-**Status: ✅ Partially complete (~1100 lines saved)**
+**Status: ✅ Complete (~2345 lines saved - pages reduced from 2041 to 868 lines)**
 
 | Item | Status |
 |------|--------|
@@ -47,7 +47,8 @@ Analysis completed. Routes differ in multi-tenancy features:
 | IntermediateResponseModal.tsx | ✅ Extracted |
 | RunComparisonModal.tsx | ✅ Extracted |
 | MetricsConfigModal.tsx | ✅ Extracted |
-| useEvaluationRun hook | ❌ Not started |
+| useEvaluationRun hook | ✅ Integrated (24 tests, ~310 lines saved) |
+| useConversationBuilder hook | ✅ Integrated (27 tests, ~360 lines saved) |
 | useMetricsConfig hook | ✅ Integrated (18 tests, ~575 lines saved) |
 
 ### 3. Decompose Chat Pages (HIGH - 1000+ lines)
@@ -100,7 +101,8 @@ The hook would need significant expansion to replace the page-level logic.
 | MCPToolsPanel shared components | ~76 | 2025-12-18 |
 | useMetricsConfig hook integration | ~575 | 2025-12-18 |
 | useConversationBuilder hook integration | ~360 | 2025-12-18 |
-| **Total** | **~5141 lines** | |
+| useEvaluationRun hook integration | ~310 | 2025-12-18 |
+| **Total** | **~5451 lines** | |
 
 ---
 
@@ -264,15 +266,41 @@ The hook would need significant expansion to replace the page-level logic.
 
 ---
 
+### 2025-12-18: useEvaluationRun Hook Extraction & Integration
+
+**Changes:**
+- Created `lib/hooks/useEvaluationRun.ts` hook for evaluation run management
+- Extracts ~310 lines of evaluation run state and handlers from evaluation pages
+- Handles run execution, progress tracking, results filtering, run history, comparison, tagging
+- Supports both `/api/agents` and `/api/adk-agents` routes via apiBasePath parameter
+
+**Files Created:**
+- `lib/hooks/useEvaluationRun.ts` - Evaluation run management hook
+- `lib/hooks/__tests__/useEvaluationRun.test.ts` - 24 unit tests
+
+**Files Modified:**
+- `app/[name]/evaluations/[evalId]/page.tsx` - 1023→868 lines
+- `app/adk-agents/[name]/evaluations/[evalId]/page.tsx` - 1023→868 lines
+
+**Hook API:**
+- Execution state: isRunning, runProgress, currentEvalCase, runError, evaluationComplete
+- Results state: expandedResultIndex, showFailedOnly, setExpandedResultIndex, setShowFailedOnly
+- Run history: selectedRunIndex, editingRunTag, runTagInput, setSelectedRunIndex, setRunTagInput
+- Comparison: selectedRunsForComparison, showComparisonView, toggleRunSelection, openComparisonView, closeComparisonView
+- Export: exporting, exportEvaluation
+- Actions: runEvaluation, addRunTag, saveRunTag, cancelRunTag, setBaseline
+- Helpers: getCurrentRun, filterResults
+
+---
+
 ## 🔄 In Progress
 
-*Currently working on: Extract useEvaluationRun hook*
+*No active work*
 
 ---
 
 ## 📋 Next Steps
 
-1. **Extract useEvaluationRun hook** - Handle evaluation execution logic (~30 useState calls remain)
-2. **Expand useChatSession hook** - Add streaming, ADK events, invocations support
-3. **Extract ConfirmDialog patterns** - Common delete confirmation across tool panels
-4. **AgentComposer decomposition** - Split 908-line monolithic visual builder
+1. **Expand useChatSession hook** - Add streaming, ADK events, invocations support
+2. **Extract ConfirmDialog patterns** - Common delete confirmation across tool panels
+3. **AgentComposer decomposition** - Split 908-line monolithic visual builder
