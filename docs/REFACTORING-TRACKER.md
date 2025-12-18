@@ -8,8 +8,8 @@ This document tracks the refactoring work to reduce code duplication and improve
 
 | File | Original | Current | Status | Issues |
 |------|----------|---------|--------|--------|
-| evaluations/[evalId]/page.tsx | 2041 | **1490** | ✅ Done | 5 modals extracted, still has 40+ useState |
-| adk-agents/.../[evalId]/page.tsx | 2041 | **1491** | ✅ Done | Using shared modal components |
+| evaluations/[evalId]/page.tsx | 2041 | **1203** | ✅ Done | 5 modals + useMetricsConfig hook |
+| adk-agents/.../[evalId]/page.tsx | 2041 | **1203** | ✅ Done | Using shared modals + useMetricsConfig |
 | chat/page.tsx | 1380 | **1349** | ✅ Partial | Components shared, ~2300 lines saved in dedup |
 | adk-agents/.../chat/page.tsx | 1345 | **1384** | ✅ Partial | Using shared components from /components/chat |
 | lib/adk/nodes.ts | 1103 | **1004** | ✅ Split | Types moved to node-types.ts (167 lines) |
@@ -48,7 +48,7 @@ Analysis completed. Routes differ in multi-tenancy features:
 | RunComparisonModal.tsx | ✅ Extracted |
 | MetricsConfigModal.tsx | ✅ Extracted |
 | useEvaluationRun hook | ❌ Not started |
-| useMetricsConfig hook | ✅ Created (16 tests passing) |
+| useMetricsConfig hook | ✅ Integrated (18 tests, ~575 lines saved) |
 
 ### 3. Decompose Chat Pages (HIGH - 1000+ lines)
 **Status: ✅ Partially complete (~2300 lines saved)**
@@ -98,7 +98,8 @@ The hook would need significant expansion to replace the page-level logic.
 | Chat components consolidation | ~2300 | 2025-12-18 |
 | Compose components consolidation | ~730 | 2025-12-18 |
 | MCPToolsPanel shared components | ~76 | 2025-12-18 |
-| **Total** | **~4206 lines** | |
+| useMetricsConfig hook integration | ~575 | 2025-12-18 |
+| **Total** | **~4781 lines** | |
 
 ---
 
@@ -214,20 +215,27 @@ The hook would need significant expansion to replace the page-level logic.
 
 ---
 
-### 2025-12-18: useMetricsConfig Hook Extraction
+### 2025-12-18: useMetricsConfig Hook Extraction & Integration
+
+**Commits:**
+- `d48d8ae` - Initial hook extraction
+- `de66261` - Integrate hook into both evaluation pages
 
 **Changes:**
 - Created `lib/hooks/useMetricsConfig.ts` hook for evaluation metrics management
-- Extracts ~200 lines of metrics-related state and handlers from evaluation pages
+- Extracts ~575 lines of metrics-related state and handlers from evaluation pages
 - Supports both `/api/agents` and `/api/adk-agents` routes via apiBasePath parameter
-- Includes modal control, metric actions, and API save/load/reset operations
+- Added jsonPreview (useMemo) and auto-load config on modal open
+- Integrated hook into both evaluation pages
 
-**Files Created:**
+**Files Created/Modified:**
 - `lib/hooks/useMetricsConfig.ts` - Metrics configuration hook
-- `lib/hooks/__tests__/useMetricsConfig.test.ts` - 16 unit tests
+- `lib/hooks/__tests__/useMetricsConfig.test.ts` - 18 unit tests
+- `app/[name]/evaluations/[evalId]/page.tsx` - 1490→1203 lines
+- `app/adk-agents/[name]/evaluations/[evalId]/page.tsx` - 1491→1203 lines
 
 **Hook API:**
-- State: metrics, showMetricsConfig, hasCustomConfig, isSaving, saveMessage
+- State: metrics, showMetricsConfig, hasCustomConfig, isSaving, saveMessage, jsonPreview
 - Modal: openMetricsConfig, closeMetricsConfig
 - Actions: toggleMetric, setThreshold, setRubric, applyTemplate
 - API: loadConfig, saveConfig, resetConfig
@@ -236,12 +244,13 @@ The hook would need significant expansion to replace the page-level logic.
 
 ## 🔄 In Progress
 
-*Currently working on: Integration of useMetricsConfig into evaluation pages*
+*No active work - ready for next task*
 
 ---
 
 ## 📋 Next Steps
 
-1. **Integrate useChatSession hook** - Reduce useState count in chat pages (~40 useState calls)
-2. **Consolidate evaluation pages further** - Extract useEvaluationRun and useMetricsConfig hooks
+1. **Extract useEvaluationRun hook** - Handle evaluation execution logic (~30 useState calls remain)
+2. **Expand useChatSession hook** - Add streaming, ADK events, invocations support
 3. **Extract ConfirmDialog patterns** - Common delete confirmation across tool panels
+4. **AgentComposer decomposition** - Split 908-line monolithic visual builder
