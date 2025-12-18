@@ -645,9 +645,49 @@ export default function ADKAgentComposePage() {
     parentFilename: string
   ): Promise<{ filename: string; childNodeData: AgentNodeData } | null> => {
     console.log('[handleAddChildAgent] Called:', { parentNodeId, childAgentClass, parentFilename });
+
+    // Generate expected filename for optimistic update
+    const childName = `New ${childAgentClass.replace('Agent', '')}`;
+    const snakeCaseName = childName.toLowerCase().replace(/\s+/g, '_');
+    const expectedFilename = `${snakeCaseName}.yaml`;
+
+    // OPTIMISTIC UPDATE: Add node to UI immediately
+    const parentNode = nodes.find(n => n.id === parentNodeId);
+    const parentPosition = parentNode?.position || { x: 250, y: 150 };
+
+    const tempNodeId = `agent-${Date.now()}`;
+    const newNodeData: AgentNodeData = {
+      name: childName,
+      agentClass: childAgentClass,
+      model: childAgentClass === 'LlmAgent' ? 'gemini-2.0-flash-exp' : undefined,
+      description: '',
+      filename: expectedFilename,
+      isRoot: false,
+    };
+
+    const newNode: Node = {
+      id: tempNodeId,
+      type: childAgentClass === 'LlmAgent' ? 'agent' : 'container',
+      position: { x: parentPosition.x + 50, y: parentPosition.y + 200 },
+      data: newNodeData,
+    };
+
+    // Add node and edge immediately
+    const newEdge: Edge = {
+      id: `edge-${parentNodeId}-${tempNodeId}`,
+      source: parentNodeId,
+      target: tempNodeId,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#6b7280', strokeWidth: 2 },
+    };
+
+    setNodes(prev => [...prev, newNode]);
+    setEdges(prev => [...prev, newEdge]);
+
+    // Now make API calls in background
     try {
       // Create the child agent file
-      const childName = `New ${childAgentClass.replace('Agent', '')}`;
       const response = await fetch(`/api/adk-agents/${agentName}/files`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -661,46 +701,54 @@ export default function ADKAgentComposePage() {
 
       const result = await response.json();
       if (!response.ok) {
+        // Rollback optimistic update
+        setNodes(prev => prev.filter(n => n.id !== tempNodeId));
+        setEdges(prev => prev.filter(e => e.id !== newEdge.id));
         setError(result.error || 'Failed to create child agent');
         return null;
       }
 
-      // Add the child as a sub_agent of the parent
-      const connectResponse = await fetch(`/api/adk-agents/${agentName}/connections`, {
+      // Update node with actual filename if different
+      if (result.filename !== expectedFilename) {
+        setNodes(prev => prev.map(n =>
+          n.id === tempNodeId
+            ? { ...n, data: { ...n.data, filename: result.filename } }
+            : n
+        ));
+      }
+
+      // Add the new file to local state
+      const newFile = { filename: result.filename, yaml: result.yaml };
+      setFiles(prev => [...prev, newFile]);
+      setOriginalFiles(prev => [...prev, newFile]);
+
+      // Add the child as a sub_agent of the parent (don't await, fire and forget)
+      fetch(`/api/adk-agents/${agentName}/connections`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           parentFilename: parentFilename,
           childFilename: result.filename,
         }),
+      }).catch(err => {
+        console.error('[handleAddChildAgent] Connection error:', err);
+        // Don't rollback for connection errors - file was created successfully
       });
 
-      const connectResult = await connectResponse.json();
-      if (!connectResponse.ok) {
-        setError(connectResult.error || 'Failed to connect child agent');
-        return null;
-      }
-
-      // Refresh files using the standard load function to preserve tool context
-      await loadFiles(false);
-
-      // Return the info needed to create the node
+      // Return the info needed
       return {
         filename: result.filename,
-        childNodeData: {
-          name: childName,
-          agentClass: childAgentClass,
-          model: childAgentClass === 'LlmAgent' ? 'gemini-2.0-flash-exp' : undefined,
-          description: '',
-          filename: result.filename,
-        } as AgentNodeData,
+        childNodeData: newNodeData,
       };
     } catch (err) {
+      // Rollback optimistic update on error
+      setNodes(prev => prev.filter(n => n.id !== tempNodeId));
+      setEdges(prev => prev.filter(e => e.id !== newEdge.id));
       console.error('[handleAddChildAgent] Error:', err);
       setError(err instanceof Error ? err.message : 'Failed to add child agent');
       return null;
     }
-  }, [agentName, loadFiles]); // Added loadFiles dependency
+  }, [agentName, nodes]); // Removed loadFiles dependency
 
   // Handle adding a sub-agent inside a container node via the plus button
   const handleAddSubAgent = useCallback(async (
