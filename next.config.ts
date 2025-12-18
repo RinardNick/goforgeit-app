@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker/Cloud Run
   output: 'standalone',
 
+  // Prevent bundling issues with Genkit/Express
+  serverExternalPackages: ['@genkit-ai/core', 'genkit', 'express', '@modelcontextprotocol/sdk'],
+
   // Configure body size limits for file uploads
   experimental: {
     serverActions: {
