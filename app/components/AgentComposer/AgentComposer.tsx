@@ -21,8 +21,15 @@ import '@xyflow/react/dist/style.css';
 import AgentNode, { AgentNodeData, ADKAgentClass, ToolConfig } from './AgentNode';
 import ContainerNode from './ContainerNode';
 import { ToolType } from './AddToolsDropdown';
-import { AgentPalette } from './AgentPalette';
 import { PropertiesPanel, ValidationError } from './PropertiesPanel';
+
+// Agent type options for the empty state
+const agentTypeOptions: { type: ADKAgentClass; label: string; icon: string; description: string }[] = [
+  { type: 'LlmAgent', label: 'LLM Agent', icon: '🤖', description: 'Single LLM-powered agent' },
+  { type: 'SequentialAgent', label: 'Sequential', icon: '⏭️', description: 'Executes sub-agents in order' },
+  { type: 'ParallelAgent', label: 'Parallel', icon: '⚡', description: 'Executes sub-agents concurrently' },
+  { type: 'LoopAgent', label: 'Loop', icon: '🔄', description: 'Iterates over sub-agents' },
+];
 
 // Custom node types
 const nodeTypes = {
@@ -215,28 +222,15 @@ function AgentComposerInner({
     onNodeSelect?.(null);
   }, [onNodeSelect]);
 
-  const onDragStart = useCallback((event: React.DragEvent, agentType: ADKAgentClass) => {
-    event.dataTransfer.setData('application/agentType', agentType);
-    event.dataTransfer.effectAllowed = 'move';
-  }, []);
-
-  const onDrop = useCallback(
-    async (event: React.DragEvent) => {
-      event.preventDefault();
-      const agentType = event.dataTransfer.getData('application/agentType') as ADKAgentClass;
-      if (!agentType) return;
-
-      const position = reactFlowInstance.screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-
+  // Create a new root agent from the empty state
+  const createNewAgent = useCallback(
+    async (agentType: ADKAgentClass) => {
       const nodeData: AgentNodeData = {
         name: `New ${agentType.replace('Agent', '')}`,
         agentClass: agentType,
         model: agentType === 'LlmAgent' ? 'gemini-2.0-flash-exp' : undefined,
         description: '',
-        isRoot: nodes.length === 0,
+        isRoot: true,
       };
 
       if (onNodeCreate) {
@@ -249,7 +243,7 @@ function AgentComposerInner({
       const newNode: Node = {
         id: `agent-${Date.now()}`,
         type: getNodeType(agentType),
-        position,
+        position: { x: 250, y: 150 },
         data: nodeData,
       };
 
@@ -259,13 +253,8 @@ function AgentComposerInner({
       onNodeSelect?.(newNode);
       notifyChange(newNodes, edges);
     },
-    [nodes, edges, setNodes, notifyChange, onNodeCreate, onNodeSelect, reactFlowInstance]
+    [nodes, edges, setNodes, notifyChange, onNodeCreate, onNodeSelect]
   );
-
-  const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }, []);
 
   const deleteSelectedNode = useCallback(async () => {
     if (!selectedNode) return;
@@ -381,11 +370,10 @@ function AgentComposerInner({
     });
   }, []);
 
+  const isEmpty = nodes.length === 0;
+
   return (
     <div className="flex h-full bg-background" onKeyDown={onKeyDown} tabIndex={0} data-testid="agent-composer">
-      {/* Agent Palette */}
-      {!readOnly && <AgentPalette onDragStart={onDragStart} />}
-
       {/* Properties Panel */}
       {!readOnly && selectedNode && (() => {
         const nodeData = selectedNode.data as AgentNodeData;
@@ -411,7 +399,7 @@ function AgentComposerInner({
       })()}
 
       {/* Canvas */}
-      <div className="flex-1 h-full" style={{ minHeight: '400px' }} data-testid="agent-canvas">
+      <div className="flex-1 h-full relative" style={{ minHeight: '400px' }} data-testid="agent-canvas">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -420,8 +408,6 @@ function AgentComposerInner({
           onConnect={readOnly ? undefined : onConnect}
           onNodeClick={onNodeClick}
           onPaneClick={onPaneClick}
-          onDrop={readOnly ? undefined : onDrop}
-          onDragOver={readOnly ? undefined : onDragOver}
           nodeTypes={nodeTypes}
           fitView
           proOptions={{ hideAttribution: true }}
@@ -430,6 +416,32 @@ function AgentComposerInner({
           <Controls className="!bg-card/80 !border-border !fill-foreground/80" />
           <MiniMap nodeColor={minimapNodeColor} maskColor="rgba(10, 25, 49, 0.6)" />
         </ReactFlow>
+
+        {/* Empty State - Add First Agent */}
+        {isEmpty && !readOnly && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto bg-card/95 backdrop-blur-sm border border-border rounded-lg p-8 shadow-2xl max-w-md">
+              <h3 className="text-lg font-heading font-bold text-foreground mb-2 text-center">Create Your First Agent</h3>
+              <p className="text-sm text-muted-foreground mb-6 text-center">
+                Select an agent type to get started. You can add more agents by clicking the + button on any agent card.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {agentTypeOptions.map((option) => (
+                  <button
+                    key={option.type}
+                    onClick={() => createNewAgent(option.type)}
+                    className="flex flex-col items-center gap-2 p-4 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all text-center group"
+                    data-testid={`create-${option.type.toLowerCase()}`}
+                  >
+                    <span className="text-2xl group-hover:scale-110 transition-transform">{option.icon}</span>
+                    <span className="text-sm font-bold text-foreground">{option.label}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{option.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
