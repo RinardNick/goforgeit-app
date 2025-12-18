@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "NODE_ENV=test playwright test",
-    "test:unit": "tsx --test lib/adk/__tests__/*.test.ts lib/hooks/__tests__/useMetricsConfig.test.ts",
+    "test:unit": "tsx --test lib/adk/__tests__/*.test.ts lib/hooks/__tests__/useMetricsConfig.test.ts lib/hooks/__tests__/useConversationBuilder.test.ts",
     "test:ui": "NODE_ENV=test playwright test --ui",
     "test:headed": "NODE_ENV=test playwright test --headed",
     "migrate": "tsx scripts/run-migrations.ts",
@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@deepgram/sdk": "^4.11.2",
+    "@genkit-ai/ai": "^1.26.0",
+    "@genkit-ai/core": "^1.26.0",
     "@google-cloud/storage": "^7.17.3",
     "@google/generative-ai": "^0.21.0",
     "@modelcontextprotocol/sdk": "^1.25.0",

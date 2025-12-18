@@ -1,22 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
 import { LoadingButton } from '@/components/ui/LoadingButton';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { useMetricsConfig } from '@/lib/hooks/useMetricsConfig';
+import { useConversationBuilder } from '@/lib/hooks/useConversationBuilder';
 import {
   EvalSetWithHistory,
   EvalCase,
-  ConversationTurn,
-  ToolUse,
-  IntermediateResponse,
-  createConversationTurn,
-  createToolUse,
-  createEvalCase,
-  generateEvalCaseId,
 } from '@/lib/adk/evaluation-types';
 import {
   ConversationBuilderModal,
@@ -57,26 +51,54 @@ export default function EvalsetDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Conversation builder state
-  const [showConversationBuilder, setShowConversationBuilder] = useState(false);
-  const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
-  const [currentConversation, setCurrentConversation] = useState<ConversationTurn[]>([]);
-  const [currentUserId, setCurrentUserId] = useState('');
-  const [currentInitialState, setCurrentInitialState] = useState('{}');
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  // Callback to update evalset from hooks
+  const handleEvalsetUpdate = useCallback((updated: unknown) => {
+    setEvalset(updated as EvalSetWithHistory);
+  }, []);
 
-  // Session config dialog
-  const [showSessionConfig, setShowSessionConfig] = useState(false);
-
-  // Tool trajectory builder state
-  const [activeTurnIndex, setActiveTurnIndex] = useState<number | null>(null);
-  const [showToolTrajectoryBuilder, setShowToolTrajectoryBuilder] = useState(false);
-  const [toolTrajectory, setToolTrajectory] = useState<ToolUse[]>([]);
-
-  // Intermediate response builder state
-  const [showIntermediateBuilder, setShowIntermediateBuilder] = useState(false);
-  const [intermediateResponses, setIntermediateResponses] = useState<IntermediateResponse[]>([]);
+  // Conversation builder hook
+  const {
+    showConversationBuilder,
+    editingConversationId,
+    currentConversation,
+    currentUserId,
+    currentInitialState,
+    saving,
+    saveError,
+    showSessionConfig,
+    showToolTrajectoryBuilder,
+    toolTrajectory,
+    showIntermediateBuilder,
+    intermediateResponses,
+    openAddConversation,
+    openEditConversation,
+    closeConversationBuilder,
+    toggleSessionConfig,
+    setUserId,
+    setInitialState,
+    addTurn,
+    updateTurn,
+    removeTurn,
+    openToolTrajectory,
+    closeToolTrajectory,
+    addTool,
+    updateTool,
+    removeTool,
+    saveToolTrajectory,
+    openIntermediateResponses,
+    closeIntermediateResponses,
+    addIntermediateResponse,
+    updateIntermediateResponse,
+    removeIntermediateResponse,
+    saveIntermediateResponses,
+    saveConversation,
+    deleteConversation,
+  } = useConversationBuilder({
+    agentName,
+    evalsetId,
+    apiBasePath: '/api/agents',
+    onEvalsetUpdate: handleEvalsetUpdate,
+  });
 
   // Evaluation execution state
   const [isRunning, setIsRunning] = useState(false);
@@ -126,208 +148,6 @@ export default function EvalsetDetailPage() {
       setError(err instanceof Error ? err.message : 'Failed to load evaluation');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAddConversation = () => {
-    setEditingConversationId(null);
-    setCurrentConversation([createConversationTurn('', '')]);
-    setCurrentUserId(`eval-user-${Date.now()}`);
-    setCurrentInitialState('{}');
-    setShowConversationBuilder(true);
-  };
-
-  const handleEditConversation = (evalCase: EvalCase) => {
-    setEditingConversationId(evalCase.eval_id);
-    setCurrentConversation([...evalCase.conversation]);
-    setCurrentUserId(evalCase.session_input.user_id);
-    setCurrentInitialState(JSON.stringify(evalCase.session_input.state || {}, null, 2));
-    setShowConversationBuilder(true);
-  };
-
-  const handleAddTurn = () => {
-    setCurrentConversation([...currentConversation, createConversationTurn('', '')]);
-  };
-
-  const handleUpdateTurn = (index: number, field: 'user' | 'expected', value: string) => {
-    const updated = [...currentConversation];
-    if (field === 'user') {
-      updated[index].user_content.parts[0].text = value;
-    } else {
-      if (!updated[index].final_response) {
-        updated[index].final_response = {
-          parts: [{ text: value }],
-          role: 'model',
-        };
-      } else {
-        updated[index].final_response.parts[0].text = value;
-      }
-    }
-    setCurrentConversation(updated);
-  };
-
-  const handleRemoveTurn = (index: number) => {
-    if (currentConversation.length > 1) {
-      setCurrentConversation(currentConversation.filter((_, i) => i !== index));
-    }
-  };
-
-  const handleOpenToolTrajectory = (turnIndex: number) => {
-    setActiveTurnIndex(turnIndex);
-    const turn = currentConversation[turnIndex];
-    setToolTrajectory(turn.intermediate_data?.tool_uses || []);
-    setShowToolTrajectoryBuilder(true);
-  };
-
-  const handleAddTool = () => {
-    setToolTrajectory([...toolTrajectory, createToolUse('google_search', {})]);
-  };
-
-  const handleUpdateTool = (index: number, field: 'name' | 'args', value: string) => {
-    const updated = [...toolTrajectory];
-    if (field === 'name') {
-      updated[index].name = value;
-    } else {
-      try {
-        updated[index].args = JSON.parse(value);
-      } catch {
-        // Keep old args if invalid JSON
-      }
-    }
-    setToolTrajectory(updated);
-  };
-
-  const handleRemoveTool = (index: number) => {
-    setToolTrajectory(toolTrajectory.filter((_, i) => i !== index));
-  };
-
-  const handleSaveToolTrajectory = () => {
-    if (activeTurnIndex !== null) {
-      const updated = [...currentConversation];
-      if (!updated[activeTurnIndex].intermediate_data) {
-        updated[activeTurnIndex].intermediate_data = {};
-      }
-      updated[activeTurnIndex].intermediate_data!.tool_uses = toolTrajectory;
-      setCurrentConversation(updated);
-    }
-    setShowToolTrajectoryBuilder(false);
-  };
-
-  const handleOpenIntermediateResponses = (turnIndex: number) => {
-    setActiveTurnIndex(turnIndex);
-    const turn = currentConversation[turnIndex];
-    setIntermediateResponses(turn.intermediate_data?.intermediate_responses || []);
-    setShowIntermediateBuilder(true);
-  };
-
-  const handleAddIntermediateResponse = () => {
-    setIntermediateResponses([...intermediateResponses, ['copywriting_agent', [{ text: '' }]]]);
-  };
-
-  const handleUpdateIntermediateResponse = (index: number, field: 'agent' | 'text', value: string) => {
-    const updated = [...intermediateResponses];
-    if (field === 'agent') {
-      updated[index][0] = value;
-    } else {
-      updated[index][1] = [{ text: value }];
-    }
-    setIntermediateResponses(updated);
-  };
-
-  const handleRemoveIntermediateResponse = (index: number) => {
-    setIntermediateResponses(intermediateResponses.filter((_, i) => i !== index));
-  };
-
-  const handleSaveIntermediateResponses = () => {
-    if (activeTurnIndex !== null) {
-      const updated = [...currentConversation];
-      if (!updated[activeTurnIndex].intermediate_data) {
-        updated[activeTurnIndex].intermediate_data = {};
-      }
-      updated[activeTurnIndex].intermediate_data!.intermediate_responses = intermediateResponses;
-      setCurrentConversation(updated);
-    }
-    setShowIntermediateBuilder(false);
-  };
-
-  const handleSaveConversation = async () => {
-    if (!evalset) return;
-
-    setSaving(true);
-    setSaveError(null);
-
-    try {
-      // Parse initial state
-      let parsedState = {};
-      try {
-        parsedState = JSON.parse(currentInitialState);
-      } catch {
-        throw new Error('Invalid JSON in initial state');
-      }
-
-      // Create eval case
-      const evalCase = createEvalCase(
-        agentName,
-        currentConversation,
-        currentUserId,
-        parsedState
-      );
-
-      // If editing, replace existing; otherwise add new
-      let updatedEvalCases = [...evalset.eval_cases];
-      if (editingConversationId) {
-        const index = updatedEvalCases.findIndex(ec => ec.eval_id === editingConversationId);
-        if (index >= 0) {
-          evalCase.eval_id = editingConversationId; // Keep same ID
-          updatedEvalCases[index] = evalCase;
-        }
-      } else {
-        updatedEvalCases.push(evalCase);
-      }
-
-      // Save to API
-      const response = await fetch(`/api/agents/${agentName}/evaluations/${evalsetId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eval_cases: updatedEvalCases }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save conversation');
-      }
-
-      setEvalset(data.evalset);
-      setShowConversationBuilder(false);
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save conversation');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDeleteConversation = async (evalCaseId: string) => {
-    if (!evalset || !confirm('Delete this conversation?')) return;
-
-    try {
-      const updatedEvalCases = evalset.eval_cases.filter(ec => ec.eval_id !== evalCaseId);
-
-      const response = await fetch(`/api/agents/${agentName}/evaluations/${evalsetId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eval_cases: updatedEvalCases }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to delete conversation');
-      }
-
-      setEvalset(data.evalset);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete conversation');
     }
   };
 
@@ -586,7 +406,7 @@ export default function EvalsetDetailPage() {
               )}
               <button
                 data-testid="add-conversation-btn"
-                onClick={handleAddConversation}
+                onClick={openAddConversation}
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors font-medium"
               >
                 + Add Conversation
@@ -1048,7 +868,7 @@ export default function EvalsetDetailPage() {
             <div className="bg-card rounded-xl border-2 border-dashed border-border p-12 text-center">
               <p className="text-muted-foreground mb-4">No conversations yet</p>
               <button
-                onClick={handleAddConversation}
+                onClick={openAddConversation}
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
               >
                 Create First Conversation
@@ -1092,13 +912,13 @@ export default function EvalsetDetailPage() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleEditConversation(evalCase)}
+                      onClick={() => openEditConversation(evalCase)}
                       className="px-3 py-1 text-sm text-foreground border border-border rounded-lg hover:bg-muted/30"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteConversation(evalCase.eval_id)}
+                      onClick={() => evalset && deleteConversation(evalCase.eval_id, evalset)}
                       className="px-3 py-1 text-sm text-destructive border border-red-300 rounded-lg hover:bg-red-50"
                     >
                       Delete
@@ -1130,7 +950,7 @@ export default function EvalsetDetailPage() {
         {/* Conversation Builder Modal */}
         <ConversationBuilderModal
           isOpen={showConversationBuilder}
-          onClose={() => setShowConversationBuilder(false)}
+          onClose={closeConversationBuilder}
           editingId={editingConversationId}
           conversation={currentConversation}
           userId={currentUserId}
@@ -1138,39 +958,39 @@ export default function EvalsetDetailPage() {
           saving={saving}
           saveError={saveError}
           showSessionConfig={showSessionConfig}
-          onToggleSessionConfig={() => setShowSessionConfig(!showSessionConfig)}
-          onUserIdChange={setCurrentUserId}
-          onInitialStateChange={setCurrentInitialState}
-          onUpdateTurn={handleUpdateTurn}
-          onAddTurn={handleAddTurn}
-          onRemoveTurn={handleRemoveTurn}
-          onOpenToolTrajectory={handleOpenToolTrajectory}
-          onOpenIntermediateResponses={handleOpenIntermediateResponses}
-          onSave={handleSaveConversation}
+          onToggleSessionConfig={toggleSessionConfig}
+          onUserIdChange={setUserId}
+          onInitialStateChange={setInitialState}
+          onUpdateTurn={updateTurn}
+          onAddTurn={addTurn}
+          onRemoveTurn={removeTurn}
+          onOpenToolTrajectory={openToolTrajectory}
+          onOpenIntermediateResponses={openIntermediateResponses}
+          onSave={() => evalset && saveConversation(evalset)}
         />
 
         {/* Tool Trajectory Builder Modal */}
         <ToolTrajectoryModal
           isOpen={showToolTrajectoryBuilder}
-          onClose={() => setShowToolTrajectoryBuilder(false)}
+          onClose={closeToolTrajectory}
           toolTrajectory={toolTrajectory}
           availableTools={availableTools}
-          onAddTool={handleAddTool}
-          onRemoveTool={handleRemoveTool}
-          onUpdateTool={handleUpdateTool}
-          onSave={handleSaveToolTrajectory}
+          onAddTool={addTool}
+          onRemoveTool={removeTool}
+          onUpdateTool={updateTool}
+          onSave={saveToolTrajectory}
         />
 
         {/* Intermediate Response Builder Modal */}
         <IntermediateResponseModal
           isOpen={showIntermediateBuilder}
-          onClose={() => setShowIntermediateBuilder(false)}
+          onClose={closeIntermediateResponses}
           intermediateResponses={intermediateResponses}
           availableSubAgents={availableSubAgents}
-          onAddResponse={handleAddIntermediateResponse}
-          onRemoveResponse={handleRemoveIntermediateResponse}
-          onUpdateResponse={handleUpdateIntermediateResponse}
-          onSave={handleSaveIntermediateResponses}
+          onAddResponse={addIntermediateResponse}
+          onRemoveResponse={removeIntermediateResponse}
+          onUpdateResponse={updateIntermediateResponse}
+          onSave={saveIntermediateResponses}
         />
 
         {/* Run Comparison Modal (Phase 18.7) */}
