@@ -10,7 +10,8 @@ import {
   addToolTool, 
   removeToolTool, 
   deleteAgentTool,
-  taskCompleteTool
+  taskCompleteTool,
+  createPythonToolTool
 } from "../genkit/tools/builder-tools";
 
 // Initialize server
@@ -30,6 +31,7 @@ const tools = [
   removeToolTool(),
   deleteAgentTool(),
   taskCompleteTool(),
+  createPythonToolTool(),
 ];
 
 for (const tool of tools) {

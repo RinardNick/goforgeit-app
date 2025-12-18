@@ -10,6 +10,7 @@ export default function Navigation() {
 
   const navItems = [
     { href: '/', label: 'AI Agents' },
+    { href: '/settings/api-keys', label: 'API Keys' },
     { href: '/settings/billing', label: 'Billing' },
   ];
 

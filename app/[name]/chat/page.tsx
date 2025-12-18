@@ -37,8 +37,8 @@ export default function ADKAgentChatPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const agentName = params.name as string;
-  const initialSessionId = searchParams.get('sessionId');
+  const agentName = params?.name as string;
+  const initialSessionId = searchParams?.get('sessionId') ?? null;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');

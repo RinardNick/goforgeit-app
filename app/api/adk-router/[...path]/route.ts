@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { beforeProxy, afterProxy, onProxyError } from '@/lib/adk/router-interceptors';
+import { getOrgProviderKeys } from '@/lib/db/provider-keys';
 
 export const runtime = 'nodejs';
 
@@ -31,13 +32,32 @@ async function proxyToADK(
 
   // Copy headers (exclude host, connection, content-length, transfer-encoding)
   // Note: fetch() will automatically set content-length for the new body
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   req.headers.forEach((value, key) => {
     const lowerKey = key.toLowerCase();
     if (!['host', 'connection', 'content-length', 'transfer-encoding'].includes(lowerKey)) {
       headers[key] = value;
     }
   });
+
+  // Inject provider API keys from org settings
+  const orgId = req.headers.get('x-org-id');
+  if (orgId) {
+    try {
+      const providerKeys = await getOrgProviderKeys(orgId);
+      if (providerKeys.has('google')) {
+        headers['x-google-api-key'] = providerKeys.get('google')!;
+      }
+      if (providerKeys.has('openai')) {
+        headers['x-openai-api-key'] = providerKeys.get('openai')!;
+      }
+      if (providerKeys.has('anthropic')) {
+        headers['x-anthropic-api-key'] = providerKeys.get('anthropic')!;
+      }
+    } catch (error) {
+      console.error('[ADK Router] Failed to fetch provider keys:', error);
+    }
+  }
 
   // Extract body for non-GET/HEAD requests
   let body: BodyInit | undefined;

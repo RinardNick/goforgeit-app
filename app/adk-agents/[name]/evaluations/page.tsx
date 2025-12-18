@@ -11,7 +11,7 @@ import { EvalSetWithHistory } from '@/lib/adk/evaluation-types';
 export default function EvaluationsPage() {
   const params = useParams();
   const router = useRouter();
-  const agentName = params.name as string;
+  const agentName = params?.name as string;
 
   const [evalsets, setEvalsets] = useState<EvalSetWithHistory[]>([]);
   const [loading, setLoading] = useState(true);

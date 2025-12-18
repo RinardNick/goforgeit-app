@@ -19,7 +19,7 @@ const mockFetch = mock.fn(async () => ({
 // Mock process.env
 const originalEnv = process.env;
 
-import { createAgentTool, listAgentsTool, addSubAgentTool } from '../builder-tools'; 
+import { createAgentTool, listAgentsTool, addSubAgentTool, createPythonToolTool } from '../builder-tools'; 
 
 describe('Builder Tools', () => {
   
@@ -99,6 +99,24 @@ describe('Builder Tools', () => {
       const args = lastCall.arguments;
       assert.match(args[1], /sub_agents:/);
       assert.match(args[1], /config_path: child.yaml/);
+    });
+  });
+
+  describe('createPythonToolTool', () => {
+    it('should create python tool file', async () => {
+      process.env.NODE_ENV = 'development';
+      const tool = createPythonToolTool({ fs: mockFs as any });
+      const result = await tool({
+        projectName: 'test_project',
+        name: 'my_tool',
+        code: 'def my_tool(): pass'
+      });
+      
+      assert.strictEqual(result.success, true);
+      const calls = mockFs.writeFile.mock.calls;
+      const pyCall = calls.find(c => typeof c.arguments[0] === 'string' && c.arguments[0].endsWith('my_tool.py'));
+      assert.ok(pyCall);
+      assert.strictEqual(pyCall.arguments[1], 'def my_tool(): pass');
     });
   });
 });

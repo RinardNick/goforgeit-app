@@ -22,8 +22,8 @@ import {
 
 export default function EvalsetDetailPage() {
   const params = useParams();
-  const agentName = params.name as string;
-  const evalsetId = params.evalId as string;
+  const agentName = params?.name as string;
+  const evalsetId = params?.evalId as string;
 
   // Metrics configuration hook
   const {

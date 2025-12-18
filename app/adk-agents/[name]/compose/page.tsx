@@ -27,7 +27,7 @@ const AgentComposer = dynamic(
 export default function ADKAgentComposePage() {
   const params = useParams();
   const router = useRouter();
-  const agentName = params.name as string;
+  const agentName = params?.name as string;
 
   // State-based navigation for AgentTool editing (no URL change)
   const [toolAgentContext, setToolAgentContext] = useState<{ filename: string; parentName: string } | null>(null);

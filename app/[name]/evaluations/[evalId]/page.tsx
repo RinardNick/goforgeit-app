@@ -8,9 +8,9 @@ import { LoadingButton } from '@/components/ui/LoadingButton';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { useMetricsConfig } from '@/lib/hooks/useMetricsConfig';
 import { useConversationBuilder } from '@/lib/hooks/useConversationBuilder';
+import { useEvaluationRun } from '@/lib/hooks/useEvaluationRun';
 import {
   EvalSetWithHistory,
-  EvalCase,
 } from '@/lib/adk/evaluation-types';
 import {
   ConversationBuilderModal,
@@ -22,8 +22,8 @@ import {
 
 export default function EvalsetDetailPage() {
   const params = useParams();
-  const agentName = params.name as string;
-  const evalsetId = params.evalId as string;
+  const agentName = params?.name as string;
+  const evalsetId = params?.evalId as string;
 
   // Metrics configuration hook
   const {
@@ -100,28 +100,42 @@ export default function EvalsetDetailPage() {
     onEvalsetUpdate: handleEvalsetUpdate,
   });
 
-  // Evaluation execution state
-  const [isRunning, setIsRunning] = useState(false);
-  const [runProgress, setRunProgress] = useState(0);
-  const [currentEvalCase, setCurrentEvalCase] = useState(0);
-  const [runError, setRunError] = useState<string | null>(null);
-  const [evaluationComplete, setEvaluationComplete] = useState(false);
-
-  // Results visualization state
-  const [expandedResultIndex, setExpandedResultIndex] = useState<number | null>(null);
-  const [showFailedOnly, setShowFailedOnly] = useState(false);
-
-  // Run history state
-  const [selectedRunIndex, setSelectedRunIndex] = useState<number | null>(null);
-  const [editingRunTag, setEditingRunTag] = useState<string | null>(null);
-  const [runTagInput, setRunTagInput] = useState('');
-
-  // Run comparison state (Phase 18.7)
-  const [selectedRunsForComparison, setSelectedRunsForComparison] = useState<number[]>([]);
-  const [showComparisonView, setShowComparisonView] = useState(false);
-
-  // Export state
-  const [exporting, setExporting] = useState(false);
+  // Evaluation run hook
+  const {
+    isRunning,
+    runProgress,
+    currentEvalCase,
+    runError,
+    evaluationComplete,
+    expandedResultIndex,
+    showFailedOnly,
+    setExpandedResultIndex,
+    setShowFailedOnly,
+    selectedRunIndex,
+    editingRunTag,
+    runTagInput,
+    setSelectedRunIndex,
+    setRunTagInput,
+    selectedRunsForComparison,
+    showComparisonView,
+    exporting,
+    runEvaluation,
+    exportEvaluation,
+    addRunTag,
+    saveRunTag,
+    cancelRunTag,
+    setBaseline,
+    toggleRunSelection,
+    openComparisonView,
+    closeComparisonView,
+    getCurrentRun,
+    filterResults,
+  } = useEvaluationRun({
+    agentName,
+    evalsetId,
+    apiBasePath: '/api/agents',
+    onEvalsetUpdate: handleEvalsetUpdate,
+  });
 
   // Available tools (mock for now - would come from agent definition)
   const availableTools = ['google_search', 'code_execution', 'web_scraper', 'calculator'];
@@ -151,177 +165,8 @@ export default function EvalsetDetailPage() {
     }
   };
 
-  const handleRunEvaluation = async () => {
-    if (!evalset) return;
-
-    setIsRunning(true);
-    setRunProgress(0);
-    setCurrentEvalCase(0);
-    setRunError(null);
-    setEvaluationComplete(false);
-
-    try {
-      const totalCases = evalset.eval_cases.length;
-
-      // Simulate progress tracking (in a real implementation, this would be server-sent events)
-      const progressInterval = setInterval(() => {
-        setRunProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90; // Keep at 90 until actual completion
-          }
-          return prev + (100 / totalCases) * 0.5; // Increment gradually
-        });
-      }, 1000);
-
-      const response = await fetch(`/api/agents/${agentName}/evaluations/${evalsetId}/run`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      clearInterval(progressInterval);
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to run evaluation');
-      }
-
-      // Update evalset with results
-      setEvalset(data.evalset);
-      setRunProgress(100);
-      setEvaluationComplete(true);
-
-      // Refresh after short delay
-      setTimeout(() => {
-        setEvaluationComplete(false);
-      }, 5000);
-    } catch (err) {
-      setRunError(err instanceof Error ? err.message : 'Failed to run evaluation');
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  const handleExport = async () => {
-    if (!evalset) return;
-
-    setExporting(true);
-    try {
-      const response = await fetch(`/api/agents/${agentName}/evaluations/${evalsetId}/export`);
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to export evaluation');
-      }
-
-      // Get the blob from response
-      const blob = await response.blob();
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${evalset.eval_set_id}.test.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to export evaluation');
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handleAddRunTag = (runId: string) => {
-    setEditingRunTag(runId);
-    setRunTagInput('');
-  };
-
-  const handleSaveRunTag = async () => {
-    if (!evalset || !editingRunTag || !runTagInput.trim()) return;
-
-    try {
-      const updatedRuns = evalset.runs?.map(run => {
-        if (run.run_id === editingRunTag) {
-          const tags = run.tags || [];
-          return { ...run, tags: [...tags, runTagInput.trim()] };
-        }
-        return run;
-      });
-
-      const response = await fetch(`/api/agents/${agentName}/evaluations/${evalsetId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runs: updatedRuns }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save tag');
-      }
-
-      setEvalset(data.evalset);
-      setEditingRunTag(null);
-      setRunTagInput('');
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save tag');
-    }
-  };
-
-  const handleSetBaseline = async (runId: string) => {
-    if (!evalset || !confirm('Set this run as the baseline?')) return;
-
-    try {
-      const response = await fetch(`/api/agents/${agentName}/evaluations/${evalsetId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ baseline_run_id: runId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to set baseline');
-      }
-
-      setEvalset(data.evalset);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to set baseline');
-    }
-  };
-
-  // Phase 18.7: Run comparison handlers
-  const handleToggleRunSelection = (index: number) => {
-    setSelectedRunsForComparison(prev => {
-      if (prev.includes(index)) {
-        return prev.filter(i => i !== index);
-      } else {
-        return [...prev, index];
-      }
-    });
-  };
-
-  const handleCompareRuns = () => {
-    setShowComparisonView(true);
-  };
-
-  const handleCloseComparison = () => {
-    setShowComparisonView(false);
-  };
-
-  // Get the current selected run (or latest run if none selected)
-  const getCurrentRun = () => {
-    if (!evalset?.runs || evalset.runs.length === 0) return null;
-    if (selectedRunIndex !== null && evalset.runs[selectedRunIndex]) {
-      return evalset.runs[selectedRunIndex];
-    }
-    return evalset.runs[evalset.runs.length - 1]; // Latest run by default
-  };
-
-  const currentRun = getCurrentRun();
+  // Get current run from hook
+  const currentRun = getCurrentRun(evalset);
 
   if (loading) {
     return (
@@ -370,7 +215,7 @@ export default function EvalsetDetailPage() {
             <div className="flex gap-3">
               <LoadingButton
                 testId="run-evaluation-btn"
-                onClick={handleRunEvaluation}
+                onClick={() => evalset && runEvaluation(evalset)}
                 isLoading={isRunning}
                 loadingText="Running..."
                 disabled={evalset.eval_cases.length === 0}
@@ -381,7 +226,7 @@ export default function EvalsetDetailPage() {
               </LoadingButton>
               <LoadingButton
                 testId="export-evalset-btn"
-                onClick={handleExport}
+                onClick={() => evalset && exportEvaluation(evalset)}
                 isLoading={exporting}
                 loadingText="Exporting..."
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90"
@@ -455,7 +300,7 @@ export default function EvalsetDetailPage() {
                 {selectedRunsForComparison.length >= 2 && (
                   <button
                     data-testid="compare-runs-btn"
-                    onClick={handleCompareRuns}
+                    onClick={openComparisonView}
                     className="px-3 py-1 text-sm bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                   >
                     Compare ({selectedRunsForComparison.length})
@@ -481,7 +326,7 @@ export default function EvalsetDetailPage() {
                         type="checkbox"
                         data-testid={`run-checkbox-${index}`}
                         checked={isChecked}
-                        onChange={() => handleToggleRunSelection(index)}
+                        onChange={() => toggleRunSelection(index)}
                         className="mt-1 w-4 h-4 text-primary rounded focus:ring-blue-500"
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -546,7 +391,7 @@ export default function EvalsetDetailPage() {
                         />
                         <button
                           data-testid="save-run-tag-btn"
-                          onClick={handleSaveRunTag}
+                          onClick={() => evalset && saveRunTag(evalset)}
                           className="px-3 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90"
                         >
                           Save Tag
@@ -593,7 +438,7 @@ export default function EvalsetDetailPage() {
                         </button>
                         <button
                           data-testid="rerun-evaluation-btn"
-                          onClick={handleRunEvaluation}
+                          onClick={() => evalset && runEvaluation(evalset)}
                           className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
                         >
                           ↻ Re-run Evaluation

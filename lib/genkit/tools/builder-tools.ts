@@ -387,6 +387,71 @@ export const deleteAgentTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.def
   }
 );
 
+export const createPythonToolTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.defineTool(
+  {
+    name: 'create_python_tool',
+    description: 'Create a custom Python function tool file.',
+    inputSchema: z.object({
+      projectName: z.string(),
+      name: z.string(),
+      code: z.string(),
+      addToAgent: z.string().optional(),
+    }),
+    outputSchema: z.object({
+      success: z.boolean(),
+      message: z.string(),
+      data: z.any().optional(),
+    }),
+  },
+  async ({ projectName, name, code, addToAgent }) => {
+    const fs = deps.fs!;
+    if (useBackend()) return { success: false, message: 'Backend tool creation not implemented yet' };
+
+    try {
+      const projectPath = path.join(ADK_AGENTS_BASE_PATH, projectName);
+      const toolsDir = path.join(projectPath, 'tools');
+      const toolPath = path.join(toolsDir, `${name}.py`);
+
+      try { await fs.mkdir(toolsDir, { recursive: true }); } catch {}
+
+      await fs.writeFile(toolPath, code, 'utf-8');
+
+      try {
+        try { await fs.access(path.join(toolsDir, '__init__.py')); } catch { await fs.writeFile(path.join(toolsDir, '__init__.py'), '', 'utf-8'); }
+      } catch {}
+
+      let message = `Created Python tool ${name}.py`;
+
+      if (addToAgent) {
+        const agentPath = path.join(projectPath, addToAgent);
+        try {
+          const content = await fs.readFile(agentPath, 'utf-8');
+          const config = yaml.parse(content);
+          
+          if (!config.tools) config.tools = [];
+          const toolRef = `tools/${name}.py`;
+          
+          if (!config.tools.includes(toolRef)) {
+            config.tools.push(toolRef);
+            await fs.writeFile(agentPath, yaml.stringify(config), 'utf-8');
+            message += ` and added to ${addToAgent}`;
+          }
+        } catch (err) {
+          message += ` (warning: failed to add to agent: ${err})`;
+        }
+      }
+
+      return {
+        success: true,
+        message,
+        data: { filename: `${name}.py` }
+      };
+    } catch (error) {
+      return { success: false, message: `Failed to create python tool: ${error}` };
+    }
+  }
+);
+
 export const taskCompleteTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.defineTool(
   {
     name: 'task_complete',

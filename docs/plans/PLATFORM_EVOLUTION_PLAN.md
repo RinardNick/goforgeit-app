@@ -77,7 +77,7 @@ graph TD
 2.  [x] **Genkit as the Tool Layer:** (Completed Dec 18, 2025)
     *   Use Google Genkit to implement the robust *infrastructure tools* (`create_agent`, `write_file`, `run_shell`) that the Meta-Agent calls.
     *   Implement a minimal "Rescue Agent" in Genkit as a fallback if the ADK engine fails.
-3.  **The "Forge" Sub-Agent:**
+3.  [x] **The "Forge" Sub-Agent:** (Completed Dec 18, 2025)
     *   Create a specialized "Tool Maker" agent.
     *   **Integration:** Add this as a *sub-agent* to the Builder Meta-Agent.
     *   *Workflow:* User asks Builder for a stock tool -> Builder delegates to Forge -> Forge writes `get_stock_price.py` -> Builder registers it.
@@ -119,4 +119,5 @@ graph TD
 3.  [x] **Design Phase 4 DB:** Sketch the schema for `organizations`, `projects`, and `billing_ledger`. (Completed Dec 16, 2025)
 4.  [x] **Implement Phase 4 & 4.5:** Full billing infrastructure, dashboard, and project hierarchy. (Completed Dec 17, 2025)
 5.  [x] **Start Phase 3 Refactor:** Port the Builder Assistant's hardcoded loop to Genkit tools and create the `builder_agent.yaml`. (Completed Dec 18, 2025)
-6.  [ ] **Implement Forge Sub-Agent:** Create the specialized tool-maker agent and integrate it with the Builder Meta-Agent.
+6.  [x] **Implement Forge Sub-Agent:** Create the specialized tool-maker agent and integrate it with the Builder Meta-Agent. (Completed Dec 18, 2025)
+7.  [ ] **Implement Tool Registry UI:** Add a UI to manage custom tools.
