@@ -208,7 +208,7 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
         ${config.bgColor}
         ${selected ? 'bg-card border-primary/50 shadow-lg shadow-primary/20' : 'border-border'}
         ${data.isRoot ? 'border-l-4 border-l-primary' : ''}
-        transition-all duration-500 group overflow-hidden
+        transition-all duration-500 group
       `}
       data-testid="agent-node"
       draggable

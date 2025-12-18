@@ -493,6 +493,18 @@ function AgentComposerInner({
     });
   }, []);
 
+  // Minimap node color based on agent type
+  const minimapNodeColor = useCallback((node: Node) => {
+    const data = node.data as AgentNodeData;
+    switch (data?.agentClass) {
+      case 'LlmAgent': return '#3b82f6';
+      case 'SequentialAgent': return '#8b5cf6';
+      case 'ParallelAgent': return '#22c55e';
+      case 'LoopAgent': return '#f97316';
+      default: return '#6b7280';
+    }
+  }, []);
+
   const isEmpty = nodes.length === 0;
 
   return (
