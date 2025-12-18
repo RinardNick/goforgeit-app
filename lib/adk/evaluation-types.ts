@@ -195,6 +195,27 @@ export interface PromptExperiment {
   created_at: string;
 }
 
+/**
+ * UI metric configuration for evaluation metrics modal
+ */
+export interface MetricConfig {
+  id: string;
+  name: string;
+  description: string;
+  threshold: number;
+  enabled: boolean;
+  type: 'deterministic' | 'llm';
+  supportsRubric?: boolean;
+  rubric?: string;
+}
+
+/**
+ * JSON configuration format for metrics
+ */
+export interface MetricsConfigJson {
+  criteria: Record<string, number | { threshold: number; rubric?: string }>;
+}
+
 // ============================================================================
 // Helper type guards
 // ============================================================================
