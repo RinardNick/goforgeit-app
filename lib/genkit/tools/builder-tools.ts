@@ -17,11 +17,37 @@ const DEFAULT_DEPS: ToolDependencies = {
 
 // Configuration
 const ADK_AGENTS_BASE_PATH = process.env.ADK_AGENTS_BASE_PATH || path.join(process.cwd(), 'adk-service', 'agents');
-const ADK_BACKEND_URL = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
+const SYSTEM_AGENTS_BASE_PATH = process.env.SYSTEM_AGENTS_BASE_PATH || path.join(process.cwd(), 'adk-service', 'system_agents');
 
 // Helper to decide mode
 function useBackend() {
   return process.env.NODE_ENV === 'production';
+}
+
+// Helper: Dual Write for System Agents
+// If we modify a file in agents/, and it corresponds to a system agent, mirror the write to system_agents/
+async function writeWithMirror(fs: typeof fsPromises, filePath: string, content: string) {
+  // 1. Write to runtime path
+  await fs.writeFile(filePath, content, 'utf-8');
+
+  // 2. Check if this is a system agent
+  // We identify system agents by checking if they are in the 'builder_agent' folder
+  // Note: We moved forge_agent inside builder_agent, so checking 'builder_agent' covers both.
+  
+  const relativePath = path.relative(ADK_AGENTS_BASE_PATH, filePath);
+  
+  if (relativePath.startsWith('builder_agent')) {
+    const systemPath = path.join(SYSTEM_AGENTS_BASE_PATH, relativePath);
+    
+    // Ensure directory exists in system path (it should, but be safe)
+    try {
+      await fs.mkdir(path.dirname(systemPath), { recursive: true });
+      await fs.writeFile(systemPath, content, 'utf-8');
+      console.log(`[BuilderTools] Mirrored write to system agent: ${relativePath}`);
+    } catch (err) {
+      console.warn(`[BuilderTools] Failed to mirror system agent write: ${err}`);
+    }
+  }
 }
 
 // --- Tools ---
@@ -117,8 +143,6 @@ export const createAgentTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.def
       }
       
       const filePath = path.join(projectPath, filename);
-      // Check exists? No, overwrite is usually fine for create (or should fail?)
-      // Original impl failed if exists. Let's replicate.
       try {
         await fs.access(filePath);
         return { success: false, message: `Agent file ${filename} already exists` };
@@ -126,7 +150,7 @@ export const createAgentTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.def
         // Proceed
       }
 
-      await fs.writeFile(filePath, yamlContent, 'utf-8');
+      await writeWithMirror(fs, filePath, yamlContent);
       
       return {
         success: true,
@@ -197,7 +221,6 @@ export const addSubAgentTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.def
       const parentPath = path.join(projectPath, parentFilename);
       const childPath = path.join(projectPath, childFilename);
 
-      // Verify files exist
       try { await fs.access(parentPath); } catch { return { success: false, message: `Parent ${parentFilename} not found` }; }
       try { await fs.access(childPath); } catch { return { success: false, message: `Child ${childFilename} not found` }; }
 
@@ -214,7 +237,7 @@ export const addSubAgentTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.def
       subAgents.push({ config_path: childFilename });
       parentConfig.sub_agents = subAgents;
 
-      await fs.writeFile(parentPath, yaml.stringify(parentConfig), 'utf-8');
+      await writeWithMirror(fs, parentPath, yaml.stringify(parentConfig));
 
       return {
         success: true,
@@ -257,7 +280,7 @@ export const modifyAgentTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.def
       if (description) config.description = description;
       if (model && config.agent_class === 'LlmAgent') config.model = model;
 
-      await fs.writeFile(filePath, yaml.stringify(config), 'utf-8');
+      await writeWithMirror(fs, filePath, yaml.stringify(config));
 
       return {
         success: true,
@@ -301,7 +324,7 @@ export const addToolTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.defineT
       if (!config.tools) config.tools = [];
       if (!config.tools.includes(tool)) {
         config.tools.push(tool);
-        await fs.writeFile(filePath, yaml.stringify(config), 'utf-8');
+        await writeWithMirror(fs, filePath, yaml.stringify(config));
       }
 
       return {
@@ -345,7 +368,7 @@ export const removeToolTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.defi
 
       if (config.tools && config.tools.includes(tool)) {
         config.tools = config.tools.filter((t: string) => t !== tool);
-        await fs.writeFile(filePath, yaml.stringify(config), 'utf-8');
+        await writeWithMirror(fs, filePath, yaml.stringify(config));
       }
 
       return {
@@ -420,7 +443,7 @@ export const createPythonToolTool = (deps: ToolDependencies = DEFAULT_DEPS) => a
 
       try { await fs.mkdir(toolsDir, { recursive: true }); } catch {}
 
-      await fs.writeFile(toolPath, code, 'utf-8');
+      await writeWithMirror(fs, toolPath, code);
 
       try {
         try { await fs.access(path.join(toolsDir, '__init__.py')); } catch { await fs.writeFile(path.join(toolsDir, '__init__.py'), '', 'utf-8'); }
@@ -439,7 +462,7 @@ export const createPythonToolTool = (deps: ToolDependencies = DEFAULT_DEPS) => a
           
           if (!config.tools.includes(toolRef)) {
             config.tools.push(toolRef);
-            await fs.writeFile(agentPath, yaml.stringify(config), 'utf-8');
+            await writeWithMirror(fs, agentPath, yaml.stringify(config));
             message += ` and added to ${addToAgent}`;
           }
         } catch (err) {

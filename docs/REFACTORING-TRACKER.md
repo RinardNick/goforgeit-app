@@ -14,7 +14,7 @@ This document tracks the refactoring work to reduce code duplication and improve
 | adk-agents/.../chat/page.tsx | 1345 | **1384** | ✅ Partial | Using shared components from /components/chat |
 | lib/adk/nodes.ts | 1103 | **1004** | ✅ Split | Types moved to node-types.ts (167 lines) |
 | AgentComposer.tsx | 908 | **426** | ✅ Done | PropertiesPanel + AgentPalette extracted |
-| AgentToolsPanel.tsx | 615 | 615 | ❌ Not started | Too many concerns |
+| AgentToolsPanel.tsx | 615 | **160** | ✅ Done | 4 dialog components extracted |
 | MCPToolsPanel.tsx | 583 | **511** | ✅ Partial | StatusBadge/KeyValueEditor extracted |
 
 ---
@@ -103,7 +103,9 @@ The hook would need significant expansion to replace the page-level logic.
 | useMetricsConfig hook integration | ~575 | 2025-12-18 |
 | useConversationBuilder hook integration | ~360 | 2025-12-18 |
 | useEvaluationRun hook integration | ~310 | 2025-12-18 |
-| **Total** | **~5451 lines** | |
+| AgentComposer decomposition | ~482 | 2025-12-18 |
+| AgentToolsPanel decomposition | ~455 | 2025-12-18 |
+| **Total** | **~6388 lines** | |
 
 ---
 
@@ -294,6 +296,26 @@ The hook would need significant expansion to replace the page-level logic.
 
 ---
 
+### 2025-12-18: AgentToolsPanel Decomposition
+
+**Changes:**
+- Extracted 4 dialog components from AgentToolsPanel.tsx (615 → 160 lines, 74% reduction)
+- Created ModeSelectionDialog.tsx - Mode selection dialog (81 lines)
+- Created AddAgentToolDialog.tsx - Select existing agent dialog (136 lines)
+- Created CreateAgentToolDialog.tsx - Create new agent dialog (194 lines)
+- Created AgentToolCard.tsx - Individual agent tool card (45 lines)
+
+**Files Created:**
+- `app/components/AgentComposer/ModeSelectionDialog.tsx`
+- `app/components/AgentComposer/AddAgentToolDialog.tsx`
+- `app/components/AgentComposer/CreateAgentToolDialog.tsx`
+- `app/components/AgentComposer/AgentToolCard.tsx`
+
+**Files Modified:**
+- `app/components/AgentComposer/AgentToolsPanel.tsx` - Now imports from extracted components
+
+---
+
 ## 🔄 In Progress
 
 *No active work*
@@ -302,6 +324,4 @@ The hook would need significant expansion to replace the page-level logic.
 
 ## 📋 Next Steps
 
-1. **Expand useChatSession hook** - Add streaming, ADK events, invocations support
-2. **Extract ConfirmDialog patterns** - Common delete confirmation across tool panels
-3. **AgentComposer decomposition** - Split 908-line monolithic visual builder
+1. **Extract common styling patterns** - Shared dialog overlay, header, footer patterns
