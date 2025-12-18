@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
 import { LoadingButton } from '@/components/ui/LoadingButton';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { useMetricsConfig } from '@/lib/hooks/useMetricsConfig';
 import {
   EvalSetWithHistory,
   EvalCase,
   ConversationTurn,
   ToolUse,
   IntermediateResponse,
-  MetricConfig,
   createConversationTurn,
   createToolUse,
   createEvalCase,
@@ -30,6 +30,28 @@ export default function EvalsetDetailPage() {
   const params = useParams();
   const agentName = params.name as string;
   const evalsetId = params.evalId as string;
+
+  // Metrics configuration hook
+  const {
+    metrics,
+    showMetricsConfig,
+    hasCustomConfig,
+    isSaving,
+    saveMessage,
+    jsonPreview,
+    openMetricsConfig,
+    closeMetricsConfig,
+    toggleMetric,
+    setThreshold,
+    setRubric,
+    applyTemplate,
+    saveConfig,
+    resetConfig,
+  } = useMetricsConfig({
+    agentName,
+    evalsetId,
+    apiBasePath: '/api/adk-agents',
+  });
 
   const [evalset, setEvalset] = useState<EvalSetWithHistory | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,321 +101,11 @@ export default function EvalsetDetailPage() {
   // Export state
   const [exporting, setExporting] = useState(false);
 
-  // Metrics configuration modal state (Phase 18.9)
-  const [showMetricsConfig, setShowMetricsConfig] = useState(false);
-  const [hasCustomConfig, setHasCustomConfig] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
-
-  // Metrics configuration state (Phase 18.9.4)
-  const [metrics, setMetrics] = useState<MetricConfig[]>([
-    {
-      id: 'tool_trajectory_avg_score',
-      name: 'Tool Trajectory Score',
-      description: 'F1 score comparing expected vs actual tool calls',
-      threshold: 1.0,
-      enabled: true,
-      type: 'deterministic',
-    },
-    {
-      id: 'response_match_score',
-      name: 'Response Match Score',
-      description: 'ROUGE-1 similarity between expected and actual responses',
-      threshold: 0.8,
-      enabled: true,
-      type: 'deterministic',
-    },
-    {
-      id: 'final_response_match_v2',
-      name: 'Final Response Match (LLM)',
-      description: 'LLM-based semantic equivalence check',
-      threshold: 0.7,
-      enabled: false,
-      type: 'llm',
-    },
-    {
-      id: 'rubric_based_final_response_quality_v1',
-      name: 'Response Quality (Rubric-based)',
-      description: 'LLM scores response quality using custom rubric',
-      threshold: 0.7,
-      enabled: false,
-      type: 'llm',
-      supportsRubric: true,
-      rubric: '',
-    },
-    {
-      id: 'rubric_based_tool_use_quality_v1',
-      name: 'Tool Use Quality (Rubric-based)',
-      description: 'LLM validates tool usage against rubric',
-      threshold: 0.7,
-      enabled: false,
-      type: 'llm',
-      supportsRubric: true,
-      rubric: '',
-    },
-    {
-      id: 'hallucinations_v1',
-      name: 'Hallucination Detection',
-      description: 'Checks if response is grounded in context',
-      threshold: 0.9,
-      enabled: false,
-      type: 'llm',
-    },
-    {
-      id: 'safety_v1',
-      name: 'Safety Assessment',
-      description: 'Detects harmful or unsafe content',
-      threshold: 0.9,
-      enabled: false,
-      type: 'llm',
-    },
-  ]);
-
   // Available tools (mock for now - would come from agent definition)
   const availableTools = ['google_search', 'code_execution', 'web_scraper', 'calculator'];
 
   // Available sub-agents (mock for now - would come from agent definition)
   const availableSubAgents = ['copywriting_agent', 'content_calendar_agent', 'scheduler_agent'];
-
-  // Toggle metric handler (Phase 18.9.4)
-  const handleToggleMetric = (metricId: string) => {
-    setMetrics((prevMetrics) => {
-      const updatedMetrics = prevMetrics.map((m) =>
-        m.id === metricId ? { ...m, enabled: !m.enabled } : m
-      );
-
-      // Ensure at least one metric remains enabled
-      const enabledCount = updatedMetrics.filter((m) => m.enabled).length;
-      if (enabledCount === 0) {
-        // Prevent disabling the last metric - revert the change
-        return prevMetrics;
-      }
-
-      return updatedMetrics;
-    });
-  };
-
-  // Threshold change handler (Phase 18.9.5)
-  const handleThresholdChange = (metricId: string, newThreshold: number) => {
-    setMetrics((prevMetrics) =>
-      prevMetrics.map((m) =>
-        m.id === metricId ? { ...m, threshold: newThreshold } : m
-      )
-    );
-  };
-
-  // Rubric change handler (Phase 18.9.6)
-  const handleRubricChange = (metricId: string, newRubric: string) => {
-    setMetrics((prevMetrics) =>
-      prevMetrics.map((m) =>
-        m.id === metricId && m.supportsRubric
-          ? { ...m, rubric: newRubric }
-          : m
-      )
-    );
-  };
-
-  // Template handler (Phase 18.9.12)
-  const applyTemplate = (template: 'strict' | 'balanced' | 'lenient') => {
-    const thresholdMap = {
-      strict: 0.9,
-      balanced: 0.75,
-      lenient: 0.55,
-    };
-
-    const newThreshold = thresholdMap[template];
-
-    setMetrics((prevMetrics) =>
-      prevMetrics.map((m) =>
-        m.enabled ? { ...m, threshold: newThreshold } : m
-      )
-    );
-  };
-
-  // Save configuration handler (Phase 18.9.7)
-  const handleSaveConfig = async () => {
-    setIsSaving(true);
-    setSaveMessage(null);
-
-    // Build criteria object from metrics state
-    const criteria: Record<string, any> = {};
-    metrics.forEach((metric) => {
-      if (metric.enabled) {
-        if (metric.supportsRubric && metric.rubric) {
-          criteria[metric.id] = {
-            threshold: metric.threshold,
-            rubric: metric.rubric,
-          };
-        } else {
-          criteria[metric.id] = metric.threshold;
-        }
-      }
-    });
-
-    try {
-      const response = await fetch(`/api/adk-agents/${params.name}/evaluations/${params.evalId}/config`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ criteria }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save configuration');
-      }
-
-      setHasCustomConfig(true);
-      setSaveMessage('Configuration saved');
-      setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
-      console.error('Error saving config:', error);
-      setSaveMessage('Error saving configuration');
-      setTimeout(() => setSaveMessage(null), 3000);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Load configuration handler (Phase 18.9.8)
-  const loadConfig = async () => {
-    try {
-      const response = await fetch(`/api/adk-agents/${params.name}/evaluations/${params.evalId}/config`);
-
-      if (!response.ok) {
-        console.error('Failed to load config');
-        return;
-      }
-
-      const data = await response.json();
-
-      // Update hasCustomConfig flag
-      setHasCustomConfig(data.hasCustomConfig);
-
-      // If custom config exists, load it into metrics state
-      if (data.hasCustomConfig && data.config && data.config.criteria) {
-        const criteria = data.config.criteria;
-
-        // Update metrics based on loaded criteria
-        setMetrics((prevMetrics) =>
-          prevMetrics.map((metric) => {
-            const savedMetric = criteria[metric.id];
-
-            if (savedMetric !== undefined) {
-              // Metric is enabled in saved config
-              if (typeof savedMetric === 'number') {
-                // Simple threshold value
-                return {
-                  ...metric,
-                  enabled: true,
-                  threshold: savedMetric,
-                };
-              } else if (typeof savedMetric === 'object') {
-                // Complex config with threshold and possibly rubric
-                return {
-                  ...metric,
-                  enabled: true,
-                  threshold: savedMetric.threshold || metric.threshold,
-                  rubric: savedMetric.rubric || metric.rubric || '',
-                };
-              }
-            } else {
-              // Metric is not in saved config, disable it
-              return {
-                ...metric,
-                enabled: false,
-              };
-            }
-
-            return metric;
-          })
-        );
-      }
-    } catch (error) {
-      console.error('Error loading config:', error);
-    }
-  };
-
-  // Reset configuration handler (Phase 18.9.9)
-  const handleResetConfig = async () => {
-    const confirmed = confirm('This will delete your custom configuration and restore the default metrics. Are you sure?');
-
-    if (!confirmed) {
-      return;
-    }
-
-    setIsSaving(true);
-    setSaveMessage(null);
-
-    try {
-      const response = await fetch(`/api/adk-agents/${params.name}/evaluations/${params.evalId}/config`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to reset configuration');
-      }
-
-      // Reset to default metrics state
-      setMetrics((prevMetrics) =>
-        prevMetrics.map((metric) => {
-          // Only tool_trajectory_avg_score and response_match_score are enabled by default
-          const isDefaultEnabled = metric.id === 'tool_trajectory_avg_score' || metric.id === 'response_match_score';
-          if (metric.supportsRubric) {
-            return {
-              ...metric,
-              enabled: isDefaultEnabled,
-              rubric: '',
-            };
-          }
-          return {
-            ...metric,
-            enabled: isDefaultEnabled,
-          };
-        })
-      );
-
-      setHasCustomConfig(false);
-      setSaveMessage('Reset to defaults');
-      setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
-      console.error('Error resetting config:', error);
-      setSaveMessage('Error resetting configuration');
-      setTimeout(() => setSaveMessage(null), 3000);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Compute JSON preview from current metrics state (Phase 18.9.10)
-  const jsonPreview = useMemo(() => {
-    const criteria: Record<string, number | { threshold: number; rubric?: string }> = {};
-
-    metrics.forEach((metric) => {
-      if (metric.enabled) {
-        if (metric.supportsRubric) {
-          // LLM metric - always use object format
-          const config: { threshold: number; rubric?: string } = {
-            threshold: metric.threshold,
-          };
-          if (metric.rubric && metric.rubric.trim() !== '') {
-            config.rubric = metric.rubric;
-          }
-          criteria[metric.id] = config;
-        } else {
-          // Deterministic metric - just threshold number
-          criteria[metric.id] = metric.threshold;
-        }
-      }
-    });
-
-    return { criteria };
-  }, [metrics]);
-
-  // Load config when modal opens (Phase 18.9.8)
-  useEffect(() => {
-    if (showMetricsConfig) {
-      loadConfig();
-    }
-  }, [showMetricsConfig]);
 
   useEffect(() => {
     fetchEvalset();
@@ -859,7 +571,7 @@ export default function EvalsetDetailPage() {
               </LoadingButton>
               <button
                 data-testid="configure-metrics-btn"
-                onClick={() => setShowMetricsConfig(true)}
+                onClick={openMetricsConfig}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
                 ⚙ Configure Metrics
@@ -1472,18 +1184,18 @@ export default function EvalsetDetailPage() {
         {/* Metrics Configuration Modal (Phase 18.9) */}
         <MetricsConfigModal
           isOpen={showMetricsConfig}
-          onClose={() => setShowMetricsConfig(false)}
+          onClose={closeMetricsConfig}
           hasCustomConfig={hasCustomConfig}
           metrics={metrics}
           jsonPreview={jsonPreview}
           isSaving={isSaving}
           saveMessage={saveMessage}
-          onToggleMetric={handleToggleMetric}
-          onThresholdChange={handleThresholdChange}
-          onRubricChange={handleRubricChange}
+          onToggleMetric={toggleMetric}
+          onThresholdChange={setThreshold}
+          onRubricChange={setRubric}
           onApplyTemplate={applyTemplate}
-          onSaveConfig={handleSaveConfig}
-          onResetConfig={handleResetConfig}
+          onSaveConfig={saveConfig}
+          onResetConfig={resetConfig}
         />
       </div>
     </div>

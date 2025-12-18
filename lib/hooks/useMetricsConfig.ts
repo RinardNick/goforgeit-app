@@ -1,7 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { MetricConfig } from '@/lib/adk/evaluation-types';
+
+// JSON preview type for the metrics config modal
+export interface MetricsJsonPreview {
+  criteria: Record<string, number | { threshold: number; rubric?: string }>;
+}
 
 // Default metrics configuration
 const DEFAULT_METRICS: MetricConfig[] = [
@@ -80,6 +85,7 @@ export interface UseMetricsConfigReturn {
   hasCustomConfig: boolean;
   isSaving: boolean;
   saveMessage: string | null;
+  jsonPreview: MetricsJsonPreview;
 
   // Modal control
   openMetricsConfig: () => void;
@@ -301,6 +307,38 @@ export function useMetricsConfig({
     }
   }, [apiBasePath, agentName, evalsetId]);
 
+  // Compute JSON preview from current metrics state
+  const jsonPreview = useMemo((): MetricsJsonPreview => {
+    const criteria: MetricsJsonPreview['criteria'] = {};
+
+    metrics.forEach((metric) => {
+      if (metric.enabled) {
+        if (metric.supportsRubric) {
+          // LLM metric - always use object format
+          const config: { threshold: number; rubric?: string } = {
+            threshold: metric.threshold,
+          };
+          if (metric.rubric && metric.rubric.trim() !== '') {
+            config.rubric = metric.rubric;
+          }
+          criteria[metric.id] = config;
+        } else {
+          // Deterministic metric - just threshold number
+          criteria[metric.id] = metric.threshold;
+        }
+      }
+    });
+
+    return { criteria };
+  }, [metrics]);
+
+  // Auto-load config when modal opens
+  useEffect(() => {
+    if (showMetricsConfig) {
+      loadConfig();
+    }
+  }, [showMetricsConfig, loadConfig]);
+
   return {
     // State
     metrics,
@@ -308,6 +346,7 @@ export function useMetricsConfig({
     hasCustomConfig,
     isSaving,
     saveMessage,
+    jsonPreview,
 
     // Modal control
     openMetricsConfig,

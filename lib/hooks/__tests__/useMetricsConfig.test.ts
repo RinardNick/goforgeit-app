@@ -304,4 +304,77 @@ describe('useMetricsConfig Hook Logic', () => {
       assert.strictEqual(metric2.enabled, false);
     });
   });
+
+  describe('JSON Preview Logic', () => {
+    it('should generate correct JSON preview from enabled metrics', () => {
+      const metrics = [
+        { id: 'metric1', enabled: true, threshold: 0.8, supportsRubric: false },
+        { id: 'metric2', enabled: false, threshold: 0.7, supportsRubric: false },
+        { id: 'metric3', enabled: true, threshold: 0.9, supportsRubric: true, rubric: 'Test rubric' },
+      ];
+
+      const generateJsonPreview = (metricsList: typeof metrics) => {
+        const criteria: Record<string, number | { threshold: number; rubric?: string }> = {};
+
+        metricsList.forEach((metric) => {
+          if (metric.enabled) {
+            if (metric.supportsRubric) {
+              const config: { threshold: number; rubric?: string } = {
+                threshold: metric.threshold,
+              };
+              if (metric.rubric && metric.rubric.trim() !== '') {
+                config.rubric = metric.rubric;
+              }
+              criteria[metric.id] = config;
+            } else {
+              criteria[metric.id] = metric.threshold;
+            }
+          }
+        });
+
+        return { criteria };
+      };
+
+      const preview = generateJsonPreview(metrics);
+
+      assert.strictEqual(preview.criteria['metric1'], 0.8);
+      assert.strictEqual(preview.criteria['metric2'], undefined);
+      assert.deepStrictEqual(preview.criteria['metric3'], { threshold: 0.9, rubric: 'Test rubric' });
+    });
+
+    it('should omit empty rubric from JSON preview', () => {
+      const metrics = [
+        { id: 'metric1', enabled: true, threshold: 0.9, supportsRubric: true, rubric: '' },
+      ];
+
+      const generateJsonPreview = (metricsList: typeof metrics) => {
+        const criteria: Record<string, number | { threshold: number; rubric?: string }> = {};
+
+        metricsList.forEach((metric) => {
+          if (metric.enabled) {
+            if (metric.supportsRubric) {
+              const config: { threshold: number; rubric?: string } = {
+                threshold: metric.threshold,
+              };
+              if (metric.rubric && metric.rubric.trim() !== '') {
+                config.rubric = metric.rubric;
+              }
+              criteria[metric.id] = config;
+            } else {
+              criteria[metric.id] = metric.threshold;
+            }
+          }
+        });
+
+        return { criteria };
+      };
+
+      const preview = generateJsonPreview(metrics);
+
+      // Should have threshold but no rubric property
+      const config = preview.criteria['metric1'] as { threshold: number; rubric?: string };
+      assert.strictEqual(config.threshold, 0.9);
+      assert.strictEqual(config.rubric, undefined);
+    });
+  });
 });
