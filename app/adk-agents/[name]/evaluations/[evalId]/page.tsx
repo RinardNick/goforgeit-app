@@ -12,11 +12,19 @@ import {
   ConversationTurn,
   ToolUse,
   IntermediateResponse,
+  MetricConfig,
   createConversationTurn,
   createToolUse,
   createEvalCase,
   generateEvalCaseId,
 } from '@/lib/adk/evaluation-types';
+import {
+  ConversationBuilderModal,
+  ToolTrajectoryModal,
+  IntermediateResponseModal,
+  RunComparisonModal,
+  MetricsConfigModal,
+} from '@/app/[name]/evaluations/[evalId]/components';
 
 export default function EvalsetDetailPage() {
   const params = useParams();
@@ -78,7 +86,7 @@ export default function EvalsetDetailPage() {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   // Metrics configuration state (Phase 18.9.4)
-  const [metrics, setMetrics] = useState([
+  const [metrics, setMetrics] = useState<MetricConfig[]>([
     {
       id: 'tool_trajectory_avg_score',
       name: 'Tool Trajectory Score',
@@ -1408,633 +1416,75 @@ export default function EvalsetDetailPage() {
         </div>
 
         {/* Conversation Builder Modal */}
-        {showConversationBuilder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {editingConversationId ? 'Edit' : 'Create'} Conversation
-                </h2>
-                <button
-                  onClick={() => setShowConversationBuilder(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {saveError && <ErrorMessage message={saveError} className="mb-4" />}
-
-              {/* Session Config */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <button
-                  data-testid="session-config-btn"
-                  onClick={() => setShowSessionConfig(!showSessionConfig)}
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
-                >
-                  <svg className={`w-4 h-4 transition-transform ${showSessionConfig ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                  Session Configuration
-                </button>
-                {showSessionConfig && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
-                      <input
-                        type="text"
-                        data-testid="user-id-input"
-                        value={currentUserId}
-                        onChange={(e) => setCurrentUserId(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                        placeholder="eval-user-123"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Initial State (JSON)</label>
-                      <textarea
-                        data-testid="initial-state-input"
-                        value={currentInitialState}
-                        onChange={(e) => setCurrentInitialState(e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono text-sm"
-                        placeholder='{"key": "value"}'
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Turns */}
-              <div className="space-y-4 mb-6">
-                {currentConversation.map((turn, index) => (
-                  <div key={turn.invocation_id} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium text-gray-900">Turn {index + 1}</h3>
-                      <div className="flex gap-2">
-                        <button
-                          data-testid="add-tool-trajectory-btn"
-                          onClick={() => handleOpenToolTrajectory(index)}
-                          className="px-2 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50"
-                        >
-                          {turn.intermediate_data?.tool_uses?.length ? `${turn.intermediate_data.tool_uses.length} Tools` : '+ Tools'}
-                        </button>
-                        <button
-                          data-testid="add-intermediate-response-btn"
-                          onClick={() => handleOpenIntermediateResponses(index)}
-                          className="px-2 py-1 text-xs text-purple-600 border border-purple-300 rounded hover:bg-purple-50"
-                        >
-                          {turn.intermediate_data?.intermediate_responses?.length ? `${turn.intermediate_data.intermediate_responses.length} Sub-agents` : '+ Sub-agents'}
-                        </button>
-                        {currentConversation.length > 1 && (
-                          <button
-                            onClick={() => handleRemoveTurn(index)}
-                            className="px-2 py-1 text-xs text-red-600 border border-red-300 rounded hover:bg-red-50"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">User Message</label>
-                        <textarea
-                          data-testid={`user-message-input-${index}`}
-                          value={turn.user_content.parts[0].text}
-                          onChange={(e) => handleUpdateTurn(index, 'user', e.target.value)}
-                          rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          placeholder="What is 2+2?"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Expected Response</label>
-                        <textarea
-                          data-testid={`expected-response-input-${index}`}
-                          value={turn.final_response?.parts[0].text || ''}
-                          onChange={(e) => handleUpdateTurn(index, 'expected', e.target.value)}
-                          rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          placeholder="2+2 equals 4"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                data-testid="add-turn-btn"
-                onClick={handleAddTurn}
-                className="w-full px-4 py-2 text-amber-600 border-2 border-dashed border-amber-300 rounded-lg hover:bg-amber-50 transition-colors mb-6"
-              >
-                + Add Turn
-              </button>
-
-              {/* Actions */}
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setShowConversationBuilder(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <LoadingButton
-                  testId="save-conversation-btn"
-                  onClick={handleSaveConversation}
-                  isLoading={saving}
-                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
-                  variant="primary"
-                >
-                  Save Conversation
-                </LoadingButton>
-              </div>
-            </div>
-          </div>
-        )}
+        <ConversationBuilderModal
+          isOpen={showConversationBuilder}
+          onClose={() => setShowConversationBuilder(false)}
+          editingId={editingConversationId}
+          conversation={currentConversation}
+          userId={currentUserId}
+          initialState={currentInitialState}
+          saving={saving}
+          saveError={saveError}
+          showSessionConfig={showSessionConfig}
+          onToggleSessionConfig={() => setShowSessionConfig(!showSessionConfig)}
+          onUserIdChange={setCurrentUserId}
+          onInitialStateChange={setCurrentInitialState}
+          onUpdateTurn={handleUpdateTurn}
+          onAddTurn={handleAddTurn}
+          onRemoveTurn={handleRemoveTurn}
+          onOpenToolTrajectory={handleOpenToolTrajectory}
+          onOpenIntermediateResponses={handleOpenIntermediateResponses}
+          onSave={handleSaveConversation}
+        />
 
         {/* Tool Trajectory Builder Modal */}
-        {showToolTrajectoryBuilder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Tool Trajectory</h2>
-                <button
-                  onClick={() => setShowToolTrajectoryBuilder(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                {toolTrajectory.map((tool, index) => (
-                  <div key={tool.id} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-700">Tool {index + 1}</span>
-                      <button
-                        onClick={() => handleRemoveTool(index)}
-                        className="text-red-600 text-xs"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Tool Name</label>
-                        <select
-                          data-testid={`tool-selector-${index}`}
-                          value={tool.name}
-                          onChange={(e) => handleUpdateTool(index, 'name', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                          {availableTools.map(toolName => (
-                            <option key={toolName} value={toolName}>{toolName}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Arguments (JSON)</label>
-                        <textarea
-                          data-testid={`tool-args-input-${index}`}
-                          value={JSON.stringify(tool.args, null, 2)}
-                          onChange={(e) => handleUpdateTool(index, 'args', e.target.value)}
-                          rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs"
-                          placeholder='{"query": "test"}'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                data-testid="add-tool-to-trajectory-btn"
-                onClick={handleAddTool}
-                className="w-full px-4 py-2 text-blue-600 border-2 border-dashed border-blue-300 rounded-lg hover:bg-blue-50 transition-colors mb-6"
-              >
-                + Add Tool
-              </button>
-
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setShowToolTrajectoryBuilder(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveToolTrajectory}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Save Tools
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <ToolTrajectoryModal
+          isOpen={showToolTrajectoryBuilder}
+          onClose={() => setShowToolTrajectoryBuilder(false)}
+          toolTrajectory={toolTrajectory}
+          availableTools={availableTools}
+          onAddTool={handleAddTool}
+          onRemoveTool={handleRemoveTool}
+          onUpdateTool={handleUpdateTool}
+          onSave={handleSaveToolTrajectory}
+        />
 
         {/* Intermediate Response Builder Modal */}
-        {showIntermediateBuilder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Intermediate Responses</h2>
-                <button
-                  onClick={() => setShowIntermediateBuilder(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                {intermediateResponses.map((resp, index) => (
-                  <div key={index} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-700">Sub-agent {index + 1}</span>
-                      <button
-                        onClick={() => handleRemoveIntermediateResponse(index)}
-                        className="text-red-600 text-xs"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Sub-agent Name</label>
-                        <select
-                          data-testid="sub-agent-selector"
-                          value={resp[0]}
-                          onChange={(e) => handleUpdateIntermediateResponse(index, 'agent', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        >
-                          {availableSubAgents.map(agentName => (
-                            <option key={agentName} value={agentName}>{agentName}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Expected Response</label>
-                        <textarea
-                          data-testid="intermediate-response-text"
-                          value={resp[1][0].text}
-                          onChange={(e) => handleUpdateIntermediateResponse(index, 'text', e.target.value)}
-                          rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                          placeholder="Sub-agent response..."
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={handleAddIntermediateResponse}
-                className="w-full px-4 py-2 text-purple-600 border-2 border-dashed border-purple-300 rounded-lg hover:bg-purple-50 transition-colors mb-6"
-              >
-                + Add Sub-agent Response
-              </button>
-
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setShowIntermediateBuilder(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveIntermediateResponses}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                >
-                  Save Responses
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <IntermediateResponseModal
+          isOpen={showIntermediateBuilder}
+          onClose={() => setShowIntermediateBuilder(false)}
+          intermediateResponses={intermediateResponses}
+          availableSubAgents={availableSubAgents}
+          onAddResponse={handleAddIntermediateResponse}
+          onRemoveResponse={handleRemoveIntermediateResponse}
+          onUpdateResponse={handleUpdateIntermediateResponse}
+          onSave={handleSaveIntermediateResponses}
+        />
 
         {/* Run Comparison Modal (Phase 18.7) */}
-        {showComparisonView && evalset.runs && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div data-testid="comparison-view" className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Run Comparison</h2>
-                <button
-                  data-testid="close-comparison-btn"
-                  onClick={handleCloseComparison}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Metrics Comparison Table */}
-              <div data-testid="metrics-comparison-table" className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b-2 border-gray-300">
-                      <th className="text-left p-3 font-semibold text-gray-900">Metric</th>
-                      {selectedRunsForComparison.map((runIndex, colIdx) => (
-                        <th key={runIndex} data-testid={`comparison-run-column-${colIdx}`} className="text-left p-3 font-semibold text-gray-900">
-                          Run {runIndex + 1}
-                          <div className="text-xs font-normal text-gray-500">
-                            {new Date(evalset.runs![runIndex].timestamp).toLocaleString()}
-                          </div>
-                        </th>
-                      ))}
-                      {selectedRunsForComparison.length >= 2 && (
-                        <th className="text-left p-3 font-semibold text-gray-900">Change</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(() => {
-                      // Collect all unique metrics across selected runs
-                      const allMetrics = new Set<string>();
-                      selectedRunsForComparison.forEach(runIndex => {
-                        const run = evalset.runs![runIndex];
-                        if (run.metrics_summary) {
-                          Object.keys(run.metrics_summary).forEach(m => allMetrics.add(m));
-                        }
-                      });
-
-                      // If no metrics, show synthetic response_match_score
-                      if (allMetrics.size === 0) {
-                        allMetrics.add('response_match_score');
-                      }
-
-                      return Array.from(allMetrics).map(metricName => {
-                        const displayNames: Record<string, string> = {
-                          'response_match_score': 'Response Match',
-                          'tool_trajectory_avg_score': 'Tool Trajectory',
-                          'final_response_match_v2': 'Semantic Match',
-                        };
-
-                        const metricValues = selectedRunsForComparison.map(runIndex => {
-                          const run = evalset.runs![runIndex];
-                          let metricData = (run.metrics_summary as Record<string, any>)?.[metricName];
-
-                          // Generate synthetic response_match_score if not present
-                          if (!metricData && metricName === 'response_match_score') {
-                            metricData = {
-                              avg_score: (run.overall_pass_rate || 0) / 100,
-                              pass_rate: run.overall_pass_rate || 0
-                            };
-                          }
-
-                          return metricData;
-                        });
-
-                        // Calculate delta (comparing first to last selected run)
-                        const firstValue = metricValues[0]?.avg_score || 0;
-                        const lastValue = metricValues[metricValues.length - 1]?.avg_score || 0;
-                        const delta = lastValue - firstValue;
-                        const deltaPercent = Math.abs(delta * 100);
-
-                        let deltaIndicator = '→';
-                        let deltaColor = 'text-gray-600';
-                        if (delta > 0.01) {
-                          deltaIndicator = '↑';
-                          deltaColor = 'text-green-600';
-                        } else if (delta < -0.01) {
-                          deltaIndicator = '↓';
-                          deltaColor = 'text-red-600';
-                        }
-
-                        return (
-                          <tr key={metricName} data-testid={`metric-row-${metricName}`} className="border-b border-gray-200">
-                            <td className="p-3 font-medium text-gray-900">
-                              {displayNames[metricName] || metricName}
-                            </td>
-                            {metricValues.map((metricData, colIdx) => (
-                              <td key={colIdx} className="p-3">
-                                {metricData ? (
-                                  <div>
-                                    <div className="text-lg font-semibold text-gray-900">
-                                      {(metricData.avg_score * 100).toFixed(1)}%
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                      Pass: {Math.round(metricData.pass_rate)}%
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <span className="text-gray-400 text-sm">N/A</span>
-                                )}
-                              </td>
-                            ))}
-                            {selectedRunsForComparison.length >= 2 && (
-                              <td data-testid={`delta-cell-${metricName}`} className="p-3">
-                                <div className={`flex items-center gap-1 ${deltaColor} font-semibold`}>
-                                  <span className="text-xl">{deltaIndicator}</span>
-                                  <span className="text-sm">{deltaPercent.toFixed(1)}%</span>
-                                </div>
-                              </td>
-                            )}
-                          </tr>
-                        );
-                      });
-                    })()}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={handleCloseComparison}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <RunComparisonModal
+          isOpen={showComparisonView && !!evalset.runs}
+          onClose={handleCloseComparison}
+          runs={evalset.runs || []}
+          selectedRunsForComparison={selectedRunsForComparison}
+        />
 
         {/* Metrics Configuration Modal (Phase 18.9) */}
-        {showMetricsConfig && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div
-              data-testid="metrics-config-modal"
-              className="bg-white rounded-xl p-6 w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold text-gray-900">Configure Evaluation Metrics</h2>
-                  <span
-                    data-testid="config-status-badge"
-                    className={`px-3 py-1 text-sm rounded-full ${
-                      hasCustomConfig
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {hasCustomConfig ? 'Using Custom Config' : 'Using Defaults'}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setShowMetricsConfig(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="Close modal"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Templates */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Quick Templates</h3>
-                <div className="flex gap-2">
-                  <button
-                    data-testid="template-strict"
-                    onClick={() => applyTemplate('strict')}
-                    className="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
-                  >
-                    Strict (0.9+)
-                  </button>
-                  <button
-                    data-testid="template-balanced"
-                    onClick={() => applyTemplate('balanced')}
-                    className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-                  >
-                    Balanced (0.7-0.8)
-                  </button>
-                  <button
-                    data-testid="template-lenient"
-                    onClick={() => applyTemplate('lenient')}
-                    className="px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
-                  >
-                    Lenient (0.5-0.6)
-                  </button>
-                </div>
-              </div>
-
-              {/* Metrics List */}
-              <div className="space-y-4">
-                {metrics.map((metric) => (
-                  <div
-                    key={metric.id}
-                    data-testid={`metric-card-${metric.id}`}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <input
-                            type="checkbox"
-                            data-testid={`metric-toggle-${metric.id}`}
-                            checked={metric.enabled}
-                            onChange={() => handleToggleMetric(metric.id)}
-                            className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                          />
-                          <h3 className="font-semibold text-gray-900">{metric.name}</h3>
-                          {!metric.enabled && (
-                            <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
-                              Disabled
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500 font-mono mb-1">{metric.id}</p>
-                        <p className="text-sm text-gray-600">{metric.description}</p>
-                      </div>
-                    </div>
-
-                    {/* Threshold Slider (Phase 18.9.5) */}
-                    {metric.enabled && (
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <label htmlFor={`threshold-${metric.id}`} className="text-sm font-medium text-gray-700">
-                            Threshold
-                          </label>
-                          <span className="text-sm font-semibold text-gray-900">{metric.threshold.toFixed(2)}</span>
-                        </div>
-                        <input
-                          id={`threshold-${metric.id}`}
-                          type="range"
-                          data-testid={`threshold-slider-${metric.id}`}
-                          min="0"
-                          max="1"
-                          step="0.01"
-                          value={metric.threshold}
-                          onChange={(e) => handleThresholdChange(metric.id, parseFloat(e.target.value))}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                        />
-                      </div>
-                    )}
-
-                    {/* Rubric Editor (Phase 18.9.6) */}
-                    {metric.enabled && metric.supportsRubric && (
-                      <div className="mt-4">
-                        <label className="text-sm font-medium text-gray-700">Custom Rubric</label>
-                        <textarea
-                          data-testid={`rubric-editor-${metric.id}`}
-                          value={metric.rubric || ''}
-                          onChange={(e) => handleRubricChange(metric.id, e.target.value)}
-                          placeholder="Write custom evaluation criteria..."
-                          className="w-full mt-1 p-2 border border-gray-200 rounded-lg text-sm"
-                          rows={4}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* JSON Preview (Phase 18.9.10) */}
-              <div className="mt-6 border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Configuration Preview</h3>
-                <pre
-                  data-testid="json-preview"
-                  className="text-xs font-mono text-gray-800 overflow-x-auto whitespace-pre-wrap break-words"
-                >
-                  {JSON.stringify(jsonPreview, null, 2)}
-                </pre>
-              </div>
-
-              {/* Save Button and Notification (Phase 18.9.7) */}
-              <div className="mt-6 flex items-center justify-between">
-                <div className="flex gap-3">
-                  <button
-                    data-testid="save-config-btn"
-                    onClick={handleSaveConfig}
-                    disabled={isSaving}
-                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                  >
-                    {isSaving ? 'Saving...' : 'Save Configuration'}
-                  </button>
-                  <button
-                    data-testid="reset-config-btn"
-                    onClick={handleResetConfig}
-                    disabled={isSaving}
-                    className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                  >
-                    Reset to Defaults
-                  </button>
-                </div>
-                {saveMessage && (
-                  <span className={`text-sm font-medium ${
-                    saveMessage.includes('Error') ? 'text-red-600' : 'text-green-600'
-                  }`}>
-                    {saveMessage}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <MetricsConfigModal
+          isOpen={showMetricsConfig}
+          onClose={() => setShowMetricsConfig(false)}
+          hasCustomConfig={hasCustomConfig}
+          metrics={metrics}
+          jsonPreview={jsonPreview}
+          isSaving={isSaving}
+          saveMessage={saveMessage}
+          onToggleMetric={handleToggleMetric}
+          onThresholdChange={handleThresholdChange}
+          onRubricChange={handleRubricChange}
+          onApplyTemplate={applyTemplate}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
+        />
       </div>
     </div>
   );
