@@ -18,7 +18,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import AgentNode, { AgentNodeData, ADKAgentClass, ToolConfig } from './AgentNode';
+import AgentNode, { AgentNodeData, ADKAgentClass, ToolConfig, MCPServerConfig } from './AgentNode';
 import ContainerNode from './ContainerNode';
 import { ToolType } from './AddToolsDropdown';
 import { PropertiesPanel, ValidationError } from './PropertiesPanel';
@@ -89,6 +89,11 @@ function AgentComposerInner({
 
   // Tool sections expansion state
   const [expandedToolSections, setExpandedToolSections] = useState<Record<string, Set<ToolType>>>({});
+
+  // Unified Debug Panel state (MCP)
+  const [mcpServerStates, setMcpServerStates] = useState<
+    Record<string, { status: 'connected' | 'disconnected' | 'error' | 'connecting'; tools: Array<{ name: string; description: string; enabled: boolean }>; errorMessage?: string }>
+  >({});
 
   const onAddChildAgentRef = useRef(onAddChildAgent);
   const onAddSubAgentRef = useRef(onAddSubAgent);
@@ -326,6 +331,135 @@ function AgentComposerInner({
     });
   }, [selectedNode, edges, setNodes, notifyChange, onNodeDataChange]);
 
+  // MCP Handlers
+  const validateMcpServer = useCallback(async (serverId: string, config: MCPServerConfig) => {
+    setMcpServerStates(prev => ({
+      ...prev,
+      [serverId]: { status: 'connecting', tools: prev[serverId]?.tools || [], errorMessage: undefined },
+    }));
+
+    try {
+      const response = await fetch('/api/mcp/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: config.type,
+          command: config.command,
+          args: config.args,
+          env: config.env,
+          url: config.url,
+          headers: config.headers,
+        }),
+      });
+
+      const data = await response.json();
+      const status = data.status === 'connected' ? 'connected' : 'error';
+      const tools = (data.tools || []).map((t: any) => ({
+        name: t.name,
+        description: t.description,
+        enabled: true,
+      }));
+
+      setMcpServerStates(prev => ({
+        ...prev,
+        [serverId]: { status, tools, errorMessage: data.errorMessage },
+      }));
+    } catch (error) {
+      setMcpServerStates(prev => ({
+        ...prev,
+        [serverId]: {
+          status: 'error',
+          tools: prev[serverId]?.tools || [],
+          errorMessage: error instanceof Error ? error.message : 'Failed to validate'
+        },
+      }));
+    }
+  }, []);
+
+  const handleAddMcpServer = useCallback((config: Omit<MCPServerConfig, 'id' | 'status' | 'tools'>) => {
+    if (!selectedNode) return;
+    const newServer: MCPServerConfig = { ...config, id: crypto.randomUUID(), status: 'disconnected', tools: [] };
+    
+    // We update the data via updateSelectedNodeData which handles persistence
+    // But we need to pass the FULL array of servers
+    setNodes((prevNodes) => {
+      const currentNode = prevNodes.find(n => n.id === selectedNode.id);
+      if (!currentNode) return prevNodes;
+      
+      const currentData = currentNode.data as AgentNodeData;
+      const servers = currentData.mcpServers || [];
+      const newServers = [...servers, newServer];
+      
+      const newData = { ...currentData, mcpServers: newServers };
+      const newNodes = prevNodes.map((n) =>
+        n.id === selectedNode.id ? { ...n, data: newData } : n
+      );
+      
+      setSelectedNode({ ...selectedNode, data: newData });
+      notifyChange(newNodes, edges);
+      onNodeDataChange?.(selectedNode.id, newData);
+      
+      return newNodes;
+    });
+    
+    // Validate immediately
+    validateMcpServer(newServer.id, newServer);
+  }, [selectedNode, edges, setNodes, notifyChange, onNodeDataChange, validateMcpServer]);
+
+  const handleDeleteMcpServer = useCallback((id: string) => {
+    if (!selectedNode) return;
+    
+    setNodes((prevNodes) => {
+      const currentNode = prevNodes.find(n => n.id === selectedNode.id);
+      if (!currentNode) return prevNodes;
+      
+      const currentData = currentNode.data as AgentNodeData;
+      const servers = currentData.mcpServers || [];
+      const newServers = servers.filter(s => s.id !== id);
+      
+      const newData = { ...currentData, mcpServers: newServers };
+      const newNodes = prevNodes.map((n) =>
+        n.id === selectedNode.id ? { ...n, data: newData } : n
+      );
+      
+      setSelectedNode({ ...selectedNode, data: newData });
+      notifyChange(newNodes, edges);
+      onNodeDataChange?.(selectedNode.id, newData);
+      
+      return newNodes;
+    });
+
+    // Cleanup state
+    setMcpServerStates(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }, [selectedNode, edges, setNodes, notifyChange, onNodeDataChange]);
+
+  const handleToggleMcpTool = useCallback((serverId: string, toolName: string) => {
+    setMcpServerStates(prev => {
+      const serverState = prev[serverId];
+      if (!serverState) return prev;
+      return {
+        ...prev,
+        [serverId]: {
+          ...serverState,
+          tools: serverState.tools.map(t => t.name === toolName ? { ...t, enabled: !t.enabled } : t)
+        }
+      };
+    });
+  }, []);
+
+  const handleRefreshMcpServer = useCallback((serverId: string) => {
+    if (!selectedNode) return;
+    const nodeData = getNodeData(selectedNode);
+    const server = nodeData.mcpServers?.find(s => s.id === serverId);
+    if (server) {
+      validateMcpServer(serverId, server);
+    }
+  }, [selectedNode, validateMcpServer]);
+
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       const target = event.target as HTMLElement;
@@ -339,17 +473,6 @@ function AgentComposerInner({
     },
     [selectedNode, readOnly, deleteSelectedNode]
   );
-
-  const minimapNodeColor = useCallback((node: Node) => {
-    const data = node.data as AgentNodeData;
-    switch (data?.agentClass) {
-      case 'LlmAgent': return '#3b82f6';
-      case 'SequentialAgent': return '#8b5cf6';
-      case 'ParallelAgent': return '#22c55e';
-      case 'LoopAgent': return '#f97316';
-      default: return '#6b7280';
-    }
-  }, []);
 
   // Handler functions for tool sections
   const handleExpandToolSection = useCallback((nodeId: string, type: ToolType) => {
@@ -387,6 +510,7 @@ function AgentComposerInner({
             selectedNode={selectedNode}
             expandedToolSections={expandedToolSections}
             validationErrors={selectedNodeValidationErrors}
+            mcpServerStates={mcpServerStates}
             onClose={onPaneClick}
             onUpdateData={updateSelectedNodeData}
             onUpdateDataLocal={updateSelectedNodeDataLocal}
@@ -394,6 +518,10 @@ function AgentComposerInner({
             onDelete={deleteSelectedNode}
             onExpandToolSection={handleExpandToolSection}
             onCollapseToolSection={handleCollapseToolSection}
+            onAddMcpServer={handleAddMcpServer}
+            onDeleteMcpServer={handleDeleteMcpServer}
+            onToggleMcpTool={handleToggleMcpTool}
+            onRefreshMcpServer={handleRefreshMcpServer}
           />
         );
       })()}
@@ -417,7 +545,7 @@ function AgentComposerInner({
           <MiniMap nodeColor={minimapNodeColor} maskColor="rgba(10, 25, 49, 0.6)" />
         </ReactFlow>
 
-        {/* Empty State - Add First Agent */}
+        {/* Empty State */}
         {isEmpty && !readOnly && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="pointer-events-auto bg-card/95 backdrop-blur-sm border border-border rounded-lg p-8 shadow-2xl max-w-md">

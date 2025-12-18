@@ -1,9 +1,10 @@
 'use client';
 
 import { Node } from '@xyflow/react';
-import { AgentNodeData, ADKAgentClass, ToolConfig } from './AgentNode';
+import { AgentNodeData, ADKAgentClass, ToolConfig, MCPServerConfig as DefinitionMCPServerConfig } from './AgentNode';
 import { BuiltInToolsPanel } from './BuiltInToolsPanel';
 import { AddToolsDropdown, ToolType } from './AddToolsDropdown';
+import MCPToolsPanel, { MCPServerConfig as RuntimeMCPServerConfig } from './MCPToolsPanel';
 import { getAvailableModels } from '@/lib/pricing';
 
 // Available models from pricing source of truth
@@ -29,6 +30,10 @@ interface PropertiesPanelProps {
   selectedNode: Node;
   expandedToolSections: Record<string, Set<ToolType>>;
   validationErrors?: ValidationError[];
+  
+  // MCP State
+  mcpServerStates: Record<string, { status: any; tools: any[]; errorMessage?: string }>;
+
   onClose: () => void;
   onUpdateData: (updates: Partial<AgentNodeData>) => void;
   onUpdateDataLocal: (updates: Partial<AgentNodeData>) => void;
@@ -36,12 +41,19 @@ interface PropertiesPanelProps {
   onDelete: () => void;
   onExpandToolSection: (nodeId: string, type: ToolType) => void;
   onCollapseToolSection: (nodeId: string, type: ToolType) => void;
+  
+  // MCP Handlers
+  onAddMcpServer: (config: Omit<DefinitionMCPServerConfig, 'id'>) => void;
+  onDeleteMcpServer: (id: string) => void;
+  onToggleMcpTool: (serverId: string, toolName: string) => void;
+  onRefreshMcpServer: (serverId: string) => void;
 }
 
 export function PropertiesPanel({
   selectedNode,
   expandedToolSections,
   validationErrors = [],
+  mcpServerStates,
   onClose,
   onUpdateData,
   onUpdateDataLocal,
@@ -49,6 +61,10 @@ export function PropertiesPanel({
   onDelete,
   onExpandToolSection,
   onCollapseToolSection,
+  onAddMcpServer,
+  onDeleteMcpServer,
+  onToggleMcpTool,
+  onRefreshMcpServer,
 }: PropertiesPanelProps) {
   const getNodeData = (): AgentNodeData => selectedNode.data as AgentNodeData;
   const nodeData = getNodeData();
@@ -75,6 +91,17 @@ export function PropertiesPanel({
   if (showAgent) visibleTypes.push('agent');
   if (showOpenApi) visibleTypes.push('openapi');
   if (showPython) visibleTypes.push('python');
+
+  // Merge MCP config with runtime state
+  const mergedMcpServers: RuntimeMCPServerConfig[] = (nodeData.mcpServers || []).map(server => {
+    const runtime = mcpServerStates[server.id] || { status: 'disconnected', tools: [] };
+    return {
+      ...server,
+      status: runtime.status,
+      errorMessage: runtime.errorMessage,
+      tools: runtime.tools,
+    };
+  });
 
   return (
     <div className="w-80 bg-card/30 border-l border-border p-4 flex flex-col overflow-y-auto backdrop-blur-sm" data-testid="properties-panel">
@@ -208,6 +235,29 @@ export function PropertiesPanel({
                   toolConfigs={nodeData.toolConfigs || new Map()}
                   onToolsChange={(tools) => onUpdateData({ tools })}
                   onToolConfigChange={onUpdateToolConfig}
+                />
+              </div>
+            )}
+
+            {showMcp && (
+              <div className="relative bg-accent border border-accent rounded-sm p-2">
+                {!hasMcpTools && (
+                  <button
+                    onClick={() => onCollapseToolSection(nodeId, 'mcp')}
+                    className="absolute -top-2 -right-2 p-1 bg-card border border-border text-muted-foreground hover:text-destructive rounded-full z-10 shadow-sm"
+                    title="Remove section"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+                <MCPToolsPanel
+                  servers={mergedMcpServers}
+                  onAddServer={onAddMcpServer}
+                  onDeleteServer={onDeleteMcpServer}
+                  onToggleTool={(serverId, toolName) => onToggleMcpTool(serverId, toolName)}
+                  onRefreshServer={onRefreshMcpServer}
                 />
               </div>
             )}
