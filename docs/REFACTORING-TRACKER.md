@@ -86,6 +86,7 @@ The hook would need significant expansion to replace the page-level logic.
 **Finding:** Panels have different data structures and purposes. Unification limited to:
 - [x] Create shared StatusBadge component
 - [x] Create shared KeyValueEditor component
+- [x] Create shared ConfirmDialog component
 - [ ] Extract common styling patterns
 
 ---
