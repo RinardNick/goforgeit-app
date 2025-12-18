@@ -3,6 +3,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import {
+  loadConversationForAgent,
+  saveConversationForAgent,
+  clearConversationForAgent,
+} from '@/lib/adk/assistant-conversation-store';
 
 // Executed action from the backend
 interface ExecutedAction {
@@ -23,12 +28,14 @@ interface Message {
   isComplete?: boolean;
 }
 
-interface AIAssistantPanelProps {
+export interface AIAssistantPanelProps {
   isOpen: boolean;
   projectName: string;
   currentAgents: Array<{ filename: string; name: string; agentClass: string }>;
   selectedAgent?: { filename: string; name: string } | null;
   onRefreshNeeded?: () => void;
+  /** API base path for the assistant endpoint (e.g., '/api/agents' or '/api/adk-agents') */
+  apiBasePath?: string;
 }
 
 const SUGGESTION_PROMPTS = [
@@ -60,6 +67,7 @@ export function AIAssistantPanel({
   currentAgents,
   selectedAgent,
   onRefreshNeeded,
+  apiBasePath = '/api/agents',
 }: AIAssistantPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -69,6 +77,21 @@ export function AIAssistantPanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation from localStorage when projectName changes
+  useEffect(() => {
+    if (projectName) {
+      const savedMessages = loadConversationForAgent(projectName);
+      setMessages(savedMessages as Message[]);
+    }
+  }, [projectName]);
+
+  // Save conversation to localStorage when messages change
+  useEffect(() => {
+    if (projectName && messages.length > 0) {
+      saveConversationForAgent(projectName, messages);
+    }
+  }, [projectName, messages]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -135,8 +158,8 @@ export function AIAssistantPanel({
     setIsLoading(true);
 
     try {
-      // Call the AI assistant API
-      const response = await fetch(`/api/adk-agents/${projectName}/assistant`, {
+      // Call the AI assistant API using the configurable base path
+      const response = await fetch(`${apiBasePath}/${projectName}/assistant`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -193,52 +216,71 @@ export function AIAssistantPanel({
     inputRef.current?.focus();
   };
 
+  const handleClearConversation = () => {
+    setMessages([]);
+    clearConversationForAgent(projectName);
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
       ref={panelRef}
       data-testid="ai-assistant-panel"
-      className="border-l border-gray-200 bg-white flex flex-col relative overflow-hidden"
+      className="border-l border-border bg-background flex flex-col relative overflow-hidden transition-colors"
       style={{ width: panelWidth, height: 'calc(100vh - 140px)', minHeight: '500px' }}
     >
       {/* Resize Handle */}
       <div
         data-testid="ai-assistant-resize-handle"
         onMouseDown={handleResizeStart}
-        className={`absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-blue-400 transition-colors z-10 ${
-          isResizing ? 'bg-blue-500' : 'bg-transparent hover:bg-blue-300'
+        className={`absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-primary/50 transition-colors z-10 ${
+          isResizing ? 'bg-primary' : 'bg-transparent hover:bg-primary/30'
         }`}
       />
 
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          AI Builder Assistant
-        </h3>
+      <div className="p-4 border-b border-border bg-card/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          <h3 className="font-heading font-bold text-foreground flex items-center gap-2 uppercase tracking-wide text-sm">
+            <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            AI Architect
+          </h3>
+          {messages.length > 0 && (
+            <button
+              data-testid="ai-assistant-clear"
+              onClick={handleClearConversation}
+              className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent transition-colors"
+              title="Clear conversation"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         {selectedAgent && (
           <div
             data-testid="ai-assistant-context"
-            className="mt-2 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded"
+            className="mt-2 text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded border border-border"
           >
-            Selected: <span className="font-medium">{selectedAgent.name}</span>
+            Context: <span className="font-medium text-primary">{selectedAgent.name}</span>
           </div>
         )}
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-background">
         {messages.length === 0 ? (
           <div data-testid="ai-assistant-welcome">
-            <div className="text-center text-gray-500 mb-4">
-              <svg className="w-12 h-12 mx-auto text-blue-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-              </svg>
-              <p className="text-sm font-medium">How can I help you build?</p>
-              <p className="text-xs mt-1">I can create agents, add tools, set up workflows, and more.</p>
+            <div className="text-center text-muted-foreground/60 mb-8 mt-4">
+              <div className="w-12 h-12 mx-auto bg-muted/30 rounded-full flex items-center justify-center mb-3 text-primary border border-border">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-foreground">Ready to architect.</p>
+              <p className="text-xs mt-1">Initialize agents, configure tools, or design workflows.</p>
             </div>
 
             {/* Suggestion Chips */}
@@ -248,47 +290,47 @@ export function AIAssistantPanel({
                   key={index}
                   data-testid="ai-assistant-suggestion"
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="w-full text-left px-3 py-2 text-xs text-muted-foreground bg-card border border-border hover:bg-accent hover:border-primary/30 hover:text-foreground rounded-sm transition-all duration-200 font-mono"
                 >
-                  {suggestion}
+                  {'>'} {suggestion}
                 </button>
               ))}
             </div>
           </div>
         ) : (
-          <div data-testid="ai-assistant-messages" className="space-y-4">
+          <div data-testid="ai-assistant-messages" className="space-y-6">
             {messages.map((message) => (
               <div key={message.id}>
                 <div
                   data-testid={message.role === 'assistant' ? 'assistant-message' : 'user-message'}
                   className={`${
                     message.role === 'user'
-                      ? 'ml-8 bg-blue-50 text-blue-900'
-                      : 'mr-4 bg-gray-50 text-gray-900'
-                  } p-3 rounded-lg text-sm`}
+                      ? 'ml-8 bg-primary/10 border border-primary/20 text-foreground'
+                      : 'mr-4 bg-muted/30 border border-border text-muted-foreground'
+                  } p-4 rounded-sm text-sm font-sans leading-relaxed shadow-sm transition-colors`}
                 >
                   {message.role === 'assistant' ? (
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
                         // Headings
-                        h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3 first:mt-0">{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-base font-bold mb-2 mt-3 first:mt-0">{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2 first:mt-0">{children}</h3>,
+                        h1: ({ children }) => <h1 className="text-lg font-bold font-heading text-foreground mb-3 mt-4 first:mt-0">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-base font-bold font-heading text-foreground mb-2 mt-3 first:mt-0">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-sm font-bold font-heading text-foreground mb-2 mt-3 first:mt-0">{children}</h3>,
                         // Paragraphs
-                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
                         // Lists
-                        ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                        ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1 marker:text-primary">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1 marker:text-primary">{children}</ol>,
                         li: ({ children }) => <li className="ml-2">{children}</li>,
                         // Code
                         code: ({ className, children }) => {
                           const isInline = !className;
                           if (isInline) {
-                            return <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded text-xs font-mono">{children}</code>;
+                            return <code className="bg-muted border border-border text-primary px-1 py-0.5 rounded text-xs font-mono">{children}</code>;
                           }
                           return (
-                            <code className="block bg-gray-800 text-gray-100 p-2 rounded text-xs font-mono overflow-x-auto my-2">
+                            <code className="block bg-muted/50 border border-border text-foreground p-3 rounded-sm text-xs font-mono overflow-x-auto my-3">
                               {children}
                             </code>
                           );
@@ -296,32 +338,32 @@ export function AIAssistantPanel({
                         pre: ({ children }) => <pre className="my-2">{children}</pre>,
                         // Tables (GFM)
                         table: ({ children }) => (
-                          <div className="overflow-x-auto my-2">
-                            <table className="min-w-full border border-gray-300 text-xs">{children}</table>
+                          <div className="overflow-x-auto my-3">
+                            <table className="min-w-full border border-border text-xs">{children}</table>
                           </div>
                         ),
-                        thead: ({ children }) => <thead className="bg-gray-200">{children}</thead>,
+                        thead: ({ children }) => <thead className="bg-muted text-foreground">{children}</thead>,
                         tbody: ({ children }) => <tbody>{children}</tbody>,
-                        tr: ({ children }) => <tr className="border-b border-gray-300">{children}</tr>,
-                        th: ({ children }) => <th className="px-2 py-1 text-left font-semibold border-r border-gray-300 last:border-r-0">{children}</th>,
-                        td: ({ children }) => <td className="px-2 py-1 border-r border-gray-300 last:border-r-0">{children}</td>,
+                        tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,
+                        th: ({ children }) => <th className="px-3 py-2 text-left font-semibold border-r border-border last:border-r-0">{children}</th>,
+                        td: ({ children }) => <td className="px-3 py-2 border-r border-border last:border-r-0">{children}</td>,
                         // Links
                         a: ({ href, children }) => (
-                          <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline hover:text-primary/80">
                             {children}
                           </a>
                         ),
                         // Blockquotes
                         blockquote: ({ children }) => (
-                          <blockquote className="border-l-4 border-blue-300 pl-3 my-2 italic text-gray-600">
+                          <blockquote className="border-l-2 border-primary pl-3 my-3 italic text-muted-foreground/80">
                             {children}
                           </blockquote>
                         ),
                         // Horizontal rule
-                        hr: () => <hr className="my-3 border-gray-300" />,
+                        hr: () => <hr className="my-4 border-border" />,
                         // Strong and emphasis
-                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                        em: ({ children }) => <em className="italic">{children}</em>,
+                        strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+                        em: ({ children }) => <em className="italic text-muted-foreground">{children}</em>,
                       }}
                     >
                       {message.content}
@@ -333,28 +375,28 @@ export function AIAssistantPanel({
 
                 {/* Show executed actions for assistant messages */}
                 {message.role === 'assistant' && message.executedActions && message.executedActions.length > 0 && (
-                  <div className="mt-2 mr-4 space-y-1" data-testid="executed-actions">
-                    <div className="text-xs font-medium text-gray-500 mb-1">Actions executed:</div>
+                  <div className="mt-3 mr-4 space-y-1 pl-1" data-testid="executed-actions">
+                    <div className="text-[10px] font-mono text-muted-foreground/40 mb-1 uppercase tracking-wider">System Actions:</div>
                     {message.executedActions.map((action, idx) => (
                       <div
                         key={idx}
-                        className={`text-xs p-2 rounded border ${
+                        className={`text-xs p-2 rounded-sm border ${
                           action.result.success
-                            ? 'bg-green-50 border-green-200 text-green-800'
-                            : 'bg-red-50 border-red-200 text-red-800'
+                            ? 'bg-green-500/5 border-green-500/20 text-green-600 dark:text-green-400'
+                            : 'bg-destructive/5 border-destructive/20 text-destructive'
                         }`}
                         data-testid="executed-action-item"
                       >
-                        <div className="flex items-center gap-1 font-medium">
-                          <span>{TOOL_ICONS[action.tool] || '🔄'}</span>
+                        <div className="flex items-center gap-2 font-medium font-mono">
+                          <span>{TOOL_ICONS[action.tool] || '⚙️'}</span>
                           <span>{action.tool}</span>
                           {action.result.success ? (
-                            <span className="text-green-600">✓</span>
+                            <span className="text-green-600 dark:text-green-400">✓</span>
                           ) : (
-                            <span className="text-red-600">✗</span>
+                            <span className="text-destructive">✗</span>
                           )}
                         </div>
-                        <div className="mt-1 text-gray-600">{action.result.message}</div>
+                        <div className="mt-1 text-muted-foreground/80 pl-6 border-l border-border ml-1">{action.result.message}</div>
                       </div>
                     ))}
                   </div>
@@ -362,11 +404,9 @@ export function AIAssistantPanel({
 
                 {/* Show completion badge */}
                 {message.role === 'assistant' && message.isComplete && (
-                  <div className="mt-2 mr-4">
-                    <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
+                  <div className="mt-2 mr-4 pl-1">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] bg-forgeGreen/10 border border-forgeGreen/20 text-forgeGreen px-2 py-0.5 rounded-full font-mono uppercase tracking-wide">
+                      <span className="w-1.5 h-1.5 rounded-full bg-forgeGreen"></span>
                       Task completed
                     </span>
                   </div>
@@ -376,13 +416,14 @@ export function AIAssistantPanel({
 
             {/* Loading indicator */}
             {isLoading && (
-              <div data-testid="ai-assistant-loading" className="mr-4 bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Working on your request...
+              <div data-testid="ai-assistant-loading" className="mr-4 bg-muted/20 border border-border p-3 rounded-sm">
+                <div className="flex items-center gap-3 text-muted-foreground text-sm font-mono">
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce delay-100"></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce delay-200"></div>
+                  </div>
+                  <span>Processing...</span>
                 </div>
               </div>
             )}
@@ -392,7 +433,7 @@ export function AIAssistantPanel({
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-border bg-card/80 backdrop-blur-sm">
         <div className="flex gap-2">
           <textarea
             ref={inputRef}
@@ -400,15 +441,15 @@ export function AIAssistantPanel({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask me to create agents, add tools, or help with your workflow..."
-            className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Instruct the Architect..."
+            className="flex-1 resize-none bg-background border border-border rounded-sm px-3 py-3 text-sm text-foreground placeholder-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-sans"
             rows={2}
           />
           <button
             data-testid="ai-assistant-send"
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
-            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-2 bg-primary text-primary-foreground rounded-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-primary/20"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

@@ -88,12 +88,20 @@ graph TD
 *   [x] **4.1 Dedicated Database:** Provision `goforgeit-db` Cloud SQL instance and configure `app.goforgeit.com` to use it. (Completed Dec 16, 2025)
 **Goal:** Turn the internal tool into a SaaS-ready platform.
 
-1.  **Organization/Project Scope:** Move from a flat agent list to `Organization -> Project -> Agent` hierarchy.
+1.  **Organization/Project Scope:** Move from a flat agent list to `Organization > Project -> Agent` hierarchy.
 2.  **Token Accounting:**
     *   Intercept ADK streams in the Next.js Router.
     *   Count tokens per request.
     *   Log usage to `billing_ledger` table linked to the User/Org.
 3.  **API Keys:** Issue API Keys for external apps to call `POST /api/run`.
+
+### Phase 4.5: The Visible Platform (Completed Dec 17, 2025)
+**Goal:** Expose the infrastructure to the user with a secure, multi-tenant UI.
+
+1.  **Project Hierarchy:** Refactored architecture to `Organization > Project (Folder) > Agent`.
+2.  **Billing Dashboard:** Created `/settings/billing` with granular cost breakdown (by Project/Agent/Model), input/output token tracking, and visual usage trends.
+3.  **Security:** Enforced "One User = One Organization" model with auto-provisioning (`ensureUserOrg`) and strict API auth checks.
+4.  **Pricing Engine:** Centralized pricing logic (`lib/pricing.ts`) supporting Gemini 3.0, GPT-5.2, and other future models.
 
 ### Phase 5: UX Revolution
 **Goal:** A chat interface that feels like an OS.
@@ -107,7 +115,7 @@ graph TD
 ## 4. Immediate Next Steps
 
 1.  [x] **Execute Phase 1:** Upgrade Dockerfile and switch DB to Postgres. (Completed Dec 15, 2025)
-2.  [x] **Prototype Phase 2:** Build a simple MCP server endpoint in Next.js that wraps one hardcoded agent. (Completed Dec 15, 2025 - Dynamic implementation!)
+2.  [x] **Prototype Phase 2:** Build a simple MCP server endpoint in Next.js that wraps one hardcoded agent. (Completed Dec 15, 2025)
 3.  [x] **Design Phase 4 DB:** Sketch the schema for `organizations`, `projects`, and `billing_ledger`. (Completed Dec 16, 2025)
-4.  [x] **Implement Phase 4 Logic:** Wire up Token Accounting to the `billing_ledger` table. (Completed Dec 16, 2025)
+4.  [x] **Implement Phase 4 & 4.5:** Full billing infrastructure, dashboard, and project hierarchy. (Completed Dec 17, 2025)
 5.  [ ] **Start Phase 3 Refactor:** Port the Builder Assistant's hardcoded loop to Genkit tools and create the `builder_agent.yaml`.

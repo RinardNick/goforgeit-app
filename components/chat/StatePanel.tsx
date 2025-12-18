@@ -9,7 +9,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { StateEntry } from '../types';
+import type { StateEntry } from './types';
 
 interface StatePanelProps {
   sessionState: StateEntry[];

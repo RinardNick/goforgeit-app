@@ -11,7 +11,7 @@
 import Link from 'next/link';
 import { LoadingButton } from '@/components/ui/LoadingButton';
 
-interface ComposeHeaderProps {
+export interface ComposeHeaderProps {
   displayName: string;
   filesCount: number;
   viewMode: 'visual' | 'yaml' | 'split';
@@ -27,6 +27,8 @@ interface ComposeHeaderProps {
   error: string | null;
   onErrorDismiss: () => void;
   onBack: () => void;
+  /** Base path for navigation links (e.g., '' or '/adk-agents') */
+  navBasePath?: string;
 }
 
 export function ComposeHeader({
@@ -45,7 +47,10 @@ export function ComposeHeader({
   error,
   onErrorDismiss,
   onBack,
+  navBasePath = '',
 }: ComposeHeaderProps) {
+  const chatLink = navBasePath ? `${navBasePath}/${agentName}/chat` : `/${agentName}/chat`;
+
   return (
     <div className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-3 z-40 relative">
       <div className="max-w-full flex items-center justify-between">
@@ -79,8 +84,8 @@ export function ComposeHeader({
                 key={mode}
                 onClick={() => onViewModeChange(mode)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-all duration-200 uppercase tracking-wide ${
-                  viewMode === mode 
-                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                  viewMode === mode
+                    ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 }`}
               >
@@ -108,7 +113,7 @@ export function ComposeHeader({
           </button>
 
           <Link
-            href={`/${agentName}/chat`}
+            href={chatLink}
             className="px-3 py-1.5 text-xs font-medium text-muted-foreground border border-border rounded-sm hover:bg-accent hover:text-foreground uppercase tracking-wide transition-colors"
           >
             Test Agent
@@ -129,8 +134,8 @@ export function ComposeHeader({
             isLoading={saving}
             loadingText="Saving..."
             className={`px-4 py-1.5 text-xs font-medium rounded-sm uppercase tracking-wide transition-all duration-300 ${
-                !hasChanges 
-                ? 'bg-muted text-muted-foreground/50 cursor-not-allowed' 
+                !hasChanges
+                ? 'bg-muted text-muted-foreground/50 cursor-not-allowed'
                 : 'bg-primary text-primary-foreground hover:opacity-90 shadow-lg'
             }`}
             testId="save-button"

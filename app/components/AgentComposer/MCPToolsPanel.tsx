@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Plus, Server, Terminal, Globe, X, RefreshCw, Trash2, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Server, Terminal, Globe, X, RefreshCw, Trash2, AlertCircle, Loader2 } from 'lucide-react';
+import { StatusBadge, KeyValueEditor, type ConnectionStatus } from './shared';
 
 // --- Types ---
 export type ServerType = 'stdio' | 'sse';
-export type ConnectionStatus = 'connected' | 'disconnected' | 'error' | 'connecting';
+export type { ConnectionStatus };
 
 export interface MCPTool {
   name: string;
@@ -39,83 +40,6 @@ interface MCPToolsPanelProps {
   onRefreshServer: (serverId: string) => void;
   onUpdateServer?: (id: string, config: Partial<MCPServerConfig>) => void;
 }
-
-// --- Status Badge ---
-const StatusBadge = ({ status }: { status: ConnectionStatus }) => {
-  const config = {
-    connected: { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10', label: 'ONLINE' },
-    disconnected: { icon: AlertCircle, color: 'text-muted-foreground/40', bg: 'bg-muted', label: 'OFFLINE' },
-    error: { icon: AlertCircle, color: 'text-destructive', bg: 'bg-destructive/10', label: 'ERROR' },
-    connecting: { icon: Loader2, color: 'text-primary', bg: 'bg-primary/10', label: 'SYNC' },
-  };
-
-  const { icon: Icon, color, bg, label } = config[status];
-
-  return (
-    <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[9px] font-bold font-mono border border-current opacity-80 ${bg} ${color}`}>
-      <Icon size={10} className={status === 'connecting' ? 'animate-spin' : ''} />
-      <span className="tracking-widest">{label}</span>
-    </div>
-  );
-};
-
-// --- Key-Value Editor ---
-interface KeyValueEditorProps {
-  label: string;
-  items: { key: string; value: string }[];
-  onChange: (items: { key: string; value: string }[]) => void;
-  placeholder?: { key: string; value: string };
-}
-
-const KeyValueEditor = ({ label, items, onChange, placeholder }: KeyValueEditorProps) => {
-  return (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest font-mono">{label}</label>
-        <button
-          type="button"
-          onClick={() => onChange([...items, { key: '', value: '' }])}
-          className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-wide flex items-center gap-1 transition-colors"
-        >
-          <Plus size={12} /> Add Entry
-        </button>
-      </div>
-      <div className="space-y-2">
-        {items.map((item, idx) => (
-          <div key={idx} className="flex gap-2">
-            <input
-              placeholder={placeholder?.key || 'KEY'}
-              className="flex-1 min-w-0 bg-background border border-border rounded-sm px-2 py-1.5 text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary outline-none"
-              value={item.key}
-              onChange={(e) => {
-                const newItems = [...items];
-                newItems[idx].key = e.target.value;
-                onChange(newItems);
-              }}
-            />
-            <input
-              placeholder={placeholder?.value || 'VALUE'}
-              className="flex-1 min-w-0 bg-background border border-border rounded-sm px-2 py-1.5 text-xs font-mono focus:ring-1 focus:ring-primary focus:border-primary outline-none"
-              value={item.value}
-              onChange={(e) => {
-                const newItems = [...items];
-                newItems[idx].value = e.target.value;
-                onChange(newItems);
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => onChange(items.filter((_, i) => i !== idx))}
-              className="text-muted-foreground/40 hover:text-destructive transition-colors px-1"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // --- Add Server Dialog ---
 interface AddServerDialogProps {

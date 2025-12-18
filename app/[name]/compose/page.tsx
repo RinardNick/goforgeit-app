@@ -7,9 +7,7 @@ import dynamic from 'next/dynamic';
 import YAML from 'yaml';
 import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
-import { AIAssistantPanel } from './AIAssistantPanel';
-import { ComposeHeader } from './components/ComposeHeader';
-import { YAMLEditorPanel } from './components/YAMLEditorPanel';
+import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
 import {
   agentFilesToNodes,
   nodesToYaml,

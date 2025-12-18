@@ -15,18 +15,22 @@ import type {
   StateEntry,
   InvocationInfo,
   AgentConfig,
-} from './types';
-import { getHeatmapColor, processArtifactDelta } from './utils';
-import { DeleteSessionDialog } from './components/DeleteSessionDialog';
-import { ArtifactUploadModal } from './components/ArtifactUploadModal';
-import { ArtifactPreviewModal } from './components/ArtifactPreviewModal';
-import { SessionsPanel } from './components/SessionsPanel';
-import { ArtifactsPanel } from './components/ArtifactsPanel';
-import { StatePanel } from './components/StatePanel';
-import { EventsPanel } from './components/EventsPanel';
-import { TracePanel } from './components/TracePanel';
-import { ChatHeader } from './components/ChatHeader';
-import { ChatInput, type Attachment } from './components/ChatInput';
+} from '@/components/chat/types';
+import {
+  getHeatmapColor,
+  processArtifactDelta,
+  DeleteSessionDialog,
+  ArtifactUploadModal,
+  ArtifactPreviewModal,
+  SessionsPanel,
+  ArtifactsPanel,
+  StatePanel,
+  EventsPanel,
+  TracePanel,
+  ChatHeader,
+  ChatInput,
+  type Attachment,
+} from '@/components/chat';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 export default function ADKAgentChatPage() {

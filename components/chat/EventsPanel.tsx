@@ -5,8 +5,8 @@
  * event details view with tabs (Event/Request/Response), and formatted JSON display.
  */
 
-import type { ADKEvent, ADKEventPart, EventFilter, DetailTab, InvocationInfo, AgentConfig } from '../types';
-import { formatTimestamp, renderJson, renderRequestContent } from '../utils';
+import type { ADKEvent, ADKEventPart, EventFilter, DetailTab, InvocationInfo, AgentConfig } from './types';
+import { formatTimestamp, renderJson, renderRequestContent } from './utils';
 
 interface EventsPanelProps {
   events: ADKEvent[];

@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "NODE_ENV=test playwright test",
-    "test:unit": "tsx --test lib/adk/__tests__/*.test.ts",
+    "test:unit": "tsx --test lib/adk/__tests__/*.test.ts lib/hooks/__tests__/useMetricsConfig.test.ts",
     "test:ui": "NODE_ENV=test playwright test --ui",
     "test:headed": "NODE_ENV=test playwright test --headed",
     "migrate": "tsx scripts/run-migrations.ts",

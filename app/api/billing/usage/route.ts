@@ -31,10 +31,10 @@ export async function GET() {
       ORDER BY project_name, agent_name, total_cost DESC
     `, [org.id]);
 
-    // Get daily cost breakdown by project (last 30 days)
+    // Get total cost over time (last 30 days) grouped by project for stacked chart
     const dailyUsage = await query(`
       SELECT 
-        TO_CHAR(bl.created_at, 'YYYY-MM-DD') as date,
+        TO_CHAR(bl.created_at, 'YYYY-MM-DD') as date, 
         COALESCE(p.name, 'Unorganized') as project_name,
         SUM(bl.amount) as cost
       FROM billing_ledger bl
@@ -42,7 +42,7 @@ export async function GET() {
       LEFT JOIN projects p ON a.project_id = p.id
       WHERE bl.created_at > NOW() - INTERVAL '30 days' AND bl.org_id = $1
       GROUP BY 1, 2
-      ORDER BY 1, 2
+      ORDER BY 1
     `, [org.id]);
 
     // Group by project

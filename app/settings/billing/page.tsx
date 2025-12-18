@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import Navigation from '@/app/components/Navigation';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { PRICING_TABLE } from '@/lib/pricing';
 
 interface UsageRow {
   project_name: string;
@@ -58,6 +59,7 @@ export default function BillingPage() {
   const [projectColors, setProjectColors] = useState<Record<string, string>>({});
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
   const [expandedAgents, setExpandedAgents] = useState<Set<string>>(new Set());
+  const [showPricing, setShowPricing] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -260,7 +262,7 @@ export default function BillingPage() {
                     {Object.entries(groupedData).map(([pName, pData]) => {
                       const isPExpanded = expandedProjects.has(pName);
                       return (
-                        <>
+                        <Fragment key={pName}>
                           {/* Project Row */}
                           <tr 
                             onClick={() => toggleProject(pName)}
@@ -269,7 +271,7 @@ export default function BillingPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground flex items-center gap-2">
                               <span className="text-muted-foreground w-4 shrink-0">{isPExpanded ? '▼' : '▶'}</span>
                               <svg className="w-4 h-4 text-yellow-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                               </svg>
                               {pName}
                             </td>
@@ -282,9 +284,8 @@ export default function BillingPage() {
                           {isPExpanded && Object.entries(pData.agents).map(([aName, aData]) => {
                             const isAExpanded = expandedAgents.has(aName);
                             return (
-                              <>
+                              <Fragment key={aName}>
                                 <tr 
-                                  key={aName}
                                   onClick={() => toggleAgent(aName)}
                                   className="hover:bg-muted/30 cursor-pointer transition-colors"
                                 >
@@ -319,15 +320,56 @@ export default function BillingPage() {
                                     <td className="px-6 py-2 whitespace-nowrap text-xs text-muted-foreground text-right">${Number(modelRow.total_cost).toFixed(4)}</td>
                                   </tr>
                                 ))}
-                              </>
+                              </Fragment>
                             );
                           })}
-                        </>
+                        </Fragment>
                       );
                     })}
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            {/* Pricing Information */}
+            <div className="mt-8 bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+              <button 
+                onClick={() => setShowPricing(!showPricing)}
+                className="w-full px-6 py-4 flex items-center justify-between bg-muted/20 hover:bg-muted/40 transition-colors"
+              >
+                <h2 className="text-lg font-heading font-semibold text-foreground">Model Pricing Reference</h2>
+                <svg className={`w-5 h-5 text-muted-foreground transform transition-transform ${showPricing ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {showPricing && (
+                <div className="p-6 overflow-x-auto">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase">Provider</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase">Model</th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-muted-foreground uppercase">Input (per 1M)</th>
+                        <th className="px-4 py-2 text-right text-xs font-medium text-muted-foreground uppercase">Output (per 1M)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {PRICING_TABLE.map((model) => (
+                        <tr key={model.id} className="hover:bg-muted/10">
+                          <td className="px-4 py-2 text-sm text-muted-foreground capitalize">{model.provider}</td>
+                          <td className="px-4 py-2 text-sm font-medium text-foreground">
+                            {model.name}
+                            <div className="text-xs text-muted-foreground font-normal">{model.id}</div>
+                          </td>
+                          <td className="px-4 py-2 text-sm text-foreground text-right">${model.inputPrice.toFixed(2)}</td>
+                          <td className="px-4 py-2 text-sm text-foreground text-right">${model.outputPrice.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

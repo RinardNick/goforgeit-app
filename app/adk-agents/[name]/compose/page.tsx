@@ -7,9 +7,7 @@ import dynamic from 'next/dynamic';
 import YAML from 'yaml';
 import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
-import { AIAssistantPanel } from './AIAssistantPanel';
-import { ComposeHeader } from './components/ComposeHeader';
-import { YAMLEditorPanel } from './components/YAMLEditorPanel';
+import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
 import {
   agentFilesToNodes,
   nodesToYaml,
@@ -851,6 +849,7 @@ export default function ADKAgentComposePage() {
         error={error}
         onErrorDismiss={() => setError(null)}
         onBack={() => router.push('/adk-agents')}
+        navBasePath="/adk-agents"
       />
 
       {/* Main Content */}
@@ -947,6 +946,7 @@ export default function ADKAgentComposePage() {
                 name: (selectedNode.data as AgentNodeData).name || '',
               } : null}
               onRefreshNeeded={() => loadFiles(false)}
+              apiBasePath="/api/adk-agents"
             />
           </>
         )}

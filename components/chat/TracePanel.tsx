@@ -5,8 +5,8 @@
  * Shows timing bars with heatmap colors, event details with tabs, and raw JSON toggle.
  */
 
-import type { ADKEvent, ADKEventPart, DetailTab, InvocationInfo, AgentConfig } from '../types';
-import { getHeatmapColor, formatTimestamp, renderJson, renderRequestContent } from '../utils';
+import type { ADKEvent, ADKEventPart, DetailTab, InvocationInfo, AgentConfig } from './types';
+import { getHeatmapColor, formatTimestamp, renderJson, renderRequestContent } from './utils';
 
 interface TracePanelProps {
   isLoading: boolean;
@@ -32,30 +32,30 @@ export function TracePanel({
   agentConfig,
 }: TracePanelProps) {
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto bg-background">
       {/* Streaming Indicator - Shows when loading/streaming */}
       {isLoading && (
-        <div data-testid="trace-streaming-indicator" className="p-3 border-b border-gray-100">
-          <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg animate-pulse">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
-            <span className="text-sm text-blue-700 font-medium">Processing...</span>
-            <div className="flex-1 h-1.5 bg-blue-100 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-400 rounded-full animate-[streaming_1.5s_ease-in-out_infinite]" style={{ width: '40%' }} />
+        <div data-testid="trace-streaming-indicator" className="p-3 border-b border-border">
+          <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-sm animate-pulse border border-primary/20">
+            <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+            <span className="text-xs text-primary font-bold uppercase tracking-widest font-mono">Processing...</span>
+            <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full animate-[streaming_1.5s_ease-in-out_infinite]" style={{ width: '40%' }} />
             </div>
           </div>
         </div>
       )}
       {invocations.length === 0 && !isLoading ? (
         <div data-testid="events-empty-state" className="flex flex-col items-center justify-center h-full text-center p-4">
-          <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-12 h-12 text-muted-foreground/20 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p className="text-sm text-gray-500 font-medium">No trace yet</p>
-          <p className="text-xs text-gray-400 mt-1">Send a message to see the execution trace</p>
+          <p className="text-sm text-muted-foreground font-medium">No trace yet</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">Send a message to see the execution trace</p>
         </div>
       ) : invocations.length > 0 ? (
         <div data-testid="trace-view-panel" className="p-3 space-y-4">
-          <div className="text-xs font-medium text-gray-600 mb-2">Invocations</div>
+          <div className="text-[10px] font-bold text-muted-foreground/60 mb-2 uppercase tracking-widest font-mono">Invocations</div>
 
           {/* Invocations grouped by user message */}
           {invocations.map((invocation, invIndex) => {
@@ -87,23 +87,23 @@ export function TracePanel({
             return (
               <div key={invocation.invocationId} className="space-y-1">
                 {/* User Message Header */}
-                <div className="text-sm font-medium text-gray-800 mb-2 truncate">
+                <div className="text-sm font-bold font-heading text-foreground mb-1 truncate uppercase tracking-tight">
                   {invocation.userMessage}
                 </div>
-                <div className="text-xs text-gray-500 mb-2">
-                  Invocation ID: <span className="font-mono">{invocation.invocationId}</span>
+                <div className="text-[10px] text-muted-foreground/60 mb-3 font-mono">
+                  ID: <span className="opacity-80">{invocation.invocationId}</span>
                 </div>
 
                 {/* Main invocation row with full time bar and heatmap */}
                 {(() => {
                   const heatmap = getHeatmapColor(invocationTime);
                   return (
-                    <div className="flex items-center gap-2 py-1.5 px-2 bg-blue-50 rounded">
+                    <div className="flex items-center gap-2 py-1.5 px-2 bg-primary/5 rounded-sm border border-primary/10">
                       <span className="text-sm">🚀</span>
-                      <span className="text-xs font-medium text-blue-700 flex-shrink-0">invocation</span>
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono">invocation</span>
                       <div
                         data-testid="trace-timing-bar"
-                        className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden"
+                        className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden"
                       >
                         <div
                           className={`h-full rounded-full ${heatmap.barColor}`}
@@ -111,7 +111,7 @@ export function TracePanel({
                           style={{ width: '100%' }}
                         />
                       </div>
-                      <span className="text-xs text-blue-600 font-mono flex-shrink-0">{invocationTime.toFixed(2)}ms</span>
+                      <span className="text-[10px] text-primary font-mono flex-shrink-0">{invocationTime.toFixed(2)}ms</span>
                     </div>
                   );
                 })()}
@@ -126,14 +126,14 @@ export function TracePanel({
 
                   const groupHeatmap = getHeatmapColor(groupDuration);
                   return (
-                    <div key={`${agentGroup.agent}-${groupIndex}`} className="ml-4 space-y-1">
+                    <div key={`${agentGroup.agent}-${groupIndex}`} className="ml-4 space-y-1 mt-2">
                       {/* Agent invoke row with heatmap */}
-                      <div className="flex items-center gap-2 py-1.5 px-2 bg-orange-50 rounded">
-                        <span className="text-sm">🏃</span>
-                        <span className="text-xs font-medium text-orange-700 flex-shrink-0">invoke_agent {agentGroup.agent}</span>
+                      <div className="flex items-center gap-2 py-1 px-2 bg-muted/30 border border-border rounded-sm">
+                        <span className="text-xs opacity-70">🏃</span>
+                        <span className="text-[10px] font-bold text-foreground/80 uppercase tracking-wide font-mono flex-shrink-0">{agentGroup.agent}</span>
                         <div
                           data-testid="trace-timing-bar"
-                          className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden"
+                          className="flex-1 h-1 bg-muted rounded-full overflow-hidden"
                         >
                           <div
                             className={`h-full rounded-full ${groupHeatmap.barColor}`}
@@ -144,7 +144,7 @@ export function TracePanel({
                             }}
                           />
                         </div>
-                        <span className="text-xs text-orange-600 font-mono flex-shrink-0">{groupDuration.toFixed(2)}ms</span>
+                        <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">{groupDuration.toFixed(2)}ms</span>
                       </div>
 
                       {/* Events within this agent */}
@@ -174,34 +174,34 @@ export function TracePanel({
                             <button
                               data-testid={`trace-node-${isLLMCall ? 'response' : 'tool'}`}
                               onClick={() => setSelectedEventIndex(isSelected ? null : globalIndex)}
-                              className={`w-full flex items-center gap-2 py-1.5 px-2 rounded text-left transition-colors ${
+                              className={`w-full flex items-center gap-2 py-1 px-2 rounded-sm text-left transition-all duration-200 border ${
                                 isSelected
-                                  ? 'bg-blue-100 ring-2 ring-blue-500'
+                                  ? 'bg-primary/10 border-primary shadow-sm'
                                   : isToolCall
-                                  ? 'bg-purple-50 hover:bg-purple-100'
+                                  ? 'bg-primary/5 border-primary/10 hover:border-primary/30'
                                   : isToolResponse
-                                  ? 'bg-green-50 hover:bg-green-100'
-                                  : 'bg-gray-50 hover:bg-gray-100'
+                                  ? 'bg-green-500/5 border-green-500/10 hover:border-green-500/30'
+                                  : 'bg-muted/20 border-border hover:bg-accent'
                               }`}
                             >
-                              <span className="text-sm">
+                              <span className="text-xs opacity-70">
                                 {isToolCall ? '⚡' : isToolResponse ? '✓' : '💬'}
                               </span>
-                              <span className={`text-xs font-medium flex-shrink-0 ${
-                                isToolCall ? 'text-purple-700' :
-                                isToolResponse ? 'text-green-700' :
-                                'text-gray-700'
+                              <span className={`text-[10px] font-mono font-medium flex-shrink-0 uppercase tracking-tight ${
+                                isToolCall ? 'text-primary' :
+                                isToolResponse ? 'text-green-500' :
+                                'text-foreground/70'
                               }`}>
-                                {isToolCall ? `execute_tool ${funcCall?.name}` :
-                                 isToolResponse ? `tool_response ${funcResp?.name}` :
-                                 `call_llm`}
+                                {isToolCall ? `tool_call ${funcCall?.name}` :
+                                 isToolResponse ? `tool_resp ${funcResp?.name}` :
+                                 `llm_invoke`}
                               </span>
-                              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="flex-1 h-1 bg-muted/50 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full ${
-                                    isToolCall ? 'bg-purple-400' :
-                                    isToolResponse ? 'bg-green-400' :
-                                    'bg-gray-400'
+                                    isToolCall ? 'bg-primary' :
+                                    isToolResponse ? 'bg-green-500' :
+                                    'bg-foreground/20'
                                   }`}
                                   style={{
                                     width: `${Math.min(Math.max(eventWidthPercent, 2), 100)}%`,
@@ -209,14 +209,14 @@ export function TracePanel({
                                   }}
                                 />
                               </div>
-                              <span className="text-xs text-gray-500 font-mono flex-shrink-0">
+                              <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0 opacity-60">
                                 {eventDuration.toFixed(2)}ms
                               </span>
                             </button>
 
                             {/* Transfer indicator */}
                             {event.actions?.transferToAgent && (
-                              <div className="ml-6 mt-1 text-xs text-purple-600 flex items-center gap-1">
+                              <div className="ml-6 mt-1 text-[10px] text-primary/70 flex items-center gap-1 font-mono uppercase tracking-tighter">
                                 <span>→</span>
                                 <span>transfer to {event.actions.transferToAgent}</span>
                               </div>
@@ -224,92 +224,79 @@ export function TracePanel({
 
                             {/* Expanded event details */}
                             {isSelected && (
-                              <div className="ml-6 mt-2 mb-2 p-3 bg-white border border-gray-200 rounded-lg">
+                              <div className="ml-6 mt-2 mb-2 p-4 bg-card border border-border rounded-sm shadow-xl relative z-10">
                                 {/* Detail tabs */}
-                                <div className="flex border-b border-gray-200 mb-3">
-                                  <button
-                                    onClick={() => setDetailTab('event')}
-                                    className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                      detailTab === 'event' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'
-                                    }`}
-                                  >
-                                    Event
-                                  </button>
-                                  <button
-                                    onClick={() => setDetailTab('request')}
-                                    className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                      detailTab === 'request' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'
-                                    }`}
-                                  >
-                                    Request
-                                  </button>
-                                  <button
-                                    onClick={() => setDetailTab('response')}
-                                    className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                      detailTab === 'response' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'
-                                    }`}
-                                  >
-                                    Response
-                                  </button>
+                                <div className="flex border-b border-border mb-4">
+                                  {(['event', 'request', 'response'] as DetailTab[]).map((tab) => (
+                                    <button
+                                      key={tab}
+                                      onClick={() => setDetailTab(tab)}
+                                      className={`px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest border-b-2 transition-all duration-200 ${
+                                        detailTab === tab ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+                                      }`}
+                                    >
+                                      {tab}
+                                    </button>
+                                  ))}
                                 </div>
 
                                 {/* Agent badges */}
-                                <div className="flex items-center gap-2 mb-3">
-                                  <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                                    🤖 {event.author}
+                                <div className="flex items-center gap-2 mb-4">
+                                  <span className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-sm text-[10px] font-mono font-bold uppercase tracking-wide">
+                                    {event.author}
                                   </span>
                                   {event.actions?.transferToAgent && (
                                     <>
-                                      <span className="text-gray-400">→</span>
-                                      <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                                        🤖 {event.actions.transferToAgent}
+                                      <span className="text-muted-foreground/40">→</span>
+                                      <span className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-sm text-[10px] font-mono font-bold uppercase tracking-wide">
+                                        {event.actions.transferToAgent}
                                       </span>
                                     </>
                                   )}
                                 </div>
 
                                 {/* Detail content */}
-                                <div data-testid="event-details" className="text-xs font-mono overflow-auto bg-gray-50 rounded p-2">
+                                <div data-testid="event-details" className="text-xs font-mono overflow-auto bg-muted/30 border border-border rounded-sm p-3 max-h-96 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                                   {detailTab === 'event' && (
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                       {event.modelVersion && (
-                                        <div><span className="text-amber-600">modelVersion:</span> <span className="text-green-600">&quot;{event.modelVersion}&quot;</span></div>
+                                        <div className="flex gap-2"><span className="text-primary/60 uppercase">modelVersion:</span> <span className="text-foreground font-medium">&quot;{event.modelVersion}&quot;</span></div>
                                       )}
-                                      <div><span className="text-amber-600">author:</span> <span className="text-green-600">&quot;{event.author}&quot;</span></div>
-                                      <div><span className="text-amber-600">invocationId:</span> <span className="text-green-600">&quot;{event.invocationId}&quot;</span></div>
+                                      <div className="flex gap-2"><span className="text-primary/60 uppercase">author:</span> <span className="text-foreground font-medium">&quot;{event.author}&quot;</span></div>
+                                      <div className="flex gap-2"><span className="text-primary/60 uppercase">invocationId:</span> <span className="text-foreground font-medium">&quot;{event.invocationId}&quot;</span></div>
                                       {event.content?.parts?.[0]?.text && (
-                                        <div className="mt-2">
-                                          <span className="text-amber-600">text:</span>
-                                          <div className="text-green-600 ml-2 whitespace-pre-wrap">&quot;{event.content.parts[0].text}&quot;</div>
+                                        <div className="mt-3">
+                                          <span className="text-primary/60 uppercase block mb-1">text:</span>
+                                          <div className="text-foreground/90 bg-background/50 p-2 rounded-sm border border-border whitespace-pre-wrap leading-relaxed">&quot;{event.content.parts[0].text}&quot;</div>
                                         </div>
                                       )}
                                       {event.usageMetadata && (
-                                        <div className="mt-2">
-                                          <span className="text-amber-600">usageMetadata:</span>
-                                          <div className="ml-2">{renderJson(event.usageMetadata)}</div>
+                                        <div className="mt-3">
+                                          <span className="text-primary/60 uppercase block mb-1">usageMetadata:</span>
+                                          <div className="p-2 bg-background/50 rounded-sm border border-border">{renderJson(event.usageMetadata)}</div>
                                         </div>
                                       )}
                                     </div>
                                   )}
                                   {detailTab === 'request' && renderRequestContent(event, invocations, agentConfig, invocation.userMessage)}
                                   {detailTab === 'response' && (
-                                    <div className="space-y-1">
+                                    <div className="space-y-1.5">
                                       {event.modelVersion && (
-                                        <div><span className="text-amber-600">model_version:</span> <span className="text-green-600">&quot;{event.modelVersion}&quot;</span></div>
+                                        <div className="flex gap-2"><span className="text-primary/60 uppercase">model_version:</span> <span className="text-foreground font-medium">&quot;{event.modelVersion}&quot;</span></div>
                                       )}
                                       {event.content?.parts?.[0]?.text && (
-                                        <div className="mt-2">
-                                          <span className="text-amber-600">text:</span>
-                                          <div className="text-green-600 ml-2 whitespace-pre-wrap">&quot;{event.content.parts[0].text}&quot;</div>
+                                        <div className="mt-3">
+                                          <span className="text-primary/60 uppercase block mb-1">text:</span>
+                                          <div className="text-foreground/90 bg-background/50 p-2 rounded-sm border border-border whitespace-pre-wrap leading-relaxed">&quot;{event.content.parts[0].text}&quot;</div>
                                         </div>
                                       )}
                                       {event.finishReason && (
-                                        <div><span className="text-amber-600">finish_reason:</span> <span className="text-green-600">&quot;{event.finishReason}&quot;</span></div>
+                                        <div className="flex gap-2"><span className="text-primary/60 uppercase">finish_reason:</span> <span className="text-foreground font-medium">&quot;{event.finishReason}&quot;</span></div>
                                       )}
                                       {event.usageMetadata && (
-                                        <div className="mt-2">
-                                          <span className="text-amber-600">usage_metadata:</span>
-                                          <div className="ml-2">{renderJson(event.usageMetadata)}</div>
+                                        <div className="mt-3">
+                                          <span className="text-primary/60 uppercase block mb-1">usage_metadata:</span>
+                                          <div className="p-2 bg-background/50 rounded-sm border border-border">{renderJson(event.usageMetadata)}</div>
                                         </div>
                                       )}
                                     </div>
@@ -317,21 +304,21 @@ export function TracePanel({
                                 </div>
 
                                 {/* Raw JSON toggle */}
-                                <div className="mt-2 pt-2 border-t border-gray-100">
+                                <div className="mt-4 pt-3 border-t border-border">
                                   <button
                                     data-testid="toggle-raw-json"
                                     onClick={() => setShowRawJson(!showRawJson)}
-                                    className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                                    className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
                                   >
                                     <svg className={`w-3 h-3 transition-transform ${showRawJson ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                     </svg>
-                                    {showRawJson ? 'Hide' : 'Show'} Raw JSON
+                                    {showRawJson ? 'Hide' : 'Show'} Raw Data
                                   </button>
                                   {showRawJson && (
-                                    <pre data-testid="raw-json-content" className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+                                    <div data-testid="raw-json-content" className="mt-3 p-3 bg-muted border border-border rounded-sm text-[10px] font-mono text-muted-foreground overflow-auto max-h-60 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                                       {JSON.stringify(event, null, 2)}
-                                    </pre>
+                                    </div>
                                   )}
                                 </div>
                               </div>
@@ -345,7 +332,7 @@ export function TracePanel({
 
                 {/* Separator between invocations */}
                 {invIndex < invocations.length - 1 && (
-                  <div className="border-b border-gray-200 my-4" />
+                  <div className="border-b border-border my-6 opacity-50" />
                 )}
               </div>
             );
