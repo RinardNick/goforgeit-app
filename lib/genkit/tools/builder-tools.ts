@@ -375,6 +375,12 @@ export const deleteAgentTool = (deps: ToolDependencies = DEFAULT_DEPS) => ai.def
   },
   async ({ projectName, filename }) => {
     const fs = deps.fs!;
+    
+    // Protect system agents
+    if (filename.includes('builder_agent') || filename.includes('forge_agent')) {
+      return { success: false, message: 'Cannot delete system agents (builder_agent, forge_agent).' };
+    }
+
     if (useBackend()) return { success: false, message: 'Backend delete not implemented yet' };
 
     try {
