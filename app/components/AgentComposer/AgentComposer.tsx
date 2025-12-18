@@ -134,6 +134,12 @@ function AgentComposerInner({
     }
   }, []);
 
+  // Use a ref to track the selected node ID to avoid infinite loops
+  const selectedNodeIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    selectedNodeIdRef.current = selectedNode?.id ?? null;
+  }, [selectedNode]);
+
   useEffect(() => {
     const nodesWithCallbacks = initialNodes.map(node => {
       const nodeData = node.data as AgentNodeData;
@@ -163,8 +169,10 @@ function AgentComposerInner({
     });
     setNodes(nodesWithCallbacks);
 
-    if (selectedNode) {
-      const updatedSelectedNode = nodesWithCallbacks.find(n => n.id === selectedNode.id);
+    // Update selected node reference if it still exists
+    const currentSelectedId = selectedNodeIdRef.current;
+    if (currentSelectedId) {
+      const updatedSelectedNode = nodesWithCallbacks.find(n => n.id === currentSelectedId);
       if (updatedSelectedNode) {
         setSelectedNode(updatedSelectedNode);
       } else {
@@ -172,7 +180,7 @@ function AgentComposerInner({
         onNodeSelect?.(null);
       }
     }
-  }, [initialNodes, validationResults, setNodes, handleAddChildAgent, handleAddSubAgent, handleAgentDroppedInContainer, handleRemoveFromContainer, onNodeSelect, selectedNode]);
+  }, [initialNodes, validationResults, setNodes, handleAddChildAgent, handleAddSubAgent, handleAgentDroppedInContainer, handleRemoveFromContainer, onNodeSelect]);
 
   useEffect(() => {
     setEdges(initialEdges);
