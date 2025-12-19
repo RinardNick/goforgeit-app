@@ -27,12 +27,64 @@ export interface StoredMessage {
 }
 
 const STORAGE_KEY_PREFIX = 'assistant-conversation:';
+const SESSION_KEY_PREFIX = 'assistant-session:';
 
 /**
  * Get the storage key for an agent's conversation
  */
 function getStorageKey(agentName: string): string {
   return `${STORAGE_KEY_PREFIX}${agentName}`;
+}
+
+/**
+ * Get the storage key for an agent's session ID
+ */
+function getSessionKey(agentName: string): string {
+  return `${SESSION_KEY_PREFIX}${agentName}`;
+}
+
+/**
+ * Generate a new unique session ID for a project
+ * Format: builder-{projectName}-{uuid}
+ */
+function generateSessionId(projectName: string): string {
+  const uuid = crypto.randomUUID();
+  return `builder-${projectName}-${uuid}`;
+}
+
+/**
+ * Get or create session ID for an agent's conversation
+ * Returns existing session ID or generates a new one
+ */
+export function getSessionIdForAgent(agentName: string): string {
+  if (typeof localStorage === 'undefined') {
+    return generateSessionId(agentName);
+  }
+
+  const key = getSessionKey(agentName);
+  let sessionId = localStorage.getItem(key);
+
+  if (!sessionId) {
+    sessionId = generateSessionId(agentName);
+    localStorage.setItem(key, sessionId);
+  }
+
+  return sessionId;
+}
+
+/**
+ * Reset session ID for an agent (creates a new session)
+ * Call this when the user clears the conversation
+ */
+export function resetSessionIdForAgent(agentName: string): string {
+  if (typeof localStorage === 'undefined') {
+    return generateSessionId(agentName);
+  }
+
+  const key = getSessionKey(agentName);
+  const newSessionId = generateSessionId(agentName);
+  localStorage.setItem(key, newSessionId);
+  return newSessionId;
 }
 
 /**

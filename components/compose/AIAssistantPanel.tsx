@@ -7,6 +7,8 @@ import {
   loadConversationForAgent,
   saveConversationForAgent,
   clearConversationForAgent,
+  getSessionIdForAgent,
+  resetSessionIdForAgent,
 } from '@/lib/adk/assistant-conversation-store';
 
 // Executed action from the backend
@@ -74,15 +76,19 @@ export function AIAssistantPanel({
   const [isLoading, setIsLoading] = useState(false);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Load conversation from localStorage when projectName changes
+  // Load conversation and session ID from localStorage when projectName changes
   useEffect(() => {
     if (projectName) {
       const savedMessages = loadConversationForAgent(projectName);
       setMessages(savedMessages as Message[]);
+      // Get or create session ID for this project's conversation
+      const savedSessionId = getSessionIdForAgent(projectName);
+      setSessionId(savedSessionId);
     }
   }, [projectName]);
 
@@ -164,6 +170,7 @@ export function AIAssistantPanel({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage.content,
+          sessionId: sessionId,  // Pass session ID for conversation continuity
           context: {
             agents: currentAgents,
             selectedAgent: selectedAgent,
@@ -219,6 +226,9 @@ export function AIAssistantPanel({
   const handleClearConversation = () => {
     setMessages([]);
     clearConversationForAgent(projectName);
+    // Reset session ID so the next conversation starts fresh in ADK
+    const newSessionId = resetSessionIdForAgent(projectName);
+    setSessionId(newSessionId);
   };
 
   if (!isOpen) return null;

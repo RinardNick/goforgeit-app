@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 // Request schema matches what the frontend sends
 const AssistantRequestSchema = z.object({
   message: z.string().min(1, 'Message is required'),
+  sessionId: z.string().optional(),  // Optional session ID for conversation continuity
   context: z.object({
     agents: z.array(z.object({
       filename: z.string(),
@@ -38,17 +39,17 @@ export async function POST(
       return NextResponse.json({ error: 'Validation failed' }, { status: 400 });
     }
 
-    const { message, context } = validation.data;
+    const { message, context, sessionId: requestSessionId } = validation.data;
 
     // Build context string to inform the agent about the current visual state
     let systemContext = `Project: ${projectName}\n`;
-    
+
     if (context.agents.length > 0) {
       systemContext += `Existing Agents (from Visual Builder):\n${context.agents.map(a => `- ${a.name} (${a.filename}) [${a.agentClass}]`).join('\n')}\n`;
     } else {
       systemContext += `Existing Agents: None\n`;
     }
-    
+
     if (context.selectedAgent) {
       systemContext += `User Focus: ${context.selectedAgent.name} (${context.selectedAgent.filename})\n`;
     }
@@ -58,8 +59,9 @@ export async function POST(
     const fullMessage = `[System Context]\n${systemContext}\n\n[User Request]\n${message}`;
 
     // Execute the "builder_agent" running on the ADK Engine
-    // We use a persistent session ID per project to maintain conversation history
-    const sessionId = `builder-${projectName}`;
+    // Use the session ID from the frontend (managed per conversation)
+    // Falls back to a project-based ID if not provided (for backwards compatibility)
+    const sessionId = requestSessionId || `builder-${projectName}`;
 
     console.log(`[Assistant] Calling builder_agent for project ${projectName}...`);
 
