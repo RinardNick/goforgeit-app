@@ -1010,9 +1010,9 @@ export default function ADKAgentChatPage() {
 
         {/* Session ID Badge */}
         {sessionId && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
+          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
             <span>Session:</span>
-            <code className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">
+            <code className="px-2 py-0.5 bg-muted rounded text-xs font-mono">
               {sessionId.slice(0, 8)}...
             </code>
           </div>
@@ -1031,7 +1031,7 @@ export default function ADKAgentChatPage() {
             <div data-testid="chat-messages" className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-info flex items-center justify-center mb-4">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
@@ -1068,12 +1068,12 @@ export default function ADKAgentChatPage() {
                                     onClick={() => handleInlineEventClick(event.id)}
                                     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border ${
                                       event.eventType === 'functionCall'
-                                        ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200'
+                                        ? 'bg-warning/10 text-warning hover:bg-warning/20 border-warning/30'
                                         : event.eventType === 'functionResponse'
-                                        ? 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200'
+                                        ? 'bg-success/10 text-success hover:bg-success/20 border-success/30'
                                         : isTransfer
-                                        ? 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200'
-                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
+                                        ? 'bg-primary/10 text-primary hover:bg-primary/20 border-primary/30'
+                                        : 'bg-muted text-muted-foreground hover:bg-accent border-border'
                                     }`}
                                     title="Click to view event details"
                                   >
@@ -1088,7 +1088,7 @@ export default function ADKAgentChatPage() {
                                         <span>✓</span>
                                         <span>{funcResp?.name || 'response'}</span>
                                         {isTransfer && (
-                                          <span className="text-purple-600 ml-1">→ {event.actions?.transferToAgent}</span>
+                                          <span className="text-primary ml-1">→ {event.actions?.transferToAgent}</span>
                                         )}
                                       </>
                                     )}
@@ -1111,7 +1111,7 @@ export default function ADKAgentChatPage() {
                           className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           {message.role === 'assistant' && (
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mr-2">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-info flex items-center justify-center mr-2">
                               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                               </svg>
@@ -1120,12 +1120,12 @@ export default function ADKAgentChatPage() {
                           <div
                             className={`max-w-[80%] rounded-lg px-4 py-3 ${
                               message.role === 'user'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 text-gray-900'
+                                ? 'bg-info text-info-foreground'
+                                : 'bg-muted text-foreground'
                             }`}
                           >
                             {message.role === 'assistant' && (
-                              <div className="text-xs font-medium text-purple-600 mb-1">
+                              <div className="text-xs font-medium text-primary mb-1">
                                 {displayName}
                               </div>
                             )}
@@ -1133,7 +1133,7 @@ export default function ADKAgentChatPage() {
                             <p className="whitespace-pre-wrap">{message.content}</p>
                             <p
                               className={`text-xs mt-1 ${
-                                message.role === 'user' ? 'text-blue-200' : 'text-gray-400'
+                                message.role === 'user' ? 'text-info-foreground/80' : 'text-muted-foreground'
                               }`}
                             >
                               {message.timestamp.toLocaleTimeString()}
@@ -1163,21 +1163,21 @@ export default function ADKAgentChatPage() {
 
             {/* Error Display */}
             {error && (
-              <div className="border-t border-red-200">
+              <div className="border-t border-destructive/20">
                 <ErrorMessage message={error} className="rounded-none border-x-0 border-b-0" />
               </div>
             )}
 
             {/* Validation Error Message */}
             {validationError && (
-              <div className="p-4 bg-red-50 border-t border-red-200" data-testid="validation-error-message">
+              <div className="p-4 bg-destructive/10 border-t border-destructive/20" data-testid="validation-error-message">
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-destructive mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="flex-1">
-                    <h4 className="text-sm font-semibold text-red-800 mb-1">Validation Error</h4>
-                    <p className="text-sm text-red-700">
+                    <h4 className="text-sm font-semibold text-destructive mb-1">Validation Error</h4>
+                    <p className="text-sm text-destructive">
                       Cannot run agent with broken references: {validationError}
                     </p>
                   </div>
@@ -1203,10 +1203,10 @@ export default function ADKAgentChatPage() {
           {showDebugPanel && (
             <div
               data-testid="events-panel"
-              className="w-[500px] bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden"
+              className="w-[500px] bg-card rounded-xl border border-border shadow-sm flex flex-col overflow-hidden"
             >
               {/* Panel Tabs Header */}
-              <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <div className="border-b border-border bg-muted/10">
                 {/* Main Panel Tabs */}
                 <div className="flex">
                   <button
@@ -1214,8 +1214,8 @@ export default function ADKAgentChatPage() {
                     onClick={() => setPanelTab('sessions')}
                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                       panelTab === 'sessions'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-info text-info bg-background'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     Sessions ({sessions.length})
@@ -1225,8 +1225,8 @@ export default function ADKAgentChatPage() {
                     onClick={() => { setPanelTab('trace'); setSelectedEventIndex(null); }}
                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                       panelTab === 'trace'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-info text-info bg-background'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     Trace
@@ -1236,8 +1236,8 @@ export default function ADKAgentChatPage() {
                     onClick={() => { setPanelTab('events'); setSelectedEventIndex(null); }}
                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                       panelTab === 'events'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-info text-info bg-background'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     Events ({events.length})
@@ -1247,8 +1247,8 @@ export default function ADKAgentChatPage() {
                     onClick={() => setPanelTab('state')}
                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                       panelTab === 'state'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-info text-info bg-background'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     State ({sessionState.length})
@@ -1258,8 +1258,8 @@ export default function ADKAgentChatPage() {
                     onClick={() => setPanelTab('artifacts')}
                     className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                       panelTab === 'artifacts'
-                        ? 'border-blue-500 text-blue-600 bg-white'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-info text-info bg-background'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     Artifacts ({artifacts.length})
@@ -1268,7 +1268,7 @@ export default function ADKAgentChatPage() {
                   <button
                     onClick={clearEvents}
                     data-testid="clear-events-button"
-                    className="px-3 py-3 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                    className="px-3 py-3 text-xs text-muted-foreground hover:text-foreground hover:bg-accent"
                   >
                     Clear
                   </button>

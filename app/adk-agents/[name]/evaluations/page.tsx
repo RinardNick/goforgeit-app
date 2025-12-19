@@ -202,7 +202,7 @@ export default function EvaluationsPage() {
                 setImportError(null);
               }}
               data-testid="import-evalset-btn"
-              className="px-4 py-2 bg-white text-amber-700 rounded-lg hover:bg-amber-50 border border-amber-300 transition-colors font-medium text-sm flex items-center gap-2"
+              className="px-4 py-2 bg-card text-warning rounded-lg hover:bg-warning/10 border border-warning transition-colors font-medium text-sm flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -217,7 +217,7 @@ export default function EvaluationsPage() {
                 setCreateError(null);
               }}
               data-testid="create-evalset-btn"
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm flex items-center gap-2"
+              className="px-4 py-2 bg-warning text-warning-foreground rounded-lg hover:opacity-90 transition-colors font-medium text-sm flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -373,8 +373,8 @@ export default function EvaluationsPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </div>
@@ -407,7 +407,7 @@ export default function EvaluationsPage() {
                   onClick={handleDeleteEvalset}
                   isLoading={deleting}
                   loadingText="Deleting..."
-                  className="text-sm text-white bg-red-600 hover:bg-red-700"
+                  className="text-sm text-white bg-destructive hover:opacity-90"
                   testId="confirm-delete-evalset"
                   variant="primary"
                 >
@@ -420,11 +420,11 @@ export default function EvaluationsPage() {
 
         {/* Success Notification */}
         {importSuccess && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-6 p-4 bg-success/10 border border-success/20 rounded-lg flex items-center gap-3">
+            <svg className="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-green-800 font-medium">Imported successfully</span>
+            <span className="text-success font-medium">Imported successfully</span>
           </div>
         )}
 
@@ -485,7 +485,7 @@ export default function EvaluationsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-warning to-primary flex items-center justify-center">
                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                           </svg>
@@ -493,10 +493,10 @@ export default function EvaluationsPage() {
                         {lastRunPassRate !== undefined && (
                           <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                             lastRunPassRate === 100
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-success/20 text-success'
                               : lastRunPassRate >= 50
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
+                              ? 'bg-warning/20 text-warning'
+                              : 'bg-destructive/20 text-destructive'
                           }`}>
                             {lastRunPassRate}% pass
                           </span>
@@ -518,7 +518,7 @@ export default function EvaluationsPage() {
                         setShowDeleteDialog(true);
                         setDeleteError(null);
                       }}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                       title="Delete evaluation"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -530,7 +530,7 @@ export default function EvaluationsPage() {
                   <div className="mt-4">
                     <Link
                       href={`/adk-agents/${agentName}/evaluations/${evalset.eval_set_id}`}
-                      className="block w-full px-3 py-2 bg-amber-50 text-amber-700 text-center rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors font-medium text-sm"
+                      className="block w-full px-3 py-2 bg-warning/10 text-warning text-center rounded-lg border border-warning/20 hover:bg-warning/20 transition-colors font-medium text-sm"
                     >
                       View Details
                     </Link>

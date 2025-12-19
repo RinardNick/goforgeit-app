@@ -16,6 +16,13 @@ export interface GenerationConfig {
 
 // MCP Server configuration
 export type MCPServerType = 'stdio' | 'sse';
+export type ConnectionStatus = 'connected' | 'disconnected' | 'error' | 'connecting';
+
+export interface MCPTool {
+  name: string;
+  description: string;
+  enabled: boolean;
+}
 
 export interface MCPServerConfig {
   id: string;
@@ -28,6 +35,10 @@ export interface MCPServerConfig {
   // SSE params
   url?: string;
   headers?: Record<string, string>;
+  // Runtime state
+  status?: ConnectionStatus;
+  errorMessage?: string;
+  tools?: MCPTool[];
 }
 
 // AgentTool configuration

@@ -219,7 +219,7 @@ export default function EvalsetDetailPage() {
                 isLoading={isRunning}
                 loadingText="Running..."
                 disabled={evalset.eval_cases.length === 0}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-success text-success-foreground rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 variant="success"
               >
                 ▶ Run Evaluation
@@ -229,7 +229,7 @@ export default function EvalsetDetailPage() {
                 onClick={() => evalset && exportEvaluation(evalset)}
                 isLoading={exporting}
                 loadingText="Exporting..."
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-info text-info-foreground rounded-lg hover:opacity-90"
                 variant="primary"
               >
                 ⬇ Export
@@ -237,14 +237,14 @@ export default function EvalsetDetailPage() {
               <button
                 data-testid="configure-metrics-btn"
                 onClick={openMetricsConfig}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors font-medium"
               >
                 ⚙ Configure Metrics
               </button>
               {hasCustomConfig && (
                 <span
                   data-testid="using-custom-config-indicator"
-                  className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-full font-medium"
+                  className="px-3 py-1 text-sm bg-primary/10 text-primary rounded-full font-medium"
                 >
                   Using custom config
                 </span>
@@ -252,7 +252,7 @@ export default function EvalsetDetailPage() {
               <button
                 data-testid="add-conversation-btn"
                 onClick={openAddConversation}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+                className="px-4 py-2 bg-warning text-warning-foreground rounded-lg hover:opacity-90 transition-colors font-medium"
               >
                 + Add Conversation
               </button>
@@ -262,20 +262,20 @@ export default function EvalsetDetailPage() {
 
         {/* Progress Tracking */}
         {isRunning && (
-          <div data-testid="evaluation-progress" className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div data-testid="evaluation-progress" className="mb-6 bg-info/10 border border-info/20 rounded-xl p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-blue-900">Running evaluation...</h3>
-              <span data-testid="progress-percentage" className="text-2xl font-bold text-blue-600">
+              <h3 className="text-lg font-semibold text-foreground">Running evaluation...</h3>
+              <span data-testid="progress-percentage" className="text-2xl font-bold text-info">
                 {Math.round(runProgress)}%
               </span>
             </div>
-            <div className="w-full bg-blue-200 rounded-full h-3 mb-3">
+            <div className="w-full bg-info/30 rounded-full h-3 mb-3">
               <div
-                className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                className="bg-info h-3 rounded-full transition-all duration-500"
                 style={{ width: `${runProgress}%` }}
               />
             </div>
-            <p data-testid="current-eval-case" className="text-sm text-blue-700">
+            <p data-testid="current-eval-case" className="text-sm text-info">
               Case {currentEvalCase + 1} of {evalset.eval_cases.length}
             </p>
           </div>
@@ -294,14 +294,14 @@ export default function EvalsetDetailPage() {
         {evalset.runs && evalset.runs.length > 0 && !isRunning && (
           <div className="flex gap-6 mb-6">
             {/* Run History Sidebar */}
-            <div data-testid="run-history-sidebar" className="w-80 flex-shrink-0 bg-white border border-gray-200 rounded-xl p-4">
+            <div data-testid="run-history-sidebar" className="w-80 flex-shrink-0 bg-card border border-border rounded-xl p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Run History</h3>
+                <h3 className="text-lg font-semibold text-foreground">Run History</h3>
                 {selectedRunsForComparison.length >= 2 && (
                   <button
                     data-testid="compare-runs-btn"
                     onClick={openComparisonView}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-3 py-1 text-sm bg-info text-info-foreground rounded-lg hover:opacity-90 transition-colors"
                   >
                     Compare ({selectedRunsForComparison.length})
                   </button>
@@ -318,8 +318,8 @@ export default function EvalsetDetailPage() {
                       data-testid={`run-history-item-${index}`}
                       className={`relative flex items-start gap-2 p-3 rounded-lg transition-colors ${
                         isSelected
-                          ? 'bg-blue-50 border-2 border-blue-500'
-                          : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                          ? 'bg-info/10 border-2 border-info'
+                          : 'bg-muted/10 border border-border hover:bg-muted/20'
                       }`}
                     >
                       <input
@@ -327,7 +327,7 @@ export default function EvalsetDetailPage() {
                         data-testid={`run-checkbox-${index}`}
                         checked={isChecked}
                         onChange={() => toggleRunSelection(index)}
-                        className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        className="mt-1 w-4 h-4 text-info rounded focus:ring-info"
                         onClick={(e) => e.stopPropagation()}
                       />
                       <button
@@ -335,11 +335,11 @@ export default function EvalsetDetailPage() {
                         className="flex-1 text-left"
                       >
                       <div className="flex items-center justify-between mb-1">
-                        <span data-testid={`run-timestamp-${index}`} className="text-xs text-gray-600">
+                        <span data-testid={`run-timestamp-${index}`} className="text-xs text-muted-foreground">
                           {new Date(run.timestamp).toLocaleString()}
                         </span>
                         {isBaseline && (
-                          <span data-testid="baseline-badge" className="px-2 py-0.5 text-xs bg-amber-100 text-amber-800 rounded-full font-medium">
+                          <span data-testid="baseline-badge" className="px-2 py-0.5 text-xs bg-warning/20 text-warning rounded-full font-medium">
                             Baseline
                           </span>
                         )}
@@ -350,19 +350,19 @@ export default function EvalsetDetailPage() {
                         }`}>
                           {run.overall_pass_rate ?? 0}%
                         </span>
-                        <span className="text-xs text-gray-500">pass rate</span>
+                        <span className="text-xs text-muted-foreground">pass rate</span>
                       </div>
                       {run.tags && run.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {run.tags.map((tag, tagIdx) => (
-                            <span key={tagIdx} className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            <span key={tagIdx} className="px-2 py-0.5 text-xs bg-info/20 text-info rounded-full">
                               {tag}
                             </span>
                           ))}
                         </div>
                       )}
                       {run.metrics_summary && Object.keys(run.metrics_summary).length > 0 && (
-                        <div className="mt-2 text-xs text-gray-600">
+                        <div className="mt-2 text-xs text-muted-foreground">
                           {Object.keys(run.metrics_summary).join(', ').substring(0, 40)}...
                         </div>
                       )}
@@ -456,12 +456,12 @@ export default function EvalsetDetailPage() {
             {/* Overall Pass Rate */}
             <div className="mb-6">
               <div className="flex items-center gap-3">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Overall Pass Rate</h3>
-                  <p data-testid="overall-pass-rate" className="text-3xl font-bold text-green-600">
+                  <h3 className="text-lg font-semibold text-foreground">Overall Pass Rate</h3>
+                  <p data-testid="overall-pass-rate" className="text-3xl font-bold text-success">
                     {currentRun?.overall_pass_rate ?? 0}%
                   </p>
                 </div>
@@ -470,9 +470,9 @@ export default function EvalsetDetailPage() {
 
             {/* Metrics Summary */}
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Metrics Summary</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Metrics Summary</h3>
               {(() => {
-                if (!currentRun) return <p className="text-gray-500 text-sm">No run selected</p>;
+                if (!currentRun) return <p className="text-muted-foreground text-sm">No run selected</p>;
                 let metricsToShow = currentRun.metrics_summary || {};
 
                 // If metrics_summary is empty but we have results, calculate synthetic response_match_score
@@ -490,7 +490,7 @@ export default function EvalsetDetailPage() {
                 }
 
                 if (Object.keys(metricsToShow).length === 0) {
-                  return <p className="text-gray-500 text-sm">No metrics available</p>;
+                  return <p className="text-muted-foreground text-sm">No metrics available</p>;
                 }
 
                 return (
@@ -524,10 +524,10 @@ export default function EvalsetDetailPage() {
                   <div
                     key={metricName}
                     data-testid={`metric-card-${metricName}`}
-                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                    className="bg-muted/10 rounded-lg p-4 border border-border"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-sm font-medium text-gray-700">{displayNames[metricName] || metricName}</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">{displayNames[metricName] || metricName}</h4>
                       <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                         isPassing ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
                       }`}>
@@ -535,10 +535,10 @@ export default function EvalsetDetailPage() {
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span data-testid={`metric-gauge-${metricName}`} className="text-2xl font-bold text-gray-900">{score}</span>
-                      <span className="text-sm text-gray-500">avg</span>
+                      <span data-testid={`metric-gauge-${metricName}`} className="text-2xl font-bold text-foreground">{score}</span>
+                      <span className="text-sm text-muted-foreground">avg</span>
                     </div>
-                    <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                    <div className="mt-2 w-full bg-muted rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all ${
                           isPassing ? 'bg-success' : 'bg-destructive'
@@ -598,37 +598,37 @@ export default function EvalsetDetailPage() {
                         <div
                           key={result.eval_id}
                           data-testid={`conversation-result-${actualIndex}`}
-                          className="bg-white border border-gray-200 rounded-lg overflow-hidden"
+                          className="bg-card border border-border rounded-lg overflow-hidden"
                         >
                           <button
                             onClick={() => setExpandedResultIndex(isExpanded ? null : actualIndex)}
-                            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                            className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/50 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                result.passed ? 'bg-green-100' : 'bg-red-100'
+                                result.passed ? 'bg-success/20' : 'bg-destructive/20'
                               }`}>
                                 {result.passed ? (
-                                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                   </svg>
                                 ) : (
-                                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                   </svg>
                                 )}
                               </div>
                               <div className="text-left">
-                                <div className="text-sm font-medium text-gray-900">
+                                <div className="text-sm font-medium text-foreground">
                                   Conversation {actualIndex + 1}
                                 </div>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-muted-foreground">
                                   {result.turns.length} turn{result.turns.length !== 1 ? 's' : ''}
                                 </div>
                               </div>
                             </div>
                             <svg
-                              className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                              className={`w-5 h-5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -638,18 +638,18 @@ export default function EvalsetDetailPage() {
                           </button>
 
                           {isExpanded && evalCase && (
-                            <div data-testid="comparison-view" className="border-t border-gray-200 p-4 bg-gray-50">
+                            <div data-testid="comparison-view" className="border-t border-border p-4 bg-muted/10">
                               <div className="space-y-4">
                                 {result.turns.map((turn, turnIdx) => {
                                   const expectedTurn = evalCase.conversation[turnIdx];
                                   return (
-                                    <div key={turn.invocation_id} className="bg-white rounded-lg p-4 border border-gray-200">
-                                      <div className="text-xs font-medium text-gray-500 mb-3">Turn {turnIdx + 1}</div>
+                                    <div key={turn.invocation_id} className="bg-card rounded-lg p-4 border border-border">
+                                      <div className="text-xs font-medium text-muted-foreground mb-3">Turn {turnIdx + 1}</div>
 
                                       {/* User Message */}
                                       <div className="mb-3">
-                                        <div className="text-xs font-medium text-gray-500 mb-1">User:</div>
-                                        <div className="text-sm text-gray-900">
+                                        <div className="text-xs font-medium text-muted-foreground mb-1">User:</div>
+                                        <div className="text-sm text-foreground">
                                           {expectedTurn.user_content.parts[0].text}
                                         </div>
                                       </div>
@@ -658,10 +658,10 @@ export default function EvalsetDetailPage() {
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Expected Response */}
                                         <div>
-                                          <div className="text-xs font-medium text-gray-500 mb-1">Expected:</div>
+                                          <div className="text-xs font-medium text-muted-foreground mb-1">Expected:</div>
                                           <div
                                             data-testid="expected-response"
-                                            className="text-sm text-gray-900 bg-gray-50 rounded p-3 border border-gray-200"
+                                            className="text-sm text-foreground bg-muted/10 rounded p-3 border border-border"
                                           >
                                             {expectedTurn.final_response?.parts[0].text || 'No expected response'}
                                           </div>
@@ -669,13 +669,13 @@ export default function EvalsetDetailPage() {
 
                                         {/* Actual Response */}
                                         <div>
-                                          <div className="text-xs font-medium text-gray-500 mb-1">Actual:</div>
+                                          <div className="text-xs font-medium text-muted-foreground mb-1">Actual:</div>
                                           <div
                                             data-testid="actual-response"
                                             className={`text-sm rounded p-3 border ${
                                               turn.passed
-                                                ? 'bg-green-50 border-green-200 text-gray-900'
-                                                : 'bg-red-50 border-red-200 text-gray-900'
+                                                ? 'bg-success/10 border-success/20 text-foreground'
+                                                : 'bg-destructive/10 border-destructive/20 text-foreground'
                                             }`}
                                           >
                                             {turn.actual_response?.parts[0]?.text || 'No response'}

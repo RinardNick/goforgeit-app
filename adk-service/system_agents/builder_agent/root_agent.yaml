@@ -19,5 +19,5 @@ sub_agents:
 tools:
   - name: MCPToolset
     args:
-      sse_server_params:
+      sse_connection_params:
         url: http://localhost:3025/api/mcp/system-tools/sse

@@ -447,7 +447,7 @@ export default function ADKAgentComposePage() {
             ...(server.env && Object.keys(server.env).length > 0 ? { env: server.env } : {}),
           };
         } else if (server.type === 'sse') {
-          (mcpToolset.args as Record<string, unknown>).sse_server_params = {
+          (mcpToolset.args as Record<string, unknown>).sse_connection_params = {
             url: server.url,
             ...(server.headers && Object.keys(server.headers).length > 0 ? { headers: server.headers } : {}),
           };

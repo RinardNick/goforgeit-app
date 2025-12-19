@@ -214,13 +214,13 @@ function extractMCPServers(tools?: ToolEntry[]): Array<{
           args: args.stdio_server_params.args,
           env: args.stdio_server_params.env,
         });
-      } else if (args.sse_server_params) {
+      } else if (args.sse_connection_params) {
         mcpServers.push({
           id: `mcp-loaded-${mcpIndex++}`,
           name: `MCP Server ${mcpIndex}`,
           type: 'sse',
-          url: args.sse_server_params.url,
-          headers: args.sse_server_params.headers,
+          url: args.sse_connection_params.url,
+          headers: args.sse_connection_params.headers,
         });
       }
     }
@@ -912,7 +912,7 @@ export function nodesToYaml(nodes: Node[], edges: Edge[]): string {
           ...(server.env && Object.keys(server.env).length > 0 ? { env: server.env } : {}),
         };
       } else if (server.type === 'sse') {
-        (mcpToolset.args as Record<string, unknown>).sse_server_params = {
+        (mcpToolset.args as Record<string, unknown>).sse_connection_params = {
           url: server.url,
           ...(server.headers && Object.keys(server.headers).length > 0 ? { headers: server.headers } : {}),
         };

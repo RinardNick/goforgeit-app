@@ -241,7 +241,7 @@ model: gemini-2.0-flash
 tools:
   - name: MCPToolset
     args:
-      sse_server_params:
+      sse_connection_params:
         url: http://localhost:8080/sse
         headers:
           Authorization: Bearer token123

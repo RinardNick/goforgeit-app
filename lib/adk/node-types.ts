@@ -33,7 +33,7 @@ export interface MCPToolsetEntry {
   name: 'MCPToolset';
   args: {
     stdio_server_params?: MCPStdioParams;
-    sse_server_params?: MCPSseParams;
+    sse_connection_params?: MCPSseParams;
   };
 }
 

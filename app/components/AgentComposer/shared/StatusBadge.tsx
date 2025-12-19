@@ -15,7 +15,7 @@ interface StatusBadgeProps {
  */
 export const StatusBadge = ({ status }: StatusBadgeProps) => {
   const config = {
-    connected: { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10', label: 'ONLINE' },
+    connected: { icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10', label: 'ONLINE' },
     disconnected: { icon: AlertCircle, color: 'text-muted-foreground/40', bg: 'bg-muted', label: 'OFFLINE' },
     error: { icon: AlertCircle, color: 'text-destructive', bg: 'bg-destructive/10', label: 'ERROR' },
     connecting: { icon: Loader2, color: 'text-primary', bg: 'bg-primary/10', label: 'SYNC' },

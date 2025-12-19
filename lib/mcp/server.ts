@@ -55,4 +55,8 @@ for (const tool of tools) {
 }
 
 // Global transport map for WebSSETransport
-export const transportMap = new Map<string, WebSSETransport>();
+// Use global object to ensure the map is shared across all API routes in Next.js
+// @ts-ignore
+globalThis.__mcpTransportMap = globalThis.__mcpTransportMap || new Map<string, WebSSETransport>();
+// @ts-ignore
+export const transportMap: Map<string, WebSSETransport> = globalThis.__mcpTransportMap;
