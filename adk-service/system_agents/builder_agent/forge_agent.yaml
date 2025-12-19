@@ -16,5 +16,5 @@ instruction: |
 tools:
   - name: MCPToolset
     args:
-      sse_client_params:
+      sse_server_params:
         url: http://localhost:3025/api/mcp/system-tools/sse
