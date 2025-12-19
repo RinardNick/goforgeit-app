@@ -1,54 +1,27 @@
 import { NextRequest } from "next/server";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { mcpServer, transportMap } from "@/lib/mcp/server";
+import { WebSSETransport } from "@/lib/mcp/transport";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const sessionId = req.nextUrl.searchParams.get("sessionId");
+  const sessionId = req.nextUrl.searchParams.get("sessionId") || crypto.randomUUID();
   
-  const transport = new SSEServerTransport(
-    "/api/mcp/system-tools/messages", 
-    sessionId || undefined
-  );
-
-  await mcpServer.connect(transport);
-  transportMap.set(transport.sessionId, transport);
-
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
-  const encoder = new TextEncoder();
+  
+  const transport = new WebSSETransport(writer, sessionId);
 
-  // Adapter to make Node-centric SDK work with Web Streams
-  const resAdapter = {
-    headersSent: false,
-    statusCode: 200,
-    setHeader: () => {},
-    writeHead: () => {},
-    write: (chunk: string) => {
-      writer.write(encoder.encode(chunk));
-      return true;
-    },
-    end: () => {
-      writer.close();
-      transportMap.delete(transport.sessionId);
-    },
-    on: () => {},
-    once: () => {},
-    emit: () => {},
-    removeListener: () => {},
-  };
+  await mcpServer.connect(transport);
+  transportMap.set(sessionId, transport);
 
-  // Start the transport (this sends the initial 'endpoint' event)
-  // We mock the request object as it's not strictly used by start() except for query parsing which we handled
-  transport.start({} as any, resAdapter as any).catch(err => {
-    console.error("MCP Transport error:", err);
-    writer.abort(err);
-  });
+  // Start the transport (sends endpoint event)
+  // We don't await because it might block? No, start() just sends initial event.
+  await transport.start();
 
   req.signal.addEventListener("abort", () => {
-    transportMap.delete(transport.sessionId);
-    // writer.close(); // Handled by stream
+    transportMap.delete(sessionId);
+    transport.close();
   });
 
   return new Response(stream.readable, {

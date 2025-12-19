@@ -16,12 +16,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const message = await req.json();
-    
-    // Bypass handlePostMessage's Node.js req/res dependency
-    // Directly inject the parsed JSON message into the transport
-    // @ts-ignore - Accessing protected/internal method if necessary, or public
     await transport.handleMessage(message);
-    
     return new NextResponse("Accepted", { status: 202 });
   } catch (err) {
     console.error("MCP Message error:", err);
