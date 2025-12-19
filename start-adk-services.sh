@@ -19,6 +19,10 @@ cd "$SCRIPT_DIR/adk-service"
 echo "🔧 Restoring System Agents (Builder/Forge)..."
 cp -R system_agents/* agents/
 
+# Configure Agents (Inject Environment Variables)
+# This replaces ${SYSTEM_TOOLS_MCP_URL} with the actual value in the runtime files
+npx tsx ../scripts/configure-agents.ts
+
 cd "$SCRIPT_DIR"
 echo ""
 
