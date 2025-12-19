@@ -172,19 +172,28 @@ export async function listADKAgents(): Promise<string[]> {
 
 /**
  * Create a new ADK session
+ *
+ * @param appName - The ADK app name
+ * @param userId - The user ID (defaults to 'default-user')
+ * @param sessionId - Optional custom session ID. If provided, creates session with this ID.
+ *                    If not provided, ADK generates a random UUID.
  */
 export async function createADKSession(
   appName: string,
-  userId: string = 'default-user'
+  userId: string = 'default-user',
+  sessionId?: string
 ): Promise<ADKSession> {
-  const response = await fetch(
-    `${getBaseUrl()}/apps/${appName}/users/${userId}/sessions`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
-    }
-  );
+  // ADK API: POST /apps/{app}/users/{user}/sessions/{session_id} creates with custom ID
+  // ADK API: POST /apps/{app}/users/{user}/sessions creates with auto-generated ID
+  const url = sessionId
+    ? `${getBaseUrl()}/apps/${appName}/users/${userId}/sessions/${sessionId}`
+    : `${getBaseUrl()}/apps/${appName}/users/${userId}/sessions`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
 
   if (!response.ok) {
     const error = await response.text();
@@ -408,8 +417,10 @@ export async function executeADKAgent(
   if (!response.ok && response.status === 404) {
     const errorText = await response.text();
     if (errorText.includes('Session not found')) {
-      console.log(`[ADK Client] Session ${sessionId} not found. Recreating...`);
-      const newSession = await createADKSession(appName, userId);
+      console.log(`[ADK Client] Session ${sessionId} not found. Recreating with same ID...`);
+      // IMPORTANT: Create session with the SAME sessionId to preserve conversation continuity
+      // If the caller provided a custom sessionId, they expect it to persist
+      const newSession = await createADKSession(appName, userId, sessionId);
       sessionId = newSession.id;
       sessionRecreated = true;
       response = await performExecution(sessionId);
