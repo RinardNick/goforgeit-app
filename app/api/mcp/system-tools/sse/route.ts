@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get("sessionId") || crypto.randomUUID();
+  console.log(`[MCP SSE] New connection request. SessionId: ${sessionId}`);
   
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
@@ -20,6 +21,7 @@ export async function GET(req: NextRequest) {
   await transport.start();
 
   req.signal.addEventListener("abort", () => {
+    console.log(`[MCP SSE] Connection aborted. SessionId: ${sessionId}`);
     transportMap.delete(sessionId);
     transport.close();
   });

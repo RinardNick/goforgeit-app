@@ -17,7 +17,4 @@ sub_agents:
   - config_path: forge_agent.yaml
 
 tools:
-  - name: MCPToolset
-    args:
-      sse_server_params:
-        url: ${SYSTEM_TOOLS_MCP_URL}
+  - mcp_tools.get_system_mcp_toolset

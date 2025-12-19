@@ -90,7 +90,7 @@ function CallbackTypeDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-1 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 py-1 z-50 min-w-[180px]"
+      className="absolute right-0 top-full mt-1 bg-popover rounded-lg shadow-lg border border-border py-1 z-50 min-w-[180px]"
     >
       {callbackTypes.map((type) => (
         <button
@@ -99,13 +99,13 @@ function CallbackTypeDropdown({
             onSelect(type);
             onClose();
           }}
-          className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700 flex flex-col"
+          className="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex flex-col"
           data-testid={`callback-type-${type}`}
         >
-          <span className="font-medium text-zinc-900 dark:text-white">
+          <span className="font-medium text-popover-foreground">
             {callbackTypeLabels[type]}
           </span>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          <span className="text-xs text-muted-foreground">
             {callbackTypeDescriptions[type]}
           </span>
         </button>
@@ -156,13 +156,13 @@ function AddCallbackDialog({
   if (!isOpen || !callbackType) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="add-callback-dialog">
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="px-4 py-3 border-b dark:border-zinc-700">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" data-testid="add-callback-dialog">
+      <div className="bg-card rounded-lg shadow-xl w-full max-w-md mx-4 border border-border">
+        <div className="px-4 py-3 border-b border-border">
+          <h3 className="text-lg font-heading font-bold text-card-foreground">
             Add {callbackTypeLabels[callbackType]} Callback
           </h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             {callbackTypeDescriptions[callbackType]}
           </p>
         </div>
@@ -170,7 +170,7 @@ function AddCallbackDialog({
         <div className="p-4 space-y-4">
           {/* Function Path Input */}
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Function Path
             </label>
             <input
@@ -178,30 +178,30 @@ function AddCallbackDialog({
               value={functionPath}
               onChange={(e) => setFunctionPath(e.target.value)}
               placeholder="my_library.callbacks.function_name"
-              className={`w-full px-3 py-2 text-sm border rounded-md dark:bg-zinc-700 dark:text-white ${
-                error ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-600'
+              className={`w-full px-3 py-2 text-sm bg-background border rounded-md text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-colors ${
+                error ? 'border-destructive' : 'border-border'
               }`}
               data-testid="callback-function-name-input"
             />
             {error && (
-              <p className="mt-1 text-xs text-red-500">{error}</p>
+              <p className="mt-1 text-xs text-destructive">{error}</p>
             )}
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Fully qualified path to your Python callback function
             </p>
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t dark:border-zinc-700 flex justify-end gap-2">
+        <div className="px-4 py-3 border-t border-border flex justify-end gap-2 bg-muted/30">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-md"
+            className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md"
+            className="px-4 py-2 text-sm bg-primary text-primary-foreground hover:opacity-90 rounded-md font-medium transition-opacity"
             data-testid="add-callback-submit"
           >
             Add Callback
@@ -222,24 +222,24 @@ function CallbackCard({
 }) {
   return (
     <div
-      className="p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg border border-zinc-200 dark:border-zinc-600"
+      className="p-3 bg-card rounded-lg border border-border"
       data-testid="callback-card"
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2 min-w-0">
-          <Code className="w-4 h-4 text-purple-500 flex-shrink-0" />
+          <Code className="w-4 h-4 text-primary flex-shrink-0" />
           <div className="min-w-0">
-            <p className="text-xs font-medium text-purple-600 dark:text-purple-400">
+            <p className="text-xs font-medium text-primary">
               {callbackTypeLabels[callback.type]}
             </p>
-            <p className="text-sm text-zinc-900 dark:text-white font-mono truncate">
+            <p className="text-sm text-card-foreground font-mono truncate">
               {callback.functionPath}
             </p>
           </div>
         </div>
         <button
           onClick={onDelete}
-          className="p-1 text-zinc-400 hover:text-red-500 rounded"
+          className="p-1 text-muted-foreground hover:text-destructive rounded transition-colors"
           title="Delete"
           data-testid="delete-callback-button"
         >
@@ -283,12 +283,12 @@ export function CallbacksPanel({
   return (
     <div className="space-y-3" data-testid="callbacks-section">
       <div className="flex items-center justify-between relative">
-        <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <h4 className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
           Callbacks
         </h4>
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="flex items-center gap-1 p-1 text-zinc-400 hover:text-blue-500 rounded"
+          className="flex items-center gap-1 p-1 text-muted-foreground hover:text-primary rounded transition-colors"
           title="Add Callback"
           data-testid="add-callback-button"
         >
@@ -304,16 +304,16 @@ export function CallbacksPanel({
 
       {callbacks.length === 0 ? (
         <div
-          className="text-center py-4 bg-zinc-50 dark:bg-zinc-700/30 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-600"
+          className="text-center py-4 bg-muted/20 rounded-lg border border-dashed border-border"
           data-testid="callbacks-empty-state"
         >
-          <Code className="w-8 h-8 mx-auto text-zinc-400 mb-2" />
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">No callbacks configured</p>
+          <Code className="w-8 h-8 mx-auto text-muted-foreground/40 mb-2" />
+          <p className="text-[10px] text-muted-foreground/60 font-mono uppercase mb-2">No callbacks configured</p>
           <button
             onClick={() => setDropdownOpen(true)}
-            className="mt-2 text-xs text-blue-500 hover:text-blue-600"
+            className="text-xs font-bold text-primary hover:text-primary/80 hover:underline uppercase tracking-wide transition-colors"
           >
-            Add your first callback
+            Add callback
           </button>
         </div>
       ) : (

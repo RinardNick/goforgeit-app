@@ -14,10 +14,10 @@ interface ErrorMessageProps {
 export function ErrorMessage({ message, testId, className = '' }: ErrorMessageProps) {
   return (
     <div
-      className={`p-4 bg-red-50 border border-red-200 rounded-lg ${className}`}
+      className={`p-4 bg-destructive/10 border border-destructive/20 rounded-lg ${className}`}
       data-testid={testId}
     >
-      <p className="text-red-600 text-sm">{message}</p>
+      <p className="text-destructive text-sm">{message}</p>
     </div>
   );
 }

@@ -31,9 +31,9 @@ export function ConfirmDialog({
   if (!isOpen) return null;
 
   const variantStyles = {
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    warning: 'bg-amber-600 hover:bg-amber-700 text-white',
-    default: 'bg-primary hover:bg-primary/90 text-white',
+    danger: 'bg-destructive hover:bg-destructive/90 text-destructive-foreground',
+    warning: 'bg-warning hover:bg-warning/90 text-warning-foreground',
+    default: 'bg-primary hover:bg-primary/90 text-primary-foreground',
   };
 
   return (

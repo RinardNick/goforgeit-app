@@ -15,6 +15,7 @@ export class WebSSETransport implements Transport {
   }
 
   async start() {
+    console.log(`[WebSSETransport] Starting session ${this.sessionId}`);
     // Send endpoint event indicating where to POST messages
     // The client (ADK) will use this URL to send JSON-RPC messages
     const endpoint = `/api/mcp/system-tools/messages?sessionId=${this.sessionId}`;
@@ -23,6 +24,7 @@ export class WebSSETransport implements Transport {
   }
 
   async send(message: JSONRPCMessage) {
+    console.log(`[WebSSETransport] Sending message to ${this.sessionId}`);
     const data = JSON.stringify(message);
     const event = `event: message\ndata: ${data}\n\n`;
     await this.writer.write(this.encoder.encode(event));

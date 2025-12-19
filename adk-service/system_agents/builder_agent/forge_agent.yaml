@@ -14,7 +14,4 @@ instruction: |
   4. Use snake_case for the function name.
 
 tools:
-  - name: MCPToolset
-    args:
-      sse_server_params:
-        url: ${SYSTEM_TOOLS_MCP_URL}
+  - mcp_tools.get_system_mcp_toolset

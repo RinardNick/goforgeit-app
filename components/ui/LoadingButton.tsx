@@ -33,10 +33,10 @@ export function LoadingButton({
   const baseClasses = 'inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantClasses = {
-    primary: 'bg-electricOrange text-white hover:opacity-90',
-    secondary: 'bg-white/10 text-silver hover:bg-white/20',
-    success: 'bg-forgeGreen hover:bg-green-600 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
+    primary: 'bg-primary text-primary-foreground hover:opacity-90',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+    success: 'bg-success text-success-foreground hover:bg-success/90',
+    danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
     custom: '',
   };
 
