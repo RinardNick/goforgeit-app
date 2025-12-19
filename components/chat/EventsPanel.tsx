@@ -172,7 +172,7 @@ export function EventsPanel({
                       data-testid={event.eventType === 'functionCall' || event.eventType === 'functionResponse' ? 'tool-name' : undefined}
                       className={`px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold uppercase tracking-wide border ${
                         event.eventType === 'functionCall' ? 'bg-primary/5 text-primary border-primary/20' :
-                        event.eventType === 'functionResponse' ? 'bg-green-500/5 text-green-500 border-green-500/20' :
+                        event.eventType === 'functionResponse' ? 'bg-success/5 text-success border-success/20' :
                         'bg-muted text-foreground/70 border-border'
                       }`}
                     >

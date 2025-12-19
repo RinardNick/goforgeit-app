@@ -180,7 +180,7 @@ export function TracePanel({
                                   : isToolCall
                                   ? 'bg-primary/5 border-primary/10 hover:border-primary/30'
                                   : isToolResponse
-                                  ? 'bg-green-500/5 border-green-500/10 hover:border-green-500/30'
+                                  ? 'bg-success/5 border-success/10 hover:border-success/30'
                                   : 'bg-muted/20 border-border hover:bg-accent'
                               }`}
                             >
@@ -189,7 +189,7 @@ export function TracePanel({
                               </span>
                               <span className={`text-[10px] font-mono font-medium flex-shrink-0 uppercase tracking-tight ${
                                 isToolCall ? 'text-primary' :
-                                isToolResponse ? 'text-green-500' :
+                                isToolResponse ? 'text-success' :
                                 'text-foreground/70'
                               }`}>
                                 {isToolCall ? `tool_call ${funcCall?.name}` :
@@ -200,7 +200,7 @@ export function TracePanel({
                                 <div
                                   className={`h-full rounded-full ${
                                     isToolCall ? 'bg-primary' :
-                                    isToolResponse ? 'bg-green-500' :
+                                    isToolResponse ? 'bg-success' :
                                     'bg-foreground/20'
                                   }`}
                                   style={{

@@ -14,4 +14,7 @@ instruction: |
   4. Use snake_case for the function name.
 
 tools:
-  - mcp_tools.get_system_mcp_toolset
+  - name: MCPToolset
+    args:
+      sse_client_params:
+        url: http://localhost:3025/api/mcp/system-tools/sse

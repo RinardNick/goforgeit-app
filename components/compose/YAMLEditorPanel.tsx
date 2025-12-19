@@ -48,7 +48,7 @@ export function YAMLEditorPanel({
               onClick={() => onSelectFile(file.filename)}
               className={`px-4 py-2 text-xs font-mono font-medium whitespace-nowrap transition-colors ${
                 selectedFile === file.filename
-                  ? 'text-electricOrange border-b-2 border-electricOrange bg-white/5'
+                  ? 'text-primary border-b-2 border-primary bg-white/5'
                   : 'text-silver hover:text-white hover:bg-white/5 border-b-2 border-transparent'
               }`}
             >
@@ -60,7 +60,7 @@ export function YAMLEditorPanel({
 
       {/* YAML Error Indicators */}
       {yamlError && (
-        <div className="px-4 py-2 bg-red-900/20 border-b border-red-500/20 text-red-400 text-xs font-mono flex items-center gap-2" data-testid="yaml-error">
+        <div className="px-4 py-2 bg-destructive/20 border-b border-destructive/20 text-destructive text-xs font-mono flex items-center gap-2" data-testid="yaml-error">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -68,7 +68,7 @@ export function YAMLEditorPanel({
         </div>
       )}
       {validationError && (
-        <div className="px-4 py-2 bg-amber-900/20 border-b border-amber-500/20 text-amber-400 text-xs font-mono flex items-center gap-2" data-testid="yaml-validation-error">
+        <div className="px-4 py-2 bg-warning/20 border-b border-warning/20 text-warning text-xs font-mono flex items-center gap-2" data-testid="yaml-validation-error">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -76,7 +76,7 @@ export function YAMLEditorPanel({
         </div>
       )}
       {circularDependencyWarning && (
-        <div className="px-4 py-2 bg-orange-900/20 border-b border-orange-500/20 text-orange-400 text-xs font-mono flex items-center gap-2" data-testid="circular-dependency-warning">
+        <div className="px-4 py-2 bg-warning/20 border-b border-warning/20 text-warning text-xs font-mono flex items-center gap-2" data-testid="circular-dependency-warning">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>

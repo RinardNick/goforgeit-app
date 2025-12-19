@@ -17,4 +17,7 @@ sub_agents:
   - config_path: forge_agent.yaml
 
 tools:
-  - mcp_tools.get_system_mcp_toolset
+  - name: MCPToolset
+    args:
+      sse_client_params:
+        url: http://localhost:3025/api/mcp/system-tools/sse

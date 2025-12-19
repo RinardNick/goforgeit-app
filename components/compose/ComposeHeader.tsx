@@ -102,7 +102,7 @@ export function ComposeHeader({
             onClick={onAIAssistantToggle}
             className={`px-3 py-1.5 text-xs font-medium rounded-sm border transition-all duration-200 flex items-center gap-2 uppercase tracking-wide ${
               showAIAssistant
-                ? 'bg-green-500/10 border-green-500 text-green-600 dark:text-green-400 shadow-sm'
+                ? 'bg-success/10 border-success text-success shadow-sm'
                 : 'bg-transparent border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
             }`}
           >
@@ -153,7 +153,7 @@ export function ComposeHeader({
         </div>
       )}
       {saveSuccess && (
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full bg-card border-b border-l border-r border-green-500/30 text-green-600 text-[10px] px-3 py-0.5 rounded-b-sm font-mono tracking-wider shadow-sm">
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full bg-card border-b border-l border-r border-success/30 text-success text-[10px] px-3 py-0.5 rounded-b-sm font-mono tracking-wider shadow-sm">
           SAVED SUCCESSFULLY
         </div>
       )}

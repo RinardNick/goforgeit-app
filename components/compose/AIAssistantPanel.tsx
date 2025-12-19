@@ -382,7 +382,7 @@ export function AIAssistantPanel({
                         key={idx}
                         className={`text-xs p-2 rounded-sm border ${
                           action.result.success
-                            ? 'bg-green-500/5 border-green-500/20 text-green-600 dark:text-green-400'
+                            ? 'bg-success/5 border-success/20 text-success'
                             : 'bg-destructive/5 border-destructive/20 text-destructive'
                         }`}
                         data-testid="executed-action-item"
@@ -391,7 +391,7 @@ export function AIAssistantPanel({
                           <span>{TOOL_ICONS[action.tool] || '⚙️'}</span>
                           <span>{action.tool}</span>
                           {action.result.success ? (
-                            <span className="text-green-600 dark:text-green-400">✓</span>
+                            <span className="text-success">✓</span>
                           ) : (
                             <span className="text-destructive">✗</span>
                           )}
@@ -405,8 +405,8 @@ export function AIAssistantPanel({
                 {/* Show completion badge */}
                 {message.role === 'assistant' && message.isComplete && (
                   <div className="mt-2 mr-4 pl-1">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] bg-forgeGreen/10 border border-forgeGreen/20 text-forgeGreen px-2 py-0.5 rounded-full font-mono uppercase tracking-wide">
-                      <span className="w-1.5 h-1.5 rounded-full bg-forgeGreen"></span>
+                    <span className="inline-flex items-center gap-1.5 text-[10px] bg-success/10 border border-success/20 text-success px-2 py-0.5 rounded-full font-mono uppercase tracking-wide">
+                      <span className="w-1.5 h-1.5 rounded-full bg-success"></span>
                       Task completed
                     </span>
                   </div>

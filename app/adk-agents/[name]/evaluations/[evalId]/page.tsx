@@ -346,7 +346,7 @@ export default function EvalsetDetailPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span data-testid={`run-pass-rate-${index}`} className={`text-lg font-bold ${
-                          (run.overall_pass_rate || 0) >= 70 ? 'text-green-600' : 'text-red-600'
+                          (run.overall_pass_rate || 0) >= 70 ? 'text-success' : 'text-destructive'
                         }`}>
                           {run.overall_pass_rate ?? 0}%
                         </span>
@@ -529,7 +529,7 @@ export default function EvalsetDetailPage() {
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-medium text-gray-700">{displayNames[metricName] || metricName}</h4>
                       <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                        isPassing ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        isPassing ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
                       }`}>
                         {passRate}%
                       </span>
@@ -541,7 +541,7 @@ export default function EvalsetDetailPage() {
                     <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all ${
-                          isPassing ? 'bg-green-500' : 'bg-red-500'
+                          isPassing ? 'bg-success' : 'bg-destructive'
                         }`}
                         style={{ width: `${passRate}%` }}
                       />

@@ -11,13 +11,13 @@ import type { ADKEvent, InvocationInfo, AgentConfig } from './types';
  */
 export function getHeatmapColor(durationMs: number): { barColor: string; testId?: string } {
   if (durationMs >= 1000) {
-    return { barColor: 'bg-red-400', testId: 'trace-danger-indicator' };
+    return { barColor: 'bg-destructive', testId: 'trace-danger-indicator' };
   } else if (durationMs >= 500) {
-    return { barColor: 'bg-orange-400', testId: 'trace-slow-indicator' };
+    return { barColor: 'bg-warning', testId: 'trace-slow-indicator' };
   } else if (durationMs >= 200) {
-    return { barColor: 'bg-yellow-400' };
+    return { barColor: 'bg-warning/70' };
   }
-  return { barColor: 'bg-green-400' };
+  return { barColor: 'bg-success' };
 }
 
 /**
@@ -31,19 +31,19 @@ export function formatTimestamp(timestamp: number): string {
  * Render JSON with proper formatting and syntax highlighting
  */
 export function renderJson(data: unknown, indent = 0) {
-  if (data === null) return <span className="text-gray-500">null</span>;
-  if (data === undefined) return <span className="text-gray-500">undefined</span>;
-  if (typeof data === 'string') return <span className="text-green-600">&quot;{data}&quot;</span>;
-  if (typeof data === 'number') return <span className="text-blue-600">{data}</span>;
-  if (typeof data === 'boolean') return <span className="text-purple-600">{data.toString()}</span>;
+  if (data === null) return <span className="text-muted-foreground">null</span>;
+  if (data === undefined) return <span className="text-muted-foreground">undefined</span>;
+  if (typeof data === 'string') return <span className="text-success">&quot;{data}&quot;</span>;
+  if (typeof data === 'number') return <span className="text-info">{data}</span>;
+  if (typeof data === 'boolean') return <span className="text-primary">{data.toString()}</span>;
 
   if (Array.isArray(data)) {
-    if (data.length === 0) return <span className="text-gray-500">[]</span>;
+    if (data.length === 0) return <span className="text-muted-foreground">[]</span>;
     return (
       <div style={{ marginLeft: indent > 0 ? '1rem' : 0 }}>
         {data.map((item, idx) => (
           <div key={idx} className="flex">
-            <span className="text-gray-400 mr-2">{idx}:</span>
+            <span className="text-muted-foreground mr-2">{idx}:</span>
             {renderJson(item, indent + 1)}
           </div>
         ))}
@@ -53,12 +53,12 @@ export function renderJson(data: unknown, indent = 0) {
 
   if (typeof data === 'object') {
     const entries = Object.entries(data as Record<string, unknown>);
-    if (entries.length === 0) return <span className="text-gray-500">{'{}'}</span>;
+    if (entries.length === 0) return <span className="text-muted-foreground">{'{}'}</span>;
     return (
       <div style={{ marginLeft: indent > 0 ? '1rem' : 0 }}>
         {entries.map(([key, value]) => (
           <div key={key} className="flex flex-wrap">
-            <span className="text-amber-600 mr-1">{key}:</span>
+            <span className="text-warning mr-1">{key}:</span>
             {renderJson(value, indent + 1)}
           </div>
         ))}
@@ -86,20 +86,20 @@ export function renderRequestContent(
     <div className="space-y-3">
       {/* Model */}
       <div>
-        <span className="text-amber-600">model:</span>{' '}
-        <span className="text-green-600">&quot;{event.modelVersion || agentConfig?.model || 'unknown'}&quot;</span>
+        <span className="text-warning">model:</span>{' '}
+        <span className="text-success">&quot;{event.modelVersion || agentConfig?.model || 'unknown'}&quot;</span>
       </div>
 
       {/* Config with http_options */}
       <div>
-        <span className="text-amber-600">config:</span>
+        <span className="text-warning">config:</span>
         <div className="ml-4 space-y-1">
           <div>
-            <span className="text-amber-600">http_options:</span>
+            <span className="text-warning">http_options:</span>
             <div className="ml-4">
-              <span className="text-amber-600">headers:</span>
+              <span className="text-warning">headers:</span>
               <div className="ml-4">
-                <span className="text-gray-500 italic"># Standard headers set by ADK runtime</span>
+                <span className="text-muted-foreground italic"># Standard headers set by ADK runtime</span>
               </div>
             </div>
           </div>
@@ -109,12 +109,12 @@ export function renderRequestContent(
       {/* System Instruction */}
       {agentConfig?.instruction && (
         <div>
-          <span className="text-amber-600">system_instruction:</span>
+          <span className="text-warning">system_instruction:</span>
           <div className="ml-4">
-            <span className="text-amber-600">parts:</span>
+            <span className="text-warning">parts:</span>
             <div className="ml-4">
-              <span className="text-amber-600">- text:</span>{' '}
-              <span className="text-green-600 whitespace-pre-wrap">&quot;{agentConfig.instruction}&quot;</span>
+              <span className="text-warning">- text:</span>{' '}
+              <span className="text-success whitespace-pre-wrap">&quot;{agentConfig.instruction}&quot;</span>
             </div>
           </div>
         </div>
@@ -123,19 +123,19 @@ export function renderRequestContent(
       {/* Tools - show sub_agents as transfer tools */}
       {agentConfig?.subAgents && agentConfig.subAgents.length > 0 && (
         <div>
-          <span className="text-amber-600">tools:</span>
+          <span className="text-warning">tools:</span>
           <div className="ml-4">
-            <span className="text-amber-600">function_declarations:</span>
+            <span className="text-warning">function_declarations:</span>
             <div className="ml-4">
               {agentConfig.subAgents.map((subAgent, idx) => {
                 const agentName = subAgent.replace('.yaml', '').replace(/_/g, ' ');
                 return (
                   <div key={idx} className="mb-2">
-                    <span className="text-amber-600">- name:</span>{' '}
-                    <span className="text-green-600">&quot;transfer_to_{subAgent.replace('.yaml', '')}&quot;</span>
+                    <span className="text-warning">- name:</span>{' '}
+                    <span className="text-success">&quot;transfer_to_{subAgent.replace('.yaml', '')}&quot;</span>
                     <div className="ml-4">
-                      <span className="text-amber-600">description:</span>{' '}
-                      <span className="text-green-600">&quot;Transfer conversation to {agentName}&quot;</span>
+                      <span className="text-warning">description:</span>{' '}
+                      <span className="text-success">&quot;Transfer conversation to {agentName}&quot;</span>
                     </div>
                   </div>
                 );
@@ -147,15 +147,15 @@ export function renderRequestContent(
 
       {/* Contents - the user message */}
       <div>
-        <span className="text-amber-600">contents:</span>
+        <span className="text-warning">contents:</span>
         <div className="ml-4">
-          <span className="text-amber-600">- role:</span>{' '}
-          <span className="text-green-600">&quot;user&quot;</span>
+          <span className="text-warning">- role:</span>{' '}
+          <span className="text-success">&quot;user&quot;</span>
           <div className="ml-4">
-            <span className="text-amber-600">parts:</span>
+            <span className="text-warning">parts:</span>
             <div className="ml-4">
-              <span className="text-amber-600">- text:</span>{' '}
-              <span className="text-green-600">&quot;{message}&quot;</span>
+              <span className="text-warning">- text:</span>{' '}
+              <span className="text-success">&quot;{message}&quot;</span>
             </div>
           </div>
         </div>
