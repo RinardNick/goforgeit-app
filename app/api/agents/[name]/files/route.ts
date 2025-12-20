@@ -122,17 +122,16 @@ export async function GET(
         );
       }
 
-      // Read all YAML files in the agent directory
-      const files = await fs.readdir(agentDir);
-      const yamlFiles = files.filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
-
-      for (const filename of yamlFiles) {
-        const filePath = path.join(agentDir, filename);
-        const content = await fs.readFile(filePath, 'utf-8');
-        agentFiles.push({
-          filename,
-          yaml: content,
-        });
+      // Read YAML files in root
+      const entries = await fs.readdir(agentDir, { withFileTypes: true });
+      
+      for (const entry of entries) {
+        // Only include YAML configuration files
+        // Python tools in tools/ are internal implementation details, not user-editable configs
+        if (entry.isFile() && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+          const content = await fs.readFile(path.join(agentDir, entry.name), 'utf-8');
+          agentFiles.push({ filename: entry.name, yaml: content });
+        }
       }
     }
 

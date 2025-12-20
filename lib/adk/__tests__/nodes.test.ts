@@ -407,6 +407,37 @@ generation_config:
       assert.strictEqual(rootNode.data.generation_config.top_p, 0.9);
       assert.strictEqual(rootNode.data.generation_config.top_k, 40);
     });
+
+    it('parses Python tools from YAML', () => {
+      const files: AgentFile[] = [
+        {
+          filename: 'root_agent.yaml',
+          yaml: `
+name: py_tool_agent
+agent_class: LlmAgent
+model: gemini-2.0-flash
+tools:
+  - google_search
+  - tools/my_tool.py
+`,
+        },
+      ];
+
+      const { nodes } = agentFilesToNodes(files);
+      const rootNode = nodes[0];
+
+      // Python tools should be separated
+      assert.ok(rootNode.data.pythonTools);
+      assert.strictEqual(rootNode.data.pythonTools.length, 1);
+      assert.strictEqual(rootNode.data.pythonTools[0].filename, 'tools/my_tool.py');
+      assert.strictEqual(rootNode.data.pythonTools[0].name, 'my_tool');
+
+      // Built-in tools should NOT include the python tool
+      assert.ok(rootNode.data.tools);
+      assert.strictEqual(rootNode.data.tools.length, 1);
+      assert.ok(rootNode.data.tools.includes('google_search'));
+      assert.ok(!rootNode.data.tools.includes('tools/my_tool.py'));
+    });
   });
 
   /**
@@ -682,6 +713,36 @@ generation_config:
 
       assert.ok(yaml.includes('agent_class: SequentialAgent'));
       assert.ok(!yaml.includes('model:'), 'SequentialAgent should not have model field');
+    });
+
+    it('generates YAML with Python tools', () => {
+      const nodes = [
+        {
+          id: 'root',
+          type: 'agent',
+          position: { x: 0, y: 0 },
+          data: {
+            name: 'Py Tool Agent',
+            agentClass: 'LlmAgent',
+            model: 'gemini-2.0-flash',
+            isRoot: true,
+            filename: 'py_tool_agent.yaml',
+            tools: ['google_search'],
+            pythonTools: [
+              { id: '1', name: 'my_tool', filename: 'tools/my_tool.py', enabled: true },
+              { id: '2', name: 'disabled_tool', filename: 'tools/disabled.py', enabled: false },
+            ],
+          },
+        },
+      ];
+
+      const yaml = nodesToYaml(nodes, []);
+      console.log('Generated YAML:', yaml);
+
+      assert.ok(yaml.includes('tools:'));
+      assert.ok(yaml.includes('google_search'));
+      assert.ok(yaml.includes('tools/my_tool.py'));
+      assert.ok(!yaml.includes('tools/disabled.py'));
     });
   });
 

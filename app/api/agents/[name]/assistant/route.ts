@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeADKAgent } from '@/lib/adk/client';
+import { executeADKAgent, getADKSession, createADKSession, updateADKSession } from '@/lib/adk/client';
 import { z } from 'zod';
+import path from 'path';
+import { auth } from '@/auth';
+
+// Get the base path for ADK agents
+const ADK_AGENTS_BASE_PATH = process.env.ADK_AGENTS_BASE_PATH ||
+  path.join(process.cwd(), 'adk-service', 'agents');
 
 export const runtime = 'nodejs';
 
@@ -32,9 +38,17 @@ export async function POST(
   const { name: projectName } = await params;
 
   try {
+    // Check auth
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // Use nickarinard@gmail.com for builder_agent sessions (dogfooding)
+    const userId = 'nickarinard@gmail.com';
+
     const body = await request.json();
     const validation = AssistantRequestSchema.safeParse(body);
-    
+
     if (!validation.success) {
       return NextResponse.json({ error: 'Validation failed' }, { status: 400 });
     }
@@ -65,12 +79,30 @@ export async function POST(
 
     console.log(`[Assistant] Calling builder_agent for project ${projectName}...`);
 
+    // Ensure session exists and has root_directory set for the project
+    // This tells Google's tools where to read/write files
+    const projectPath = path.join(ADK_AGENTS_BASE_PATH, projectName);
+
+    // Check if session exists, create if not
+    let session = await getADKSession('builder_agent', userId, sessionId);
+    if (!session) {
+      console.log(`[Assistant] Creating new session ${sessionId}...`);
+      session = await createADKSession('builder_agent', userId, sessionId);
+    }
+
+    // Update session state with root_directory pointing to the project folder
+    // Google's tools (write_config_files, explore_project, etc.) use this to resolve paths
+    console.log(`[Assistant] Setting root_directory to ${projectPath}...`);
+    await updateADKSession('builder_agent', userId, sessionId, {
+      root_directory: projectPath
+    });
+
     const result = await executeADKAgent(
       'builder_agent', // Must match name in builder_agent.yaml
       fullMessage,
       {
         sessionId,
-        // Optional: Pass userId if we want multi-user separation within the project
+        userId,
       }
     );
 
@@ -96,7 +128,9 @@ export async function POST(
     return NextResponse.json({
       response: result.response, // The text response from the LLM
       executedActions,
-      isComplete
+      isComplete,
+      sessionId: result.sessionId, // Return session ID for tracking/debugging
+      events: result.events, // Return ADK events for debug panel
     });
 
   } catch (error) {

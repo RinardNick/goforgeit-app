@@ -1,534 +1,138 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Plus, Code, Trash2, Play, X, FileCode } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import Monaco to avoid SSR issues
-const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
-
-// Types
-export interface PythonToolConfig {
-  id: string;
-  name: string;
-  filename: string;
-  code?: string;
-  signature?: {
-    name: string;
-    params: Array<{
-      name: string;
-      type: string;
-      required: boolean;
-      default?: string;
-    }>;
-    docstring?: string;
-    returnType?: string;
-  };
-  enabled: boolean;
-}
+import React, { useState } from 'react';
+import { PythonToolConfig } from './AgentNode';
+import { FileCode, Trash2, Edit3, Save, X, Plus } from 'lucide-react';
+import Editor from '@monaco-editor/react';
 
 interface CustomPythonToolsPanelProps {
-  projectName: string;
-  pythonTools: PythonToolConfig[];
-  onToolsChange: (tools: PythonToolConfig[]) => void;
-  onCreateTool: (name: string, code: string) => Promise<PythonToolConfig | null>;
-  onDeleteTool: (id: string) => Promise<boolean>;
-  onTestTool?: (toolName: string, params: Record<string, unknown>) => Promise<{ success: boolean; result?: unknown; error?: string }>;
+  agentFiles: Array<{ filename: string; yaml: string }>;
+  onSaveFile: (filename: string, content: string) => Promise<void>;
+  onDeleteFile: (filename: string) => Promise<void>;
 }
 
-// Default Python tool template
-const DEFAULT_TOOL_TEMPLATE = `def my_tool(query: str, count: int = 5) -> dict:
-    """Describe what this tool does.
-
-    Args:
-        query: The search query to process
-        count: Number of results to return (optional)
-
-    Returns:
-        A dictionary with status and results
-    """
-    # Your implementation here
-    return {
-        "status": "success",
-        "results": [f"Result for {query}"] * count
-    }
-`;
-
-// Create Tool Dialog Component
-function CreateToolDialog({
-  isOpen,
-  onClose,
-  onCreate,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  onCreate: (name: string, code: string) => void;
-}) {
-  const [toolName, setToolName] = useState('');
-  const [code, setCode] = useState(DEFAULT_TOOL_TEMPLATE);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setToolName('');
-      setCode(DEFAULT_TOOL_TEMPLATE);
-      setError(null);
-    }
-  }, [isOpen]);
-
-  const handleCreate = () => {
-    // Validate tool name
-    if (!toolName.trim()) {
-      setError('Tool name is required');
-      return;
-    }
-    if (!/^[a-z][a-z0-9_]*$/.test(toolName)) {
-      setError('Tool name must be lowercase with underscores (e.g., my_tool)');
-      return;
-    }
-    if (!code.includes('def ')) {
-      setError('Code must contain a function definition');
-      return;
-    }
-    if (!code.includes('"""')) {
-      setError('Function must have a docstring');
-      return;
-    }
-
-    onCreate(toolName, code);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-      <div
-        className="bg-card rounded-xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden max-h-[90vh] flex flex-col border border-border"
-        onClick={(e) => e.stopPropagation()}
-        data-testid="create-python-tool-dialog"
-      >
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between flex-shrink-0 bg-muted/30">
-          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <FileCode size={20} className="text-green-600" />
-            Create Python Tool
-          </h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-5 space-y-4 overflow-y-auto flex-1 bg-card">
-          {/* Tool Name */}
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-mono">
-              Tool Name
-            </label>
-            <input
-              type="text"
-              value={toolName}
-              onChange={(e) => setToolName(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))}
-              placeholder="my_custom_tool"
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-mono text-foreground"
-              data-testid="python-tool-name-input"
-            />
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              Use lowercase letters, numbers, and underscores
-            </p>
-          </div>
-
-          {/* Python Code Editor */}
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-mono">
-              Python Code
-            </label>
-            <div
-              className="border border-border rounded-lg overflow-hidden"
-              data-testid="python-code-editor"
-            >
-              <MonacoEditor
-                height="300px"
-                language="python"
-                value={code}
-                onChange={(value) => setCode(value || '')}
-                theme="vs-dark" // Use dark theme by default or dynamic if possible, defaulting to dark for Sovereign Forge
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 13,
-                  lineNumbers: 'on',
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  tabSize: 4,
-                  wordWrap: 'on',
-                }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              Define a function with type hints and a docstring. The docstring becomes the tool description.
-            </p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-3 py-2 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 flex-shrink-0 bg-muted/30">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleCreate}
-            data-testid="create-python-tool-button"
-            className="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            <Plus size={16} />
-            Create Tool
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Test Tool Dialog Component
-function TestToolDialog({
-  isOpen,
-  onClose,
-  tool,
-  onRunTest,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  tool: PythonToolConfig | null;
-  onRunTest: (params: Record<string, unknown>) => Promise<{ success: boolean; result?: unknown; error?: string }>;
-}) {
-  const [params, setParams] = useState<Record<string, string>>({});
-  const [result, setResult] = useState<{ success: boolean; result?: unknown; error?: string } | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
-
-  useEffect(() => {
-    if (isOpen && tool?.signature?.params) {
-      const initialParams: Record<string, string> = {};
-      tool.signature.params.forEach((p) => {
-        initialParams[p.name] = p.default || '';
-      });
-      setParams(initialParams);
-      setResult(null);
-    }
-  }, [isOpen, tool]);
-
-  const handleRun = async () => {
-    setIsRunning(true);
-    try {
-      // Convert params to appropriate types based on signature
-      const typedParams: Record<string, unknown> = {};
-      tool?.signature?.params.forEach((p) => {
-        const value = params[p.name];
-        if (p.type === 'int') {
-          typedParams[p.name] = parseInt(value) || 0;
-        } else if (p.type === 'float') {
-          typedParams[p.name] = parseFloat(value) || 0;
-        } else if (p.type === 'bool') {
-          typedParams[p.name] = value.toLowerCase() === 'true';
-        } else {
-          typedParams[p.name] = value;
-        }
-      });
-
-      const testResult = await onRunTest(typedParams);
-      setResult(testResult);
-    } catch (err) {
-      setResult({ success: false, error: err instanceof Error ? err.message : 'Test failed' });
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  if (!isOpen || !tool) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
-      <div
-        className="bg-card rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-border"
-        onClick={(e) => e.stopPropagation()}
-        data-testid="test-python-tool-dialog"
-      >
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/30">
-          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Play size={20} className="text-primary" />
-            Test: {tool.name}
-          </h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-5 space-y-4 bg-card">
-          {/* Description */}
-          {tool.signature?.docstring && (
-            <p className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border">
-              {tool.signature.docstring}
-            </p>
-          )}
-
-          {/* Parameter Inputs */}
-          {tool.signature?.params.map((param) => (
-            <div key={param.name}>
-              <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-mono">
-                {param.name} ({param.type}){!param.required && ' - optional'}
-              </label>
-              <input
-                type="text"
-                value={params[param.name] || ''}
-                onChange={(e) => setParams({ ...params, [param.name]: e.target.value })}
-                placeholder={param.default ? `Default: ${param.default}` : `Enter ${param.name}`}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
-                data-testid={`test-param-${param.name}`}
-              />
-            </div>
-          ))}
-
-          {/* Result Display */}
-          {result && (
-            <div
-              className={`p-3 rounded-lg text-sm border ${
-                result.success ? 'bg-green-500/10 border-green-500/20' : 'bg-destructive/10 border-destructive/20'
-              }`}
-              data-testid="tool-test-result"
-            >
-              <p className={`font-medium mb-1 ${result.success ? 'text-green-600' : 'text-destructive'}`}>
-                {result.success ? 'Success' : 'Error'}
-              </p>
-              <pre className="text-xs font-mono whitespace-pre-wrap overflow-auto max-h-40 text-foreground">
-                {result.success ? JSON.stringify(result.result, null, 2) : result.error}
-              </pre>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-border flex justify-end gap-3 bg-muted/30">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Close
-          </button>
-          <button
-            type="button"
-            onClick={handleRun}
-            disabled={isRunning}
-            data-testid="run-tool-test-button"
-            className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors flex items-center gap-2 disabled:opacity-50"
-          >
-            <Play size={16} />
-            {isRunning ? 'Running...' : 'Run Test'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Python Tool Card Component
-function PythonToolCard({
-  tool,
-  onToggle,
-  onDelete,
-  onTest,
-}: {
-  tool: PythonToolConfig;
-  onToggle: () => void;
-  onDelete: () => void;
-  onTest: () => void;
-}) {
-  return (
-    <div
-      data-testid={`python-tool-card-${tool.name}`}
-      className={`border rounded-lg p-3 transition-colors ${
-        tool.enabled ? 'bg-green-500/10 border-green-500/20' : 'bg-muted/30 border-border'
-      }`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-start gap-2 min-w-0 flex-1">
-          {/* Enable Checkbox */}
-          <input
-            type="checkbox"
-            checked={tool.enabled}
-            onChange={onToggle}
-            className="mt-1 w-4 h-4 text-green-600 rounded focus:ring-green-500 bg-background border-border"
-            data-testid="enable-python-tool-checkbox"
-          />
-
-          <div className="min-w-0 flex-1">
-            {/* Tool Name */}
-            <div className="flex items-center gap-2">
-              <Code size={14} className="text-green-600 flex-shrink-0" />
-              <span className="text-sm font-medium text-foreground truncate font-mono">{tool.name}</span>
-            </div>
-
-            {/* Function Signature */}
-            {tool.signature && (
-              <p className="text-xs text-muted-foreground font-mono mt-1 truncate">
-                ({tool.signature.params.map((p) => `${p.name}: ${p.type}`).join(', ')})
-              </p>
-            )}
-
-            {/* Docstring Preview */}
-            {tool.signature?.docstring && (
-              <p className="text-xs text-muted-foreground/80 mt-1 line-clamp-2">
-                {tool.signature.docstring}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <button
-            onClick={onTest}
-            className="p-1.5 text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors"
-            title="Test tool"
-            data-testid="test-python-tool-button"
-          >
-            <Play size={14} />
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
-            title="Delete tool"
-            data-testid="delete-python-tool-button"
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Main Panel Component
-export default function CustomPythonToolsPanel({
-  projectName,
-  pythonTools,
-  onToolsChange,
-  onCreateTool,
-  onDeleteTool,
-  onTestTool,
+export function CustomPythonToolsPanel({
+  agentFiles,
+  onSaveFile,
+  onDeleteFile,
 }: CustomPythonToolsPanelProps) {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [testingTool, setTestingTool] = useState<PythonToolConfig | null>(null);
+  const [editingFile, setEditingFile] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleCreate = async (name: string, code: string) => {
-    const newTool = await onCreateTool(name, code);
-    if (newTool) {
-      onToolsChange([...pythonTools, newTool]);
-    }
+  // Filter for python files in tools/ directory
+  const pythonFiles = agentFiles.filter(f => f.filename.startsWith('tools/') && f.filename.endsWith('.py'));
+
+  const handleStartEdit = (filename: string, content: string) => {
+    setEditingFile(filename);
+    setEditContent(content);
   };
 
-  const handleDelete = async (id: string) => {
-    const success = await onDeleteTool(id);
-    if (success) {
-      onToolsChange(pythonTools.filter((t) => t.id !== id));
-    }
+  const handleCancelEdit = () => {
+    setEditingFile(null);
+    setEditContent('');
   };
 
-  const handleToggle = (id: string) => {
-    onToolsChange(
-      pythonTools.map((t) => (t.id === id ? { ...t, enabled: !t.enabled } : t))
-    );
-  };
-
-  const handleTest = useCallback(async (params: Record<string, unknown>) => {
-    if (!testingTool || !onTestTool) {
-      return { success: false, error: 'Test not available' };
+  const handleSave = async () => {
+    if (!editingFile) return;
+    setIsSaving(true);
+    try {
+      await onSaveFile(editingFile, editContent);
+      setEditingFile(null);
+    } finally {
+      setIsSaving(false);
     }
-    return onTestTool(testingTool.name, params);
-  }, [testingTool, onTestTool]);
+  };
 
   return (
-    <div data-testid="custom-python-tools-section" className="space-y-3">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <label className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Custom Python Tools</label>
-        <button
-          onClick={() => setIsCreateDialogOpen(true)}
-          data-testid="add-python-tool-btn"
-          className="p-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-          title="Create Python Tool"
-        >
-          <Plus size={14} />
-        </button>
+    <div className="space-y-3" data-testid="custom-python-tools-panel">
+      <div className="flex justify-between items-center mb-2">
+        <label className="block text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Python Tools</label>
       </div>
 
-      {/* Tools List */}
       <div className="space-y-2">
-        {pythonTools.length === 0 ? (
-          <div
-            data-testid="custom-python-tools-empty-state"
-            className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border rounded-lg bg-muted/20"
-          >
-            <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 mb-2">
-              <Code size={16} />
-            </div>
-            <p className="text-xs text-muted-foreground mb-2">No custom Python tools</p>
-            <button
-              onClick={() => setIsCreateDialogOpen(true)}
-              className="text-xs font-medium text-green-600 hover:text-green-500 hover:underline"
-            >
-              Create your first Python tool
-            </button>
+        {pythonFiles.length === 0 ? (
+          <div className="text-[10px] text-muted-foreground/40 italic font-mono uppercase text-center py-4 border border-dashed border-border rounded-sm">
+            NO_PYTHON_TOOLS_FOUND
           </div>
         ) : (
-          pythonTools.map((tool) => (
-            <PythonToolCard
-              key={tool.id}
-              tool={tool}
-              onToggle={() => handleToggle(tool.id)}
-              onDelete={() => handleDelete(tool.id)}
-              onTest={() => setTestingTool(tool)}
-            />
+          pythonFiles.map((file) => (
+            <div key={file.filename} className="group bg-card border border-border rounded-sm overflow-hidden">
+              <div className="p-2 flex items-center justify-between hover:bg-muted/20 transition-colors">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileCode size={14} className="text-primary opacity-70" />
+                  <span className="text-xs font-mono truncate text-foreground/80">{file.filename.replace('tools/', '')}</span>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleStartEdit(file.filename, file.yaml)}
+                    className="p-1 text-muted-foreground hover:text-primary rounded-sm transition-colors"
+                    title="Edit Code"
+                  >
+                    <Edit3 size={12} />
+                  </button>
+                  <button
+                    onClick={() => onDeleteFile(file.filename)}
+                    className="p-1 text-muted-foreground hover:text-destructive rounded-sm transition-colors"
+                    title="Delete Tool"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            </div>
           ))
         )}
       </div>
 
-      {/* Footer Summary */}
-      {pythonTools.length > 0 && (
-        <div className="text-[10px] text-muted-foreground/40 font-mono pt-1 border-t border-border">
-          {pythonTools.filter((t) => t.enabled).length}/{pythonTools.length} tool
-          {pythonTools.length !== 1 ? 's' : ''} enabled
+      {/* Editor Modal */}
+      {editingFile && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-lg shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-muted/30">
+              <div className="flex items-center gap-2">
+                <FileCode size={16} className="text-primary" />
+                <h3 className="text-sm font-bold font-mono text-foreground">{editingFile}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-sm text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition-all shadow-md"
+                >
+                  {isSaving ? <span className="animate-pulse">Saving...</span> : <><Save size={14} /> Save</>}
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body - Editor */}
+            <div className="flex-1 min-h-0 bg-[#1e1e1e]">
+              <Editor
+                height="100%"
+                defaultLanguage="python"
+                theme="vs-dark"
+                value={editContent}
+                onChange={(val) => setEditContent(val || '')}
+                options={{
+                  fontSize: 13,
+                  fontFamily: 'var(--font-mono)',
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  padding: { top: 16, bottom: 16 },
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Create Dialog */}
-      <CreateToolDialog
-        isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
-        onCreate={handleCreate}
-      />
-
-      {/* Test Dialog */}
-      <TestToolDialog
-        isOpen={testingTool !== null}
-        onClose={() => setTestingTool(null)}
-        tool={testingTool}
-        onRunTest={handleTest}
-      />
     </div>
   );
 }

@@ -50,6 +50,8 @@ interface AgentComposerProps {
   initialNodes?: Node[];
   initialEdges?: Edge[];
   availableAgents?: string[];
+  files?: Array<{ filename: string; yaml: string }>;
+  onSaveFile?: (filename: string, content: string) => Promise<void>;
   onChange?: (nodes: Node[], edges: Edge[]) => void;
   onNodeSelect?: (node: Node | null) => void;
   onNodeDataChange?: (nodeId: string, data: AgentNodeData) => void;
@@ -69,6 +71,8 @@ function AgentComposerInner({
   initialNodes = [],
   initialEdges = [],
   availableAgents = [],
+  files = [],
+  onSaveFile,
   onChange,
   onNodeSelect,
   onNodeDataChange,
@@ -519,6 +523,7 @@ function AgentComposerInner({
             : [];
         return (
           <PropertiesPanel
+            files={files}
             selectedNode={selectedNode}
             expandedToolSections={expandedToolSections}
             validationErrors={selectedNodeValidationErrors}
@@ -534,6 +539,7 @@ function AgentComposerInner({
             onDeleteMcpServer={handleDeleteMcpServer}
             onToggleMcpTool={handleToggleMcpTool}
             onRefreshMcpServer={handleRefreshMcpServer}
+            onSaveFile={onSaveFile}
           />
         );
       })()}

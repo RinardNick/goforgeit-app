@@ -828,6 +828,34 @@ export default function ADKAgentComposePage() {
     }
   }, [agentName, loadFiles]); // Added loadFiles dependency
 
+  // Handle saving a specific file (e.g. Python tool)
+  const handleSaveFile = useCallback(async (filename: string, content: string) => {
+    try {
+      const response = await fetch(`/api/agents/${agentName}/files`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, yaml: content }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `Failed to save ${filename}`);
+      }
+
+      setFiles(prev => prev.map(f =>
+        f.filename === filename ? { ...f, yaml: content } : f
+      ));
+      setOriginalFiles(prev => prev.map(f =>
+        f.filename === filename ? { ...f, yaml: content } : f
+      ));
+      
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save file');
+    }
+  }, [agentName]);
+
   // Handle save
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -947,6 +975,8 @@ export default function ADKAgentComposePage() {
                 <div className="flex-1">
                   <AgentComposer
                     projectName={agentName}
+                    files={files}
+                    onSaveFile={handleSaveFile}
                     initialNodes={nodes}
                     initialEdges={edges}
                     availableAgents={files.map(f => f.filename)}

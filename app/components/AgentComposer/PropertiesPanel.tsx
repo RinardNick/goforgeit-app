@@ -5,6 +5,7 @@ import { AgentNodeData, ADKAgentClass, ToolConfig, MCPServerConfig as Definition
 import { BuiltInToolsPanel } from './BuiltInToolsPanel';
 import { AddToolsDropdown, ToolType } from './AddToolsDropdown';
 import MCPToolsPanel, { MCPServerConfig as RuntimeMCPServerConfig } from './MCPToolsPanel';
+import { CustomPythonToolsPanel } from './CustomPythonToolsPanel';
 import { getAvailableModels } from '@/lib/pricing';
 
 // Available models from pricing source of truth
@@ -28,9 +29,12 @@ export interface ValidationError {
 
 interface PropertiesPanelProps {
   selectedNode: Node;
+  files: Array<{ filename: string; yaml: string }>;
   expandedToolSections: Record<string, Set<ToolType>>;
   validationErrors?: ValidationError[];
   
+  onSaveFile?: (filename: string, content: string) => Promise<void>;
+
   // MCP State
   mcpServerStates: Record<string, { status: any; tools: any[]; errorMessage?: string }>;
 
@@ -51,6 +55,7 @@ interface PropertiesPanelProps {
 
 export function PropertiesPanel({
   selectedNode,
+  files,
   expandedToolSections,
   validationErrors = [],
   mcpServerStates,
@@ -65,6 +70,7 @@ export function PropertiesPanel({
   onDeleteMcpServer,
   onToggleMcpTool,
   onRefreshMcpServer,
+  onSaveFile,
 }: PropertiesPanelProps) {
   const getNodeData = (): AgentNodeData => selectedNode.data as AgentNodeData;
   const nodeData = getNodeData();
@@ -258,6 +264,33 @@ export function PropertiesPanel({
                   onDeleteServer={onDeleteMcpServer}
                   onToggleTool={(serverId, toolName) => onToggleMcpTool(serverId, toolName)}
                   onRefreshServer={onRefreshMcpServer}
+                />
+              </div>
+            )}
+
+            {showPython && (
+              <div className="relative bg-accent border border-accent rounded-sm p-2">
+                {!hasPythonTools && (
+                  <button
+                    onClick={() => onCollapseToolSection(nodeId, 'python')}
+                    className="absolute -top-2 -right-2 p-1 bg-card border border-border text-muted-foreground hover:text-destructive rounded-full z-10 shadow-sm"
+                    title="Remove section"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+                <CustomPythonToolsPanel
+                  agentFiles={files}
+                  onSaveFile={onSaveFile || (async () => {})}
+                  onDeleteFile={async (filename) => {
+                    if (confirm(`Delete ${filename}?`)) {
+                      // We can implement a proper onDeleteFile prop later, 
+                      // but for now we can call the API directly or through onUpdateData if it supported files.
+                      // Given current structure, we'll wait for final wiring.
+                    }
+                  }}
                 />
               </div>
             )}

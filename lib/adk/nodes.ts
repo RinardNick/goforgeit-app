@@ -77,8 +77,24 @@ function isOpenAPIToolsetEntry(tool: ToolEntry): tool is OpenAPIToolsetEntry {
 function extractSimpleTools(tools?: ToolEntry[]): string[] {
   if (!tools) return [];
   return tools
-    .filter((t): t is string | BuiltInToolEntry => typeof t === 'string' || isBuiltInToolEntry(t))
+    .filter((t): t is string | BuiltInToolEntry => {
+      if (typeof t === 'string') return !t.endsWith('.py');
+      return isBuiltInToolEntry(t);
+    })
     .map(t => typeof t === 'string' ? t : t.name);
+}
+
+// Helper to extract Python tools from tools array
+function extractPythonTools(tools?: ToolEntry[]): any[] {
+  if (!tools) return [];
+  return tools
+    .filter((t): t is string => typeof t === 'string' && t.endsWith('.py'))
+    .map((t, idx) => ({
+      id: `py-tool-loaded-${idx}`,
+      name: t.replace('tools/', '').replace('.py', ''),
+      filename: t,
+      enabled: true,
+    }));
 }
 
 // Helper to extract tool confirmation configs and tool-specific args from tools array
@@ -521,6 +537,7 @@ export function agentFilesToNodes(
         mcpServers: extractMCPServers(rootAgent.tools),
         agentTools: extractAgentTools(rootAgent.tools),
         openApiTools: extractOpenAPITools(rootAgent.tools),
+        pythonTools: extractPythonTools(rootAgent.tools),
         callbacks: extractCallbacks(rootAgent),
         isRoot: true,
         filename: rootFilename,
@@ -691,6 +708,7 @@ export function agentFilesToNodes(
         mcpServers: extractMCPServers(agent.tools),
         agentTools: extractAgentTools(agent.tools),
         openApiTools: extractOpenAPITools(agent.tools),
+        pythonTools: extractPythonTools(agent.tools),
         callbacks: extractCallbacks(agent),
         isRoot: false,
         filename: filename,
@@ -939,21 +957,30 @@ export function nodesToYaml(nodes: Node[], edges: Edge[]): string {
     }
   }
 
-  // Add OpenAPI Tools as OpenAPIToolset entries
-  if (rootData.openApiTools && rootData.openApiTools.length > 0) {
-    for (const openApiTool of rootData.openApiTools) {
-      toolsArray.push({
-        name: 'OpenAPIToolset',
-        args: {
-          name: openApiTool.name,
-          spec_url: openApiTool.specUrl,
-        },
-      });
-    }
-  }
-
-  // Always add tools array (matches Google ADK builder format, even when empty)
-  agentObj.tools = toolsArray;
+      // Add OpenAPI Tools as OpenAPIToolset entries
+      if (rootData.openApiTools && rootData.openApiTools.length > 0) {
+        for (const openApiTool of rootData.openApiTools) {
+          toolsArray.push({
+            name: 'OpenAPIToolset',
+            args: {
+              name: openApiTool.name,
+              spec_url: openApiTool.specUrl,
+            },
+          });
+        }
+      }
+  
+      // Add python tools back to tools array
+      if (rootData.pythonTools && rootData.pythonTools.length > 0) {
+        for (const pyTool of rootData.pythonTools) {
+          if (pyTool.enabled) {
+            toolsArray.push(pyTool.filename);
+          }
+        }
+      }
+  
+      // Always add tools array (matches Google ADK builder format, even when empty)
+    agentObj.tools = toolsArray;
 
   // Include generation_config if present
   if (rootData.generation_config) {
