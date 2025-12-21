@@ -40,7 +40,11 @@ export function ToolRegistryPanel({
   if (!isOpen) return null;
 
   // Categorize tools
-  const pythonTools = files.filter(f => f.filename.startsWith('tools/') && f.filename.endsWith('.py'));
+  const pythonTools = files.filter(f => 
+    f.filename.startsWith('tools/') && 
+    f.filename.endsWith('.py') && 
+    !f.filename.endsWith('__init__.py')
+  );
   const agentTools = files.filter(f => f.filename !== 'root_agent.yaml' && f.filename.endsWith('.yaml'));
   
   // Built-in tools (standard ADK tools)

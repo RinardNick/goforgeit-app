@@ -8,12 +8,17 @@ describe('ToolRegistryPanel Logic', () => {
     { filename: 'other_agent.yaml', yaml: 'name: other' },
     { filename: 'tools/get_weather.py', yaml: 'def get_weather(): pass' },
     { filename: 'tools/search.py', yaml: 'def search(): pass' },
+    { filename: 'tools/__init__.py', yaml: '' },
     { filename: 'README.md', yaml: '# README' },
   ];
 
   describe('File Filtering', () => {
-    it('should correctly identify python tools', () => {
-      const pythonTools = mockFiles.filter(f => f.filename.startsWith('tools/') && f.filename.endsWith('.py'));
+    it('should correctly identify python tools and exclude __init__.py', () => {
+      const pythonTools = mockFiles.filter(f => 
+        f.filename.startsWith('tools/') && 
+        f.filename.endsWith('.py') && 
+        !f.filename.endsWith('__init__.py')
+      );
       assert.strictEqual(pythonTools.length, 2);
       assert.strictEqual(pythonTools[0].filename, 'tools/get_weather.py');
       assert.strictEqual(pythonTools[1].filename, 'tools/search.py');
@@ -27,7 +32,11 @@ describe('ToolRegistryPanel Logic', () => {
   });
 
   describe('Search Filtering', () => {
-    const pythonTools = mockFiles.filter(f => f.filename.startsWith('tools/') && f.filename.endsWith('.py'));
+    const pythonTools = mockFiles.filter(f => 
+      f.filename.startsWith('tools/') && 
+      f.filename.endsWith('.py') && 
+      !f.filename.endsWith('__init__.py')
+    );
     
     it('should filter tools by search query', () => {
       const searchQuery = 'weather';

@@ -22,6 +22,8 @@ All tasks follow a strict lifecycle:
 3. **Write Failing Tests (Red Phase):**
    - Create a new test file for the feature or bug fix.
    - Write one or more unit tests that clearly define the expected behavior and acceptance criteria for the task.
+   - This test should test the behavior we expect to happen not the implementation details of the code, for example, if we are testing a function that adds two numbers, we should test that the function returns the correct sum, not that the function uses the correct algorithm to calculate the sum. 
+     - The tests should be written in a way that if the implementation changes but the behavior does not, the tests will still pass.
    - **CRITICAL:** Run the tests and confirm that they fail as expected. This is the "Red" phase of TDD. Do not proceed until you have failing tests.
 
 4. **Implement to Pass Tests (Green Phase):**
