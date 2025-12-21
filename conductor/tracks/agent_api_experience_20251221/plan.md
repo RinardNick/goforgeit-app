@@ -4,7 +4,7 @@
 - [x] Task: Create database migration for granular API key scoping. [01f556d]
     - [ ] Subtask: Add `scoped_agents` (UUID array) to `api_keys` table.
     - [ ] Subtask: Update `api_keys` to include `org_id` properly if missing (verifying 022).
-- [ ] Task: Implement Backend API for API Key Scoping.
+- [x] Task: Implement Backend API for API Key Scoping. [347d58d]
     - [ ] Subtask: Update `lib/auth/api-keys.ts` or create `lib/db/api-keys.ts` to support CRUD with scoping.
     - [ ] Subtask: Implement `POST /api/api-keys` with agent/org scoping logic.
     - [ ] Subtask: Implement `GET /api/api-keys` to list keys and their scopes.
