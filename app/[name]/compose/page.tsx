@@ -67,9 +67,13 @@ export default function ADKAgentComposePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: `Please use the forge_agent to create a new python tool based on this description: ${description}. 
-          The tool should be written to the tools/ directory. 
-          Make sure the code follows ADK tool patterns with proper docstrings and type hints.`,
+          message: `COMMAND: Use the forge_agent to IMMEDIATELY create a new python tool based on this description: ${description}. 
+          
+          DIRECTIVE: Skip all architectural discussion and confirmation steps. Proceed directly to calling 'write_files' via the forge_agent.
+          
+          LOCATION: The tool must be written to the 'tools/' directory within the current project.
+          
+          REQUIREMENT: Ensure 'tools/__init__.py' also exists.`,
           context: {
             agents: nodes.map(n => ({
               filename: (n.data as AgentNodeData).filename || '',

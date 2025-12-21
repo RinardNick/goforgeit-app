@@ -58,6 +58,13 @@ function summarizeToolResult(toolName: string, result: unknown): string {
         const errors = r.errors as string[] | undefined;
         return errors?.[0] ?? 'Failed to write files';
       }
+      
+      // If specific files are mentioned in the result, include them
+      const files = r.files as string[] | undefined;
+      if (files && files.length > 0) {
+        return `Wrote ${files.join(', ')}`;
+      }
+      
       return `Wrote ${successfulWrites}/${totalFiles} file${Number(totalFiles) !== 1 ? 's' : ''}`;
     }
 
@@ -209,7 +216,14 @@ export async function POST(
     // Update session state with root_directory pointing to the project folder
     // Google's tools (write_config_files, explore_project, etc.) use this to resolve paths
     console.log(`[Assistant] Setting root_directory to ${projectPath}...`);
+    
+    // Set for builder_agent
     await updateADKSession('builder_agent', userId, sessionId, {
+      root_directory: projectPath
+    });
+
+    // ALSO set for forge_agent explicitly to ensure sub-agent tools work correctly
+    await updateADKSession('forge_agent', userId, sessionId, {
       root_directory: projectPath
     });
 
