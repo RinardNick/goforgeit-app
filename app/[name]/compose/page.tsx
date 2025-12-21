@@ -9,6 +9,7 @@ import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
 import { ToolRegistryPanel, ToolEditorModal, CreateToolModal } from '@/app/components/AgentComposer';
 import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
+import { ApiInstructionsModal } from '@/components/ui';
 import {
   agentFilesToNodes,
   nodesToYaml,
@@ -48,6 +49,7 @@ export default function ADKAgentComposePage() {
   const [circularDependencyWarning, setCircularDependencyWarning] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(true);
   const [showToolRegistry, setShowToolRegistry] = useState(false);
+  const [showApiInstructions, setShowApiInstructions] = useState(false);
   const [showCreateTool, setShowCreateTool] = useState(false);
   const [editingTool, setEditingTool] = useState<{ filename: string; content: string } | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -977,6 +979,7 @@ export default function ADKAgentComposePage() {
         onBack={() => router.push('/')}
         showToolRegistry={showToolRegistry}
         onToolRegistryToggle={() => setShowToolRegistry(!showToolRegistry)}
+        onApiInstructionsToggle={() => setShowApiInstructions(!showApiInstructions)}
       />
 
       {/* Main Content */}
@@ -1103,6 +1106,12 @@ export default function ADKAgentComposePage() {
               isOpen={showCreateTool}
               onClose={() => setShowCreateTool(false)}
               onSubmit={handleForgeTool}
+            />
+
+            <ApiInstructionsModal
+              isOpen={showApiInstructions}
+              onClose={() => setShowApiInstructions(false)}
+              agentName={agentName}
             />
 
             {/* AI Assistant Panel */}

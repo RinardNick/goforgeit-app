@@ -15,6 +15,7 @@ interface ChatHeaderProps {
   setPanelTab: (tab: 'sessions' | 'trace' | 'events' | 'state' | 'artifacts') => void;
   onNewConversation: () => void;
   onNavigateBack: () => void;
+  onApiInstructionsToggle?: () => void;
 }
 
 export function ChatHeader({
@@ -26,6 +27,7 @@ export function ChatHeader({
   setPanelTab,
   onNewConversation,
   onNavigateBack,
+  onApiInstructionsToggle,
 }: ChatHeaderProps) {
   return (
     <div className="max-w-full flex items-center justify-between mb-6">
@@ -66,6 +68,17 @@ export function ChatHeader({
           </svg>
           {streamingEnabled ? 'Streaming' : 'Stream'}
         </button>
+
+        <button
+          onClick={onApiInstructionsToggle}
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-all duration-200 border border-border"
+          title="API Instructions"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        </button>
+
         {/* Unified Debug Panel Toggle */}
         <button
           onClick={() => {

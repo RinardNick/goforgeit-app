@@ -29,6 +29,7 @@ import {
   TracePanel,
   ChatHeader,
   ChatInput,
+  ApiInstructionsModal,
   type Attachment,
 } from '@/components/chat';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
@@ -48,6 +49,7 @@ export default function ADKAgentChatPage() {
   const [streamingEnabled, setStreamingEnabled] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showApiInstructions, setShowApiInstructions] = useState(false);
 
   // Sessions state (now part of unified Debug panel)
   const [sessions, setSessions] = useState<Array<{
@@ -1006,6 +1008,7 @@ export default function ADKAgentChatPage() {
           setPanelTab={setPanelTab}
           onNewConversation={handleNewConversation}
           onNavigateBack={() => router.push('/')}
+          onApiInstructionsToggle={() => setShowApiInstructions(!showApiInstructions)}
         />
 
         {/* Session ID Badge */}
@@ -1304,15 +1307,21 @@ export default function ADKAgentChatPage() {
 
 
           {/* Artifact Preview Modal */}
-          <ArtifactPreviewModal
-            artifact={selectedArtifact}
-            agentName={agentName}
-            sessionId={sessionId}
-            onClose={() => setSelectedArtifact(null)}
-            onDownload={handleDownloadArtifact}
-          />
-        </div>
-      </main>
+        <ArtifactPreviewModal
+          artifact={selectedArtifact}
+          agentName={agentName}
+          sessionId={sessionId}
+          onClose={() => setSelectedArtifact(null)}
+          onDownload={handleDownloadArtifact}
+        />
+      </div>
+
+      <ApiInstructionsModal
+        isOpen={showApiInstructions}
+        onClose={() => setShowApiInstructions(false)}
+        agentName={agentName}
+      />
+    </main>
 
       {/* Upload Artifact Modal */}
       <ArtifactUploadModal

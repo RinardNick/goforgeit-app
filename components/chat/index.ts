@@ -20,3 +20,4 @@ export { TracePanel } from './TracePanel';
 export { ArtifactsPanel } from './ArtifactsPanel';
 export { ArtifactPreviewModal } from './ArtifactPreviewModal';
 export { ArtifactUploadModal } from './ArtifactUploadModal';
+export { ApiInstructionsModal } from '../ui/ApiInstructionsModal';
