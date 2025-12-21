@@ -36,7 +36,7 @@ export const authConfig: NextAuthConfig = {
       const pathname = nextUrl.pathname;
 
       // Public routes that don't require authentication
-      const publicRoutes = ['/login', '/api/auth', '/api/adk-router', '/api/validate-agent', '/api/mcp'];
+      const publicRoutes = ['/login', '/api/auth', '/api/adk-router', '/api/validate-agent', '/api/mcp', '/api/debug'];
       const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
       if (isPublicRoute) {
