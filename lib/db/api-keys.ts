@@ -9,6 +9,7 @@ export interface ApiKey {
   key_prefix: string;
   scoped_agents: string[] | null;
   org_id: string;
+  created_by: string;
   created_at: Date;
   last_used_at?: Date;
   revoked_at?: Date;
@@ -92,7 +93,7 @@ export async function createApiKey(params: CreateApiKeyParams): Promise<CreateAp
 export async function listApiKeys(orgId: string): Promise<ApiKey[]> {
   const sql = `
     SELECT 
-      id, name, description, key_prefix, scoped_agents, org_id, 
+      id, name, description, key_prefix, scoped_agents, org_id, created_by,
       created_at, last_used_at, revoked_at 
     FROM api_keys 
     WHERE org_id = $1 
@@ -121,11 +122,38 @@ export async function revokeApiKey(keyId: string, userId: string): Promise<void>
 export async function getApiKey(keyId: string, orgId: string): Promise<ApiKey | null> {
   const sql = `
     SELECT 
-      id, name, description, key_prefix, scoped_agents, org_id, 
+      id, name, description, key_prefix, scoped_agents, org_id, created_by,
       created_at, last_used_at, revoked_at 
     FROM api_keys 
     WHERE id = $1 AND org_id = $2
   `;
   
   return queryOne<ApiKey>(sql, [keyId, orgId]);
+}
+
+/**
+ * Validate an API key and return full details if valid
+ */
+export async function validateApiKey(apiKey: string): Promise<ApiKey | null> {
+  if (!apiKey) return null;
+  
+  const hash = crypto.createHash('sha256').update(apiKey).digest('hex');
+
+  const sql = `
+    SELECT 
+      id, name, description, key_prefix, scoped_agents, org_id, created_by,
+      created_at, last_used_at, revoked_at 
+    FROM api_keys 
+    WHERE key_hash = $1 
+      AND (revoked_at IS NULL)
+  `;
+  
+  const key = await queryOne<ApiKey>(sql, [hash]);
+  
+  if (key) {
+    // Async update last_used_at (don't await to not block)
+    query('UPDATE api_keys SET last_used_at = NOW(), usage_count = usage_count + 1 WHERE id = $1', [key.id]).catch(console.error);
+  }
+  
+  return key;
 }

@@ -11,7 +11,7 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend - API Key Management & Scoping' (Protocol in workflow.md)
 
 ## Phase 2: Backend - Agent Execution API & Streaming
-- [ ] Task: Implement the Execution API with API Key authentication.
+- [~] Task: Implement the Execution API with API Key authentication.
     - [ ] Subtask: Create `app/api/v1/agents/[name]/execute/route.ts`.
     - [ ] Subtask: Implement `X-Forge-Api-Key` validation middleware/helper that checks scoping (Org-wide vs. Specific Agents).
 - [ ] Task: Implement Streaming (SSE) for the Execution API.

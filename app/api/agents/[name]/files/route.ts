@@ -7,6 +7,8 @@ const ADK_AGENTS_DIR = path.join(process.cwd(), 'adk-service', 'agents');
 const ADK_BACKEND_URL = process.env.ADK_BACKEND_URL || 'http://127.0.0.1:8000';
 const USE_ADK_BACKEND = process.env.NODE_ENV === 'production';
 
+export const dynamic = 'force-dynamic';
+
 interface AgentFile {
   filename: string;
   yaml: string;

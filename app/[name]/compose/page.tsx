@@ -113,7 +113,7 @@ export default function ADKAgentComposePage() {
       setLoading(true);
     }
     try {
-      const response = await fetch(`/api/agents/${agentName}/files`);
+      const response = await fetch(`/api/agents/${agentName}/files?t=${Date.now()}`);
       const data = await response.json();
 
       if (!response.ok) {
