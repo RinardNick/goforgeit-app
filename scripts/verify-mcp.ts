@@ -1,5 +1,4 @@
-import { fetch } from 'undici';
-
+// Use native fetch (Node 18+)
 async function verify() {
   const url = 'http://localhost:3025/api/mcp/system-tools/sse';
   console.log(`Checking MCP Server at ${url}...`);
