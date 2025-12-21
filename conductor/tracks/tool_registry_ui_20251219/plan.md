@@ -37,3 +37,24 @@
     - [x] Subtask: Create a tool using the new UI, assign it to an agent, and verify the agent can use it (using the existing Chat panel).
 - [x] Task: UI Polish. f2fd1ea
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Integration & Polish' (Protocol in workflow.md) f2fd1ea
+
+## Phase 5: Streaming Infrastructure [checkpoint: a48dedd]
+- [x] Task: Extract the `useAssistant` hook. a48dedd
+    - [x] Subtask: Identify core chat and SSE logic in `AIAssistantPanel.tsx`.
+    - [x] Subtask: Implement `lib/hooks/useAssistant.ts` to manage messages, loading state, and SSE parsing.
+    - [x] Subtask: Refactor `AIAssistantPanel.tsx` to use the new hook.
+- [x] Task: Update Assistant API for Tool Streaming. a48dedd
+    - [x] Subtask: Ensure `app/api/agents/[name]/assistant/route.ts` correctly pipes `functionCall` events to the SSE stream.
+    - [x] Subtask: Add a "dry-run" mode or similar if needed to ensure files aren't committed to disk before user approval.
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Streaming Infrastructure' (Protocol in workflow.md) a48dedd
+
+## Phase 6: Forge Workspace UI [checkpoint: a48dedd]
+- [x] Task: Create the `ForgeWorkspaceModal` component. a48dedd
+    - [x] Subtask: Implement large modal shell with split-view layout.
+    - [x] Subtask: Integrate `useAssistant` for the left-side chat area.
+    - [x] Subtask: Implement the right-side "Live Preview" using Monaco Editor.
+    - [x] Subtask: Logic to detect `write_files` in the stream and update preview buffers.
+- [x] Task: Wire up the "Save & Register" flow. a48dedd
+    - [x] Subtask: Implement the final commit of forged files to the backend.
+    - [x] Subtask: Auto-close workspace and open Tool Registry on success.
+- [~] Task: Conductor - User Manual Verification 'Phase 6: Forge Workspace UI' (Protocol in workflow.md)
