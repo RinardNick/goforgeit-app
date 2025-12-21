@@ -2,23 +2,22 @@
 
 ## Phase 1: Backend - API Key Management & Scoping [checkpoint: 45569c1]
 - [x] Task: Create database migration for granular API key scoping. [01f556d]
-    - [ ] Subtask: Add `scoped_agents` (UUID array) to `api_keys` table.
-    - [ ] Subtask: Update `api_keys` to include `org_id` properly if missing (verifying 022).
+    - [x] Subtask: Add `scoped_agents` (UUID array) to `api_keys` table.
+    - [x] Subtask: Update `api_keys` to include `org_id` properly if missing (verifying 022).
 - [x] Task: Implement Backend API for API Key Scoping. [347d58d]
-    - [ ] Subtask: Update `lib/auth/api-keys.ts` or create `lib/db/api-keys.ts` to support CRUD with scoping.
-    - [ ] Subtask: Implement `POST /api/api-keys` with agent/org scoping logic.
-    - [ ] Subtask: Implement `GET /api/api-keys` to list keys and their scopes.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend - API Key Management & Scoping' (Protocol in workflow.md)
+    - [x] Subtask: Update `lib/auth/api-keys.ts` or create `lib/db/api-keys.ts` to support CRUD with scoping.
+    - [x] Subtask: Implement `POST /api/api-keys` with agent/org scoping logic.
+    - [x] Subtask: Implement `GET /api/api-keys` to list keys and their scopes.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Backend - API Key Management & Scoping' (Protocol in workflow.md)
 
-## Phase 2: Backend - Agent Execution API & Streaming
-- [~] Task: Implement the Execution API with API Key authentication.
-    - [ ] Subtask: Create `app/api/v1/agents/[name]/execute/route.ts`.
-    - [ ] Subtask: Implement `X-Forge-Api-Key` validation middleware/helper that checks scoping (Org-wide vs. Specific Agents).
-- [ ] Task: Implement Streaming (SSE) for the Execution API.
-    - [ ] Subtask: Integrate with ADK to proxy the streaming response to the external caller.
-    - [ ] Subtask: Implement session naming logic: `<key-name>-<session-id>`.
-    - [ ] Subtask: Ensure `agent_sessions` record the `api_key_id` for traceability.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Backend - Agent Execution API & Streaming' (Protocol in workflow.md)
+## Phase 2: Backend - Agent Execution API & Streaming [checkpoint: 0b4da22]
+- [x] Task: Implement the Execution API with API Key authentication. [0b4da22]
+    - [x] Subtask: Update `app/api/agents/[name]/execute/route.ts` to support `X-Forge-Api-Key`.
+    - [x] Subtask: Implement `X-Forge-Api-Key` validation and scoping checks.
+- [x] Task: Implement Streaming (SSE) for the Execution API. [0b4da22]
+    - [x] Subtask: Support token-level streaming for API-authenticated requests.
+    - [x] Subtask: Implement explicit session creation and linking to `api_key_id`.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Backend - Agent Execution API & Streaming' (Protocol in workflow.md) [0b4da22]
 
 ## Phase 3: Frontend - API Key Management UI
 - [ ] Task: Enhance the API Keys Settings page.
