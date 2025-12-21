@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import YAML from 'yaml';
 import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
+import { ToolRegistryPanel } from '@/app/components/AgentComposer';
 import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
 import {
   agentFilesToNodes,
@@ -46,6 +47,7 @@ export default function ADKAgentComposePage() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [circularDependencyWarning, setCircularDependencyWarning] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(true);
+  const [showToolRegistry, setShowToolRegistry] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [validationResults, setValidationResults] = useState<Record<string, { valid: boolean; errors: Array<{ type: string; message: string; field?: string; value?: string }> }>>({});
 
@@ -930,6 +932,8 @@ export default function ADKAgentComposePage() {
         error={error}
         onErrorDismiss={() => setError(null)}
         onBack={() => router.push('/')}
+        showToolRegistry={showToolRegistry}
+        onToolRegistryToggle={() => setShowToolRegistry(!showToolRegistry)}
       />
 
       {/* Main Content */}
@@ -1009,6 +1013,14 @@ export default function ADKAgentComposePage() {
               circularDependencyWarning={circularDependencyWarning}
               currentYaml={currentYaml}
               onYamlChange={handleYamlChange}
+            />
+
+            {/* Tool Registry Panel */}
+            <ToolRegistryPanel
+              isOpen={showToolRegistry}
+              onClose={() => setShowToolRegistry(false)}
+              files={files}
+              projectName={agentName}
             />
 
             {/* AI Assistant Panel */}
