@@ -51,17 +51,47 @@ const MIN_WIDTH = 320;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 400;
 
-// Tool icons for display
-const TOOL_ICONS: Record<string, string> = {
-  create_agent: '🆕',
-  add_sub_agent: '🔗',
-  add_tool: '🔧',
-  modify_agent: '✏️',
-  create_python_tool: '🐍',
-  list_agents: '📋',
-  read_agent: '📖',
-  task_complete: '✅',
+// Tool icons and display names
+const TOOL_CONFIG: Record<string, { icon: string; label: string }> = {
+  // Legacy tools
+  create_agent: { icon: '🆕', label: 'Create Agent' },
+  add_sub_agent: { icon: '🔗', label: 'Add Sub-Agent' },
+  add_tool: { icon: '🔧', label: 'Add Tool' },
+  modify_agent: { icon: '✏️', label: 'Modify Agent' },
+  create_python_tool: { icon: '🐍', label: 'Create Python Tool' },
+  list_agents: { icon: '📋', label: 'List Agents' },
+  read_agent: { icon: '📖', label: 'Read Agent' },
+  task_complete: { icon: '✅', label: 'Complete' },
+  // Builder agent tools (Google ADK)
+  'builder_agent.tools.read_config_files.read_config_files': { icon: '📖', label: 'Read Config' },
+  'builder_agent.tools.write_config_files.write_config_files': { icon: '💾', label: 'Write Config' },
+  'builder_agent.tools.explore_project.explore_project': { icon: '🔍', label: 'Explore Project' },
+  'builder_agent.tools.read_files.read_files': { icon: '📄', label: 'Read Files' },
+  'builder_agent.tools.write_files.write_files': { icon: '✏️', label: 'Write Files' },
+  'builder_agent.tools.delete_files.delete_files': { icon: '🗑️', label: 'Delete Files' },
+  'builder_agent.tools.cleanup_unused_files.cleanup_unused_files': { icon: '🧹', label: 'Cleanup' },
+  'builder_agent.tools.search_adk_source.search_adk_source': { icon: '🔎', label: 'Search Source' },
+  'builder_agent.tools.search_adk_knowledge.search_adk_knowledge': { icon: '📚', label: 'Search Knowledge' },
 };
+
+// Helper to get tool display info
+function getToolDisplay(toolName: string): { icon: string; label: string } {
+  // Direct match
+  if (TOOL_CONFIG[toolName]) {
+    return TOOL_CONFIG[toolName];
+  }
+  // Try to extract the last part of the tool name (e.g., "read_config_files" from full path)
+  const parts = toolName.split('.');
+  const shortName = parts[parts.length - 1];
+  if (TOOL_CONFIG[shortName]) {
+    return TOOL_CONFIG[shortName];
+  }
+  // Fallback: format the tool name nicely
+  return {
+    icon: '⚙️',
+    label: shortName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+  };
+}
 
 export function AIAssistantPanel({
   isOpen,
@@ -385,30 +415,36 @@ export function AIAssistantPanel({
 
                 {/* Show executed actions for assistant messages */}
                 {message.role === 'assistant' && message.executedActions && message.executedActions.length > 0 && (
-                  <div className="mt-3 mr-4 space-y-1 pl-1" data-testid="executed-actions">
-                    <div className="text-[10px] font-mono text-muted-foreground/40 mb-1 uppercase tracking-wider">System Actions:</div>
-                    {message.executedActions.map((action, idx) => (
-                      <div
-                        key={idx}
-                        className={`text-xs p-2 rounded-sm border ${
-                          action.result.success
-                            ? 'bg-success/5 border-success/20 text-success'
-                            : 'bg-destructive/5 border-destructive/20 text-destructive'
-                        }`}
-                        data-testid="executed-action-item"
-                      >
-                        <div className="flex items-center gap-2 font-medium font-mono">
-                          <span>{TOOL_ICONS[action.tool] || '⚙️'}</span>
-                          <span>{action.tool}</span>
-                          {action.result.success ? (
-                            <span className="text-success">✓</span>
-                          ) : (
-                            <span className="text-destructive">✗</span>
-                          )}
-                        </div>
-                        <div className="mt-1 text-muted-foreground/80 pl-6 border-l border-border ml-1">{action.result.message}</div>
-                      </div>
-                    ))}
+                  <div className="mt-3 mr-4" data-testid="executed-actions">
+                    <div className="flex flex-wrap gap-1.5">
+                      {message.executedActions.map((action, idx) => {
+                        const toolDisplay = getToolDisplay(action.tool);
+                        return (
+                          <div
+                            key={idx}
+                            className={`group relative inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-mono transition-all ${
+                              action.result.success
+                                ? 'bg-success/10 text-success border border-success/20 hover:bg-success/15'
+                                : 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/15'
+                            }`}
+                            data-testid="executed-action-item"
+                            title={action.result.message}
+                          >
+                            <span className="text-xs">{toolDisplay.icon}</span>
+                            <span className="font-medium">{toolDisplay.label}</span>
+                            {action.result.success ? (
+                              <span className="text-success/80">✓</span>
+                            ) : (
+                              <span className="text-destructive/80">✗</span>
+                            )}
+                            {/* Tooltip with full message on hover */}
+                            <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-popover border border-border rounded shadow-lg text-[10px] text-popover-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 max-w-[200px] truncate">
+                              {action.result.message}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 

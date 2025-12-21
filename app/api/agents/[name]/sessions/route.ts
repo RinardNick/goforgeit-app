@@ -15,12 +15,16 @@ export async function GET(
   const { name } = await params;
 
   try {
-    // Check auth - use email as userId for session isolation
+    // Check auth
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const userId = session.user.email;
+    // Use nickarinard@gmail.com only for builder_agent (dogfooding)
+    // Other agents use the authenticated user's email
+    const userId = name === 'builder_agent'
+      ? 'nickarinard@gmail.com'
+      : session.user.email;
 
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
@@ -74,12 +78,16 @@ export async function POST(
   const { name } = await params;
 
   try {
-    // Check auth - use email as userId for session isolation
+    // Check auth
     const authSession = await auth();
     if (!authSession?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const userId = authSession.user.email;
+    // Use nickarinard@gmail.com only for builder_agent (dogfooding)
+    // Other agents use the authenticated user's email
+    const userId = name === 'builder_agent'
+      ? 'nickarinard@gmail.com'
+      : authSession.user.email;
 
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();

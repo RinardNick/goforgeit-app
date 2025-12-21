@@ -162,10 +162,25 @@ Run the existing `adopt-system-agents.ts` script, which:
 
 **Session Visibility Fix**: Fixed sessions not appearing in chat debug panel:
 - **Root Cause**: `/api/agents/[name]/assistant/route.ts` was using `userId = 'default-user'`
-  but sessions list API uses `session.user.email` (authenticated user's email)
-- **Fix**: Updated assistant route to use authenticated user's email as userId
-  - Added `import { auth } from '@/auth'`
-  - Added auth check to get user's email
-  - Removed hardcoded `'default-user'`
+  but sessions list API uses different userId
+- **Fix**: Updated all session-related routes to use `nickarinard@gmail.com` ONLY for builder_agent
+  - Assistant route: `userId = projectName === 'builder_agent' ? 'nickarinard@gmail.com' : session.user.email`
+  - Sessions list route: Same pattern
+  - Session detail route (GET/PATCH/DELETE): Same pattern
+- **Other agents**: Continue to use authenticated user's email for session isolation
 - **Additional**: Now returns sessionId and events in response for tracking
+
+**Tool Output Rendering Fix**: Improved tool output display in AI Architect panel:
+- **Backend**: Added `summarizeToolResult()` function to generate human-readable summaries
+  - `read_config_files` → "Read 1/1 files"
+  - `write_config_files` → "Wrote 1/1 files" or validation error message
+  - `explore_project` → "Found 13 files in googleadk_builder_example"
+  - `search_adk_knowledge` → "Found 1 result in ADK knowledge base"
+  - Generic fallback for unknown tools
+- **Frontend**: Redesigned tool action display
+  - Changed from verbose list to compact pill/chip design
+  - Added `TOOL_CONFIG` with icons and friendly labels
+  - Added `getToolDisplay()` helper for tool name resolution
+  - Hover tooltip shows full summary message
+  - Flex-wrap layout for multiple actions
 
