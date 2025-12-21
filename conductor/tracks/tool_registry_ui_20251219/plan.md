@@ -15,10 +15,10 @@
 - [x] Task: Connect the Tool List to the backend. d107835
     - [x] Subtask: Implement a fetch function (e.g., in a hook `useTools`) to get the real list of tools from the API.
     - [x] Subtask: Update `ToolsPanel` to render the fetched tools with their names and descriptions.
-- [~] Task: Implement Tool Details/Edit View.
-    - [ ] Subtask: Create `ToolEditor.tsx` using `@monaco-editor/react` for viewing tool code/schema.
-    - [ ] Subtask: Allow clicking a tool in the list to open it in the `ToolEditor` (read-only for system tools, editable for custom).
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Tool Listing & Management' (Protocol in workflow.md)
+- [x] Task: Implement Tool Details/Edit View. a954142
+    - [x] Subtask: Create `ToolEditor.tsx` using `@monaco-editor/react` for viewing tool code/schema.
+    - [x] Subtask: Allow clicking a tool in the list to open it in the `ToolEditor` (read-only for system tools, editable for custom).
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Tool Listing & Management' (Protocol in workflow.md)
 
 ## Phase 3: Tool Creation Flow ("The Forge")
 - [ ] Task: Implement the "New Tool" dialog/modal.
