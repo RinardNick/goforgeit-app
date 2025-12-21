@@ -417,6 +417,11 @@ export function agentFilesToNodes(
 
   // First pass: parse all YAML files
   for (const file of files) {
+    // Only attempt to parse YAML files
+    if (!file.filename.endsWith('.yaml') && !file.filename.endsWith('.yml')) {
+      continue;
+    }
+
     try {
       const parsed = YAML.parse(file.yaml) as ParsedAgent;
       if (parsed && parsed.name) {

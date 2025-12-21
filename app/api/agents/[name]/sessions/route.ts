@@ -47,17 +47,22 @@ export async function GET(
     
     let apiKeyMap: Record<string, string> = {};
     if (sessionIds.length > 0) {
-      const dbInfo = await query<{ session_id: string, key_name: string }>(
-        `SELECT s.id as session_id, k.name as key_name 
-         FROM agent_sessions s 
-         JOIN api_keys k ON s.api_key_id = k.id 
-         WHERE s.id = ANY($1)`,
-        [sessionIds]
-      );
-      apiKeyMap = dbInfo.reduce((acc, row) => {
-        acc[row.session_id] = row.key_name;
-        return acc;
-      }, {} as Record<string, string>);
+      try {
+        const dbInfo = await query<{ session_id: string, key_name: string }>(
+          `SELECT s.id as session_id, k.name as key_name 
+           FROM agent_sessions s 
+           JOIN api_keys k ON s.api_key_id = k.id 
+           WHERE s.id = ANY($1)`,
+          [sessionIds]
+        );
+        apiKeyMap = dbInfo.reduce((acc, row) => {
+          acc[row.session_id] = row.key_name;
+          return acc;
+        }, {} as Record<string, string>);
+      } catch (dbError) {
+        console.warn('[Sessions API] Failed to fetch API key metadata from Postgres:', dbError instanceof Error ? dbError.message : String(dbError));
+        // Non-fatal, continue with empty map
+      }
     }
 
     // Convert to format expected by frontend (snake_case keys)
