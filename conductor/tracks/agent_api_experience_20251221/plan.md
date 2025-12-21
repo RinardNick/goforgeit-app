@@ -35,10 +35,10 @@
     - [x] Subtask: Include endpoint URL and `X-Forge-Api-Key` header documentation.
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Frontend - Developer Info UI' (Protocol in workflow.md) [99568b8]
 
-## Phase 5: Visibility & Polish
-- [ ] Task: Verify External Sessions in Forge UI.
-    - [ ] Subtask: Confirm sessions created via API appear in the sessions list with the correct naming.
-    - [ ] Subtask: Verify traces and events for these sessions are visible.
-- [ ] Task: Final UI/UX Polish.
-    - [ ] Subtask: Ensure consistent styling and handle edge cases (e.g., no agents selected in scoping).
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Visibility & Polish' (Protocol in workflow.md)
+## Phase 5: Visibility & Polish [checkpoint: 4071ea4]
+- [x] Task: Verify External Sessions in Forge UI. [4071ea4]
+    - [x] Subtask: Confirm sessions created via API appear in the sessions list with the correct naming.
+    - [x] Subtask: Verify traces and events for these sessions are visible.
+- [x] Task: Final UI/UX Polish. [4071ea4]
+    - [x] Subtask: Ensure consistent styling and handle edge cases (e.g., no agents selected in scoping).
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Visibility & Polish' (Protocol in workflow.md) [4071ea4]
