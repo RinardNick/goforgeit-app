@@ -1,6 +1,6 @@
 # Track Plan: Agent API Experience
 
-## Phase 1: Backend - API Key Management & Scoping
+## Phase 1: Backend - API Key Management & Scoping [checkpoint: 45569c1]
 - [x] Task: Create database migration for granular API key scoping. [01f556d]
     - [ ] Subtask: Add `scoped_agents` (UUID array) to `api_keys` table.
     - [ ] Subtask: Update `api_keys` to include `org_id` properly if missing (verifying 022).
