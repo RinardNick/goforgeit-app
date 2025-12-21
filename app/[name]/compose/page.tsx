@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import YAML from 'yaml';
 import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
-import { ToolRegistryPanel, ToolEditorModal, CreateToolModal } from '@/app/components/AgentComposer';
+import { ToolRegistryPanel, ToolEditorModal, CreateToolModal, ForgeWorkspaceModal } from '@/app/components/AgentComposer';
 import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
 import { ApiInstructionsModal } from '@/components/ui';
 import {
