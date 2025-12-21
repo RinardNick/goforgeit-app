@@ -38,59 +38,63 @@ export function CreateToolModal({
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-lg shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-200">
+      <div className="bg-card border border-border/50 rounded-lg shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-300 backdrop-blur-md">
         <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-full text-primary">
+          <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-primary/10 rounded-sm text-primary shadow-inner">
                 <Wrench size={20} />
               </div>
-              <h2 className="text-lg font-heading font-bold text-foreground">Forge New Tool</h2>
+              <div>
+                <h2 className="text-lg font-heading font-bold text-foreground uppercase tracking-tight">The_Forge</h2>
+                <p className="text-[10px] font-mono text-primary/60 uppercase tracking-widest">TRANSMUTATION_ENGINE_v3.0</p>
+              </div>
             </div>
             <button 
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1 text-muted-foreground/40 hover:text-foreground transition-colors rounded-full hover:bg-muted"
             >
               <X size={20} />
             </button>
           </div>
 
-          <p className="text-sm text-muted-foreground mb-6">
-            Describe the tool you want to build. Our Forge agent will write the Python code for you.
+          <p className="text-xs text-muted-foreground mb-8 leading-relaxed font-mono uppercase tracking-tight opacity-70">
+            Describe the capability you wish to manifest. The Forge will architect the implementation logic.
           </p>
 
           <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                  Tool Description
+                <label className="block text-[10px] font-bold text-primary/60 uppercase tracking-widest font-mono mb-3">
+                  MANIFESTATION_PROMPT
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="E.g., A tool that takes a stock ticker symbol and returns the current price using Yahoo Finance."
-                  className="w-full h-32 px-3 py-2 bg-background border border-border rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none placeholder:text-muted-foreground/40"
+                  placeholder="E.g., A tool that synthesizes market trends for a given asset..."
+                  className="w-full h-32 px-4 py-3 bg-background/50 border border-border/50 rounded-sm text-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none placeholder:text-muted-foreground/20 font-mono"
                   autoFocus
                 />
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex items-center justify-between gap-4 pt-2">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-[10px] font-bold text-muted-foreground/40 hover:text-destructive uppercase tracking-widest font-mono transition-colors"
                 >
-                  Cancel
+                  ABORT_INITIATION
                 </button>
                 <LoadingButton
                   type="submit"
                   isLoading={isSubmitting}
-                  loadingText="Forging..."
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg"
+                  loadingText="TRANSMUTING..."
+                  className="px-6 py-2.5 bg-primary text-primary-foreground rounded-sm text-[10px] font-bold uppercase tracking-widest font-mono flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20"
                   disabled={!description.trim()}
+                  variant="custom"
                 >
-                  <Sparkles size={16} />
-                  Forge Tool
+                  <Sparkles size={14} />
+                  FORGE_TOOL
                 </LoadingButton>
               </div>
             </div>

@@ -108,39 +108,55 @@ export function ToolRegistryPanel({
       </div>
 
       {/* Tool List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-primary/20">
         {/* Custom Python Tools */}
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <FileCode size={14} className="text-primary" />
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Custom Python Tools</h3>
+          <div className="flex items-center justify-between mb-3 border-b border-primary/10 pb-1">
+            <div className="flex items-center gap-2">
+              <FileCode size={14} className="text-primary" />
+              <h3 className="text-[10px] font-bold text-primary/80 uppercase tracking-widest font-mono">Custom_Python_Tools</h3>
+            </div>
+            <span className="text-[9px] font-mono text-muted-foreground/40 px-1.5 py-0.5 bg-muted rounded-sm">
+              {pythonTools.length}
+            </span>
           </div>
           <div className="space-y-2">
             {filteredPythonTools.map((tool) => (
-              <div key={tool.filename} className="group bg-accent/50 border border-border rounded-sm p-3 hover:border-primary/30 transition-all">
+              <div key={tool.filename} className="group bg-accent/30 border border-border/50 rounded-sm p-3 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-mono font-bold text-foreground truncate">{tool.filename.replace('tools/', '')}</span>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-sm font-mono font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                    {tool.filename.replace('tools/', '')}
+                  </span>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
                     <button 
                       onClick={() => onEditTool?.(tool.filename, tool.yaml)}
-                      className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-sm transition-all"
+                      title="Edit Tool"
                     >
                       <Edit3 size={14} />
                     </button>
                     <button 
                       onClick={() => onDeleteTool?.(tool.filename)}
-                      className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-sm transition-all"
+                      title="Delete Tool"
                     >
                       <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground line-clamp-2 italic">Custom Python tool defined in {tool.filename}</p>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                  <p className="text-[10px] text-muted-foreground line-clamp-1 italic font-mono">
+                    IMPLEMENTATION: {tool.filename}
+                  </p>
+                </div>
               </div>
             ))}
             {filteredPythonTools.length === 0 && (
-              <div className="text-center py-4 border border-dashed border-border rounded-sm text-[10px] text-muted-foreground/40 font-mono uppercase">
-                NO_CUSTOM_TOOLS_FOUND
+              <div className="text-center py-8 border border-dashed border-border/30 rounded-sm bg-muted/5">
+                <p className="text-[10px] text-muted-foreground/30 font-mono uppercase tracking-widest">
+                  NO_CUSTOM_TOOLS_REGISTERED
+                </p>
               </div>
             )}
           </div>
@@ -148,28 +164,43 @@ export function ToolRegistryPanel({
 
         {/* Agent Tools */}
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Bot size={14} className="text-purple-500" />
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Agent Modules</h3>
+          <div className="flex items-center justify-between mb-3 border-b border-purple-500/10 pb-1">
+            <div className="flex items-center gap-2">
+              <Bot size={14} className="text-purple-500" />
+              <h3 className="text-[10px] font-bold text-purple-500/80 uppercase tracking-widest font-mono">Agent_Modules</h3>
+            </div>
+            <span className="text-[9px] font-mono text-muted-foreground/40 px-1.5 py-0.5 bg-muted rounded-sm">
+              {agentTools.length}
+            </span>
           </div>
           <div className="space-y-2">
             {filteredAgentTools.map((tool) => (
-              <div key={tool.filename} className="bg-accent/50 border border-border rounded-sm p-3 hover:border-purple-500/30 transition-all group">
+              <div key={tool.filename} className="group bg-accent/30 border border-border/50 rounded-sm p-3 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all duration-300">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-mono font-bold text-foreground truncate">{tool.filename}</span>
+                  <span className="text-sm font-mono font-bold text-foreground truncate group-hover:text-purple-400 transition-colors">
+                    {tool.filename}
+                  </span>
                   <button 
                     onClick={() => onNavigateToAgent?.(tool.filename)}
-                    className="p-1 text-muted-foreground hover:text-purple-500 transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1.5 text-muted-foreground hover:text-purple-500 hover:bg-purple-500/10 rounded-sm transition-all opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0"
+                    title="Go to Agent"
                   >
                     <ExternalLink size={14} />
                   </button>
                 </div>
-                <p className="text-[10px] text-muted-foreground line-clamp-1 italic">Agent configured as a tool module</p>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500/40" />
+                  <p className="text-[10px] text-muted-foreground line-clamp-1 italic font-mono uppercase">
+                    TYPE: ADK_AGENT_YAML
+                  </p>
+                </div>
               </div>
             ))}
             {filteredAgentTools.length === 0 && (
-              <div className="text-center py-4 border border-dashed border-border rounded-sm text-[10px] text-muted-foreground/40 font-mono uppercase">
-                NO_AGENT_MODULES_FOUND
+              <div className="text-center py-8 border border-dashed border-border/30 rounded-sm bg-muted/5">
+                <p className="text-[10px] text-muted-foreground/30 font-mono uppercase tracking-widest">
+                  NO_AGENT_MODULES_DETECTED
+                </p>
               </div>
             )}
           </div>
@@ -177,15 +208,22 @@ export function ToolRegistryPanel({
 
         {/* Built-in Tools */}
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Wrench size={14} className="text-muted-foreground" />
-            <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Built-in Capabilities</h3>
+          <div className="flex items-center justify-between mb-3 border-b border-muted-foreground/10 pb-1">
+            <div className="flex items-center gap-2">
+              <Wrench size={14} className="text-muted-foreground" />
+              <h3 className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest font-mono">System_Capabilities</h3>
+            </div>
+            <span className="text-[9px] font-mono text-muted-foreground/40 px-1.5 py-0.5 bg-muted rounded-sm">
+              {builtinTools.length}
+            </span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 opacity-70">
             {builtinTools.map((tool) => (
-              <div key={tool.name} className="bg-muted/30 border border-border rounded-sm p-3 opacity-60">
-                <span className="text-sm font-mono font-bold text-foreground/80">{tool.name}</span>
-                <p className="text-[10px] text-muted-foreground line-clamp-2 italic">{tool.description}</p>
+              <div key={tool.name} className="bg-muted/20 border border-border/30 rounded-sm p-3 grayscale hover:grayscale-0 transition-all duration-500">
+                <span className="text-sm font-mono font-bold text-foreground/60">{tool.name}</span>
+                <p className="text-[10px] text-muted-foreground/60 line-clamp-2 italic font-mono uppercase mt-1 leading-relaxed">
+                  {tool.description}
+                </p>
               </div>
             ))}
           </div>
