@@ -223,6 +223,13 @@ export async function POST(
     });
 
     // ALSO set for forge_agent explicitly to ensure sub-agent tools work correctly
+    // Check if session exists for forge_agent, create if not
+    let forgeSession = await getADKSession('forge_agent', userId, sessionId);
+    if (!forgeSession) {
+      console.log(`[Assistant] Creating new forge_agent session ${sessionId}...`);
+      await createADKSession('forge_agent', userId, sessionId);
+    }
+    
     await updateADKSession('forge_agent', userId, sessionId, {
       root_directory: projectPath
     });
