@@ -46,6 +46,7 @@ for (const tool of tools) {
     // @ts-ignore
     action.inputSchema ? zodToJsonSchema(action.inputSchema) : {}, 
     async (args) => {
+      // @ts-ignore - args type from MCP doesn't match tool's expected input type
       const result = await tool(args);
       return {
         content: [{ type: "text", text: JSON.stringify(result) }],
