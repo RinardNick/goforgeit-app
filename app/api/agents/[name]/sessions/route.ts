@@ -41,6 +41,25 @@ export async function GET(
     // List sessions from the ADK backend
     const sessions = await listADKSessions(name, userId);
 
+    // Fetch API Key info from Postgres for these sessions
+    const { query } = await import('@/lib/db/client');
+    const sessionIds = sessions.map(s => s.id);
+    
+    let apiKeyMap: Record<string, string> = {};
+    if (sessionIds.length > 0) {
+      const dbInfo = await query<{ session_id: string, key_name: string }>(
+        `SELECT s.id as session_id, k.name as key_name 
+         FROM agent_sessions s 
+         JOIN api_keys k ON s.api_key_id = k.id 
+         WHERE s.id = ANY($1)`,
+        [sessionIds]
+      );
+      apiKeyMap = dbInfo.reduce((acc, row) => {
+        acc[row.session_id] = row.key_name;
+        return acc;
+      }, {} as Record<string, string>);
+    }
+
     // Convert to format expected by frontend (snake_case keys)
     const formattedSessions = sessions.map(s => ({
       session_id: s.id,
@@ -48,6 +67,7 @@ export async function GET(
       user_id: s.userId,
       state: s.state,
       last_update_time: s.lastUpdateTime,
+      api_key_name: apiKeyMap[s.id] || null,
       // Approximate message count from events (user messages only)
       message_count: s.events ? Math.ceil((s.events as unknown[]).length / 2) : 0,
     }));

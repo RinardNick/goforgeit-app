@@ -182,8 +182,12 @@ export default function ForgeApiKeysSection() {
             <tbody className="divide-y border-border">
               {keys.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
-                    No Forge API keys found. Create one to get started.
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Key className="w-8 h-8 text-muted-foreground/30" />
+                      <p className="text-sm text-muted-foreground font-medium">No Forge API keys found</p>
+                      <p className="text-xs text-muted-foreground/60">Create one to start integrating with external apps.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (

@@ -9,6 +9,7 @@ interface Session {
   sessionId: string;
   createdAt: string;
   messageCount: number;
+  apiKeyName?: string | null;
 }
 
 interface SessionsPanelProps {
@@ -76,7 +77,7 @@ export function SessionsPanel({
                           data-testid="session-id-display"
                           className={`text-xs font-mono font-medium ${isActive ? 'text-primary' : 'text-foreground'}`}
                         >
-                          {session.sessionId}
+                          {session.apiKeyName ? `${session.apiKeyName}-${session.sessionId}` : session.sessionId}
                         </code>
                         {isActive && (
                           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-primary text-primary-foreground rounded-sm uppercase tracking-wider">

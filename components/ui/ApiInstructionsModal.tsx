@@ -109,7 +109,16 @@ print(response.json())`;
           {/* Endpoint Info */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 bg-muted/20 rounded-lg border border-border">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Endpoint URL</h3>
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center justify-between">
+                Endpoint URL
+                <button
+                  onClick={() => copyToClipboard(apiUrl, 'endpoint')}
+                  className="p-1 hover:text-primary transition-colors"
+                  title="Copy URL"
+                >
+                  {copied === 'endpoint' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                </button>
+              </h3>
               <div className="flex items-center gap-2 font-mono text-sm break-all bg-background p-2 rounded border border-border/50">
                 {apiUrl}
               </div>

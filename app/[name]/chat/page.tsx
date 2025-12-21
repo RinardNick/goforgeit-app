@@ -593,7 +593,6 @@ export default function ADKAgentChatPage() {
     setAttachments([]);
   };
 
-  // Fetch sessions list
   const fetchSessions = async () => {
     try {
       const response = await fetch(`/api/agents/${agentName}/sessions`);
@@ -603,32 +602,14 @@ export default function ADKAgentChatPage() {
       }
       const data = await response.json();
       // Transform ADK response to our format
-      // ADK list sessions doesn't return timestamps/counts, so we fetch each session's details
-      const sessionsWithDetails = await Promise.all(
-        (data.sessions || []).map(async (s: { session_id: string }) => {
-          try {
-            // Fetch session details to get lastUpdateTime and events count
-            const detailRes = await fetch(`/api/agents/${agentName}/sessions/${s.session_id}`);
-            if (detailRes.ok) {
-              const detail = await detailRes.json();
-              return {
-                sessionId: s.session_id,
-                createdAt: detail.lastUpdateTime
-                  ? new Date(detail.lastUpdateTime * 1000).toISOString()
-                  : new Date().toISOString(),
-                messageCount: detail.events ? Math.ceil(detail.events.length / 2) : 0,
-              };
-            }
-          } catch {
-            // Fallback if detail fetch fails
-          }
-          return {
-            sessionId: s.session_id,
-            createdAt: new Date().toISOString(),
-            messageCount: 0,
-          };
-        })
-      );
+      const sessionsWithDetails = (data.sessions || []).map((s: any) => ({
+        sessionId: s.session_id,
+        createdAt: s.last_update_time
+          ? new Date(s.last_update_time * 1000).toISOString()
+          : new Date().toISOString(),
+        messageCount: s.message_count || 0,
+        apiKeyName: s.api_key_name || null,
+      }));
       setSessions(sessionsWithDetails);
     } catch (error) {
       console.error('Error fetching sessions:', error);
