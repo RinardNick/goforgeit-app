@@ -21,13 +21,19 @@ interface ToolRegistryPanelProps {
   onClose: () => void;
   files: AgentFile[];
   projectName: string;
+  onEditTool?: (filename: string, content: string) => void;
+  onDeleteTool?: (filename: string) => void;
+  onNavigateToAgent?: (filename: string) => void;
 }
 
 export function ToolRegistryPanel({
   isOpen,
   onClose,
   files,
-  projectName
+  projectName,
+  onEditTool,
+  onDeleteTool,
+  onNavigateToAgent,
 }: ToolRegistryPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -37,13 +43,19 @@ export function ToolRegistryPanel({
   const pythonTools = files.filter(f => f.filename.startsWith('tools/') && f.filename.endsWith('.py'));
   const agentTools = files.filter(f => f.filename !== 'root_agent.yaml' && f.filename.endsWith('.yaml'));
   
-  // Built-in tools (placeholders for now, should come from a central list)
+  // Built-in tools (standard ADK tools)
   const builtinTools = [
     { name: 'google_search', description: 'Search the web using Google' },
     { name: 'built_in_code_execution', description: 'Execute Python code in a sandbox' },
+    { name: 'VertexAiSearchTool', description: 'Search through unstructured data using Vertex AI Search' },
+    { name: 'VertexAiRagRetrieval', description: 'Retrieve context from a RAG corpus' },
   ];
 
   const filteredPythonTools = pythonTools.filter(t => 
+    t.filename.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredAgentTools = agentTools.filter(t => 
     t.filename.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -100,8 +112,18 @@ export function ToolRegistryPanel({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-mono font-bold text-foreground truncate">{tool.filename.replace('tools/', '')}</span>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-1 text-muted-foreground hover:text-primary transition-colors"><Edit3 size={14} /></button>
-                    <button className="p-1 text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={14} /></button>
+                    <button 
+                      onClick={() => onEditTool?.(tool.filename, tool.yaml)}
+                      className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Edit3 size={14} />
+                    </button>
+                    <button 
+                      onClick={() => onDeleteTool?.(tool.filename)}
+                      className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
                 <p className="text-[10px] text-muted-foreground line-clamp-2 italic">Custom Python tool defined in {tool.filename}</p>
@@ -122,15 +144,25 @@ export function ToolRegistryPanel({
             <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Agent Modules</h3>
           </div>
           <div className="space-y-2">
-            {agentTools.map((tool) => (
-              <div key={tool.filename} className="bg-accent/50 border border-border rounded-sm p-3 hover:border-purple-500/30 transition-all">
+            {filteredAgentTools.map((tool) => (
+              <div key={tool.filename} className="bg-accent/50 border border-border rounded-sm p-3 hover:border-purple-500/30 transition-all group">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-mono font-bold text-foreground truncate">{tool.filename}</span>
-                  <ExternalLink size={14} className="text-muted-foreground hover:text-purple-500 cursor-pointer transition-colors" />
+                  <button 
+                    onClick={() => onNavigateToAgent?.(tool.filename)}
+                    className="p-1 text-muted-foreground hover:text-purple-500 transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <ExternalLink size={14} />
+                  </button>
                 </div>
                 <p className="text-[10px] text-muted-foreground line-clamp-1 italic">Agent configured as a tool module</p>
               </div>
             ))}
+            {filteredAgentTools.length === 0 && (
+              <div className="text-center py-4 border border-dashed border-border rounded-sm text-[10px] text-muted-foreground/40 font-mono uppercase">
+                NO_AGENT_MODULES_FOUND
+              </div>
+            )}
           </div>
         </section>
 

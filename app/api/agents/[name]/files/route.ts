@@ -126,12 +126,26 @@ export async function GET(
       const entries = await fs.readdir(agentDir, { withFileTypes: true });
       
       for (const entry of entries) {
-        // Only include YAML configuration files
-        // Python tools in tools/ are internal implementation details, not user-editable configs
         if (entry.isFile() && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
           const content = await fs.readFile(path.join(agentDir, entry.name), 'utf-8');
           agentFiles.push({ filename: entry.name, yaml: content });
         }
+      }
+
+      // Read Python tools from tools/ directory if it exists
+      const toolsDir = path.join(agentDir, 'tools');
+      try {
+        await fs.access(toolsDir);
+        const toolEntries = await fs.readdir(toolsDir, { withFileTypes: true });
+        for (const entry of toolEntries) {
+          if (entry.isFile() && entry.name.endsWith('.py')) {
+            const filename = `tools/${entry.name}`;
+            const content = await fs.readFile(path.join(toolsDir, entry.name), 'utf-8');
+            agentFiles.push({ filename, yaml: content });
+          }
+        }
+      } catch {
+        // tools/ directory does not exist or is not accessible, skip
       }
     }
 

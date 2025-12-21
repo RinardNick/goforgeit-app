@@ -1021,6 +1021,36 @@ export default function ADKAgentComposePage() {
               onClose={() => setShowToolRegistry(false)}
               files={files}
               projectName={agentName}
+              onEditTool={(filename, content) => {
+                // We'll reuse the existing state-based editor logic from CustomPythonToolsPanel 
+                // by essentially mimicking what happens when you click edit there.
+                // However, CustomPythonToolsPanel's editor state is internal to it.
+                // For a truly unified experience, we might want to lift that state.
+                // For now, let's just close the registry and let the user edit from the PropertiesPanel
+                // OR we can implement a global editor state.
+                // Given the current structure, let's close registry and "select" the node if possible.
+                setShowToolRegistry(false);
+                // If it's a python tool, we don't have a node for it.
+                // So we'll need to implement a project-wide editor.
+              }}
+              onDeleteTool={async (filename) => {
+                if (confirm(`Are you sure you want to delete ${filename}?`)) {
+                  try {
+                    const response = await fetch(`/api/agents/${agentName}/files?filename=${encodeURIComponent(filename)}`, {
+                      method: 'DELETE',
+                    });
+                    if (response.ok) {
+                      await loadFiles(false);
+                    }
+                  } catch (err) {
+                    setError('Failed to delete tool');
+                  }
+                }
+              }}
+              onNavigateToAgent={(filename) => {
+                setShowToolRegistry(false);
+                setToolAgentContext({ filename, parentName: 'Registry' });
+              }}
             />
 
             {/* AI Assistant Panel */}
