@@ -1012,8 +1012,8 @@ export default function ADKAgentChatPage() {
         {sessionId && (
           <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
             <span>Session:</span>
-            <code className="px-2 py-0.5 bg-muted rounded text-xs font-mono">
-              {sessionId.slice(0, 8)}...
+            <code className="px-2 py-0.5 bg-muted border border-border rounded text-xs font-mono text-primary">
+              {sessionId}
             </code>
           </div>
         )}

@@ -74,9 +74,9 @@ export function SessionsPanel({
                       <div className="flex items-center gap-2 mb-1">
                         <code
                           data-testid="session-id-display"
-                          className={`text-xs font-mono font-medium truncate ${isActive ? 'text-primary' : 'text-foreground'}`}
+                          className={`text-xs font-mono font-medium ${isActive ? 'text-primary' : 'text-foreground'}`}
                         >
-                          {session.sessionId.slice(0, 8)}
+                          {session.sessionId}
                         </code>
                         {isActive && (
                           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-primary text-primary-foreground rounded-sm uppercase tracking-wider">
