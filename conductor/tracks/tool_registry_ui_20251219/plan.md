@@ -11,14 +11,14 @@
     - [x] Subtask: Implement a basic list view in `ToolsPanel` to display placeholder tool data.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Analysis & Scaffolding' (Protocol in workflow.md) ab85b1c
 
-## Phase 2: Tool Listing & Management
+## Phase 2: Tool Listing & Management [checkpoint: a92ea70]
 - [x] Task: Connect the Tool List to the backend. d107835
     - [x] Subtask: Implement a fetch function (e.g., in a hook `useTools`) to get the real list of tools from the API.
     - [x] Subtask: Update `ToolsPanel` to render the fetched tools with their names and descriptions.
 - [x] Task: Implement Tool Details/Edit View. a954142
     - [x] Subtask: Create `ToolEditor.tsx` using `@monaco-editor/react` for viewing tool code/schema.
     - [x] Subtask: Allow clicking a tool in the list to open it in the `ToolEditor` (read-only for system tools, editable for custom).
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Tool Listing & Management' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Tool Listing & Management' (Protocol in workflow.md) a92ea70
 
 ## Phase 3: Tool Creation Flow ("The Forge")
 - [ ] Task: Implement the "New Tool" dialog/modal.
