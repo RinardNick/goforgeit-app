@@ -26,14 +26,14 @@
     - [x] Subtask: Add "Organization-Wide" toggle for scoping.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend - API Key Management UI' (Protocol in workflow.md) [5085759]
 
-## Phase 4: Frontend - Developer Info UI (`</>` Icon)
-- [ ] Task: Add `</>` Developer Info button to Agent UI.
-    - [ ] Subtask: Add the icon to `ComposeHeader.tsx` and `ChatHeader.tsx`.
-- [ ] Task: Implement the API Instructions Modal.
-    - [ ] Subtask: Create `components/AgentComposer/ApiInstructionsModal.tsx`.
-    - [ ] Subtask: Implement copyable `curl` and code snippets (JS, Python) for the current agent.
-    - [ ] Subtask: Include endpoint URL and `X-Forge-Api-Key` header documentation.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Frontend - Developer Info UI' (Protocol in workflow.md)
+## Phase 4: Frontend - Developer Info UI (`</>` Icon) [checkpoint: 99568b8]
+- [x] Task: Add `</>` Developer Info button to Agent UI. [99568b8]
+    - [x] Subtask: Add the icon to `ComposeHeader.tsx` and `ChatHeader.tsx`.
+- [x] Task: Implement the API Instructions Modal. [99568b8]
+    - [x] Subtask: Create `components/AgentComposer/ApiInstructionsModal.tsx`.
+    - [x] Subtask: Implement copyable `curl` and code snippets (JS, Python) for the current agent.
+    - [x] Subtask: Include endpoint URL and `X-Forge-Api-Key` header documentation.
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Frontend - Developer Info UI' (Protocol in workflow.md) [99568b8]
 
 ## Phase 5: Visibility & Polish
 - [ ] Task: Verify External Sessions in Forge UI.
