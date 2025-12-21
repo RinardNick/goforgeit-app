@@ -32,10 +32,8 @@
     - [x] Subtask: Refresh the tool list upon successful save.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Tool Creation Flow' (Protocol in workflow.md) 4503465
 
-## Phase 4: Integration & Polish
-- [~] Task: Verify end-to-end flow.
-    - [ ] Subtask: Create a tool using the new UI, assign it to an agent, and verify the agent can use it (using the existing Chat panel).
-- [ ] Task: UI Polish.
-    - [ ] Subtask: Ensure empty states, loading states, and error states are handled gracefully.
-    - [ ] Subtask: Apply "Sovereign Forge" styling (dark mode, semantic colors) to match the Product Guidelines.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration & Polish' (Protocol in workflow.md)
+## Phase 4: Integration & Polish [checkpoint: f2fd1ea]
+- [x] Task: Verify end-to-end flow. f2fd1ea
+    - [x] Subtask: Create a tool using the new UI, assign it to an agent, and verify the agent can use it (using the existing Chat panel).
+- [x] Task: UI Polish. f2fd1ea
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration & Polish' (Protocol in workflow.md) f2fd1ea
