@@ -3,12 +3,35 @@ import { auth } from '@/auth';
 
 export const runtime = 'nodejs';
 
+interface DiagnosticResult {
+  timestamp: string;
+  environment: {
+    NODE_ENV: string | undefined;
+    AUTH_URL: string;
+    AUTH_SECRET: string;
+  };
+  request: {
+    url: string;
+    method: string;
+    hasNextUrl: boolean;
+    nextUrlType: string;
+    nextUrlValue: string | null;
+    nextUrlSearchParams: string | null;
+  };
+  auth: {
+    called: boolean;
+    success: boolean;
+    error: string | null;
+    session: { hasUser: boolean; email: string | null | undefined } | null;
+  };
+}
+
 /**
  * Diagnostic endpoint to debug auth issues in Cloud Run
  * This endpoint logs request state and auth behavior
  */
 export async function GET(req: NextRequest) {
-  const diagnostics: Record<string, unknown> = {
+  const diagnostics: DiagnosticResult = {
     timestamp: new Date().toISOString(),
     environment: {
       NODE_ENV: process.env.NODE_ENV,
@@ -19,23 +42,24 @@ export async function GET(req: NextRequest) {
       url: req.url,
       method: req.method,
       hasNextUrl: 'nextUrl' in req,
-      nextUrlType: typeof (req as any).nextUrl,
-      nextUrlValue: null as string | null,
-      nextUrlSearchParams: null as string | null,
+      nextUrlType: typeof (req as unknown as { nextUrl?: unknown }).nextUrl,
+      nextUrlValue: null,
+      nextUrlSearchParams: null,
     },
     auth: {
       called: false,
       success: false,
-      error: null as string | null,
-      session: null as unknown,
+      error: null,
+      session: null,
     },
   };
 
   // Check nextUrl
   try {
-    if ((req as any).nextUrl) {
-      diagnostics.request.nextUrlValue = String((req as any).nextUrl);
-      diagnostics.request.nextUrlSearchParams = (req as any).nextUrl.searchParams?.toString() ?? 'undefined';
+    const reqAny = req as unknown as { nextUrl?: { toString(): string; searchParams?: { toString(): string } } };
+    if (reqAny.nextUrl) {
+      diagnostics.request.nextUrlValue = String(reqAny.nextUrl);
+      diagnostics.request.nextUrlSearchParams = reqAny.nextUrl.searchParams?.toString() ?? 'undefined';
     } else {
       diagnostics.request.nextUrlValue = 'UNDEFINED';
     }
