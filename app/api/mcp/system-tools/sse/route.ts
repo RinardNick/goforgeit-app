@@ -5,7 +5,7 @@ import { WebSSETransport } from "@/lib/mcp/transport";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const { origin } = new URL(req.url);
+  const origin = req.nextUrl.origin;
   const sessionId = req.nextUrl.searchParams.get("sessionId") || crypto.randomUUID();
   
   console.log(`[MCP SSE] Connection request: ${sessionId} (Origin: ${origin})`);

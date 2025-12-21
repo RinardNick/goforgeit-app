@@ -25,8 +25,8 @@ export function AgentToolCard({ tool, onDelete, onNavigate }: AgentToolCardProps
           <Bot size={14} />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-sm font-bold text-foreground font-heading truncate tracking-tight">{tool.agentName}</span>
-          <span className="text-[10px] text-muted-foreground/60 font-mono truncate uppercase">{tool.agentPath}</span>
+          <span className="text-sm font-bold text-foreground font-heading break-all tracking-tight">{tool.agentName}</span>
+          <span className="text-[10px] text-muted-foreground/60 font-mono break-all uppercase">{tool.agentPath}</span>
         </div>
         <ExternalLink size={12} className="text-primary/40 opacity-0 group-hover:opacity-100 transition-opacity ml-1 shrink-0" />
       </button>

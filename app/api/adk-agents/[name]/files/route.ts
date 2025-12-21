@@ -442,8 +442,7 @@ export async function DELETE(
   const { name: agentName } = await params;
 
   try {
-    const { searchParams } = new URL(request.url);
-    const filename = searchParams.get('filename');
+    const filename = request.nextUrl.searchParams.get('filename');
 
     if (!filename) {
       return NextResponse.json(

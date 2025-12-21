@@ -24,8 +24,7 @@ async function proxyToADK(
 
   // Reconstruct target URL
   const adkPath = params.path.join('/');
-  const url = new URL(req.url);
-  const targetUrl = `${ADK_BACKEND_URL}/${adkPath}${url.search}`;
+  const targetUrl = `${ADK_BACKEND_URL}/${adkPath}${req.nextUrl.search}`;
 
   // Log request
   console.log(`[ADK Router] ${req.method} /${adkPath}`);

@@ -1,0 +1,8 @@
+{
+  "track_id": "agent_api_experience_20251221",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2025-12-21T10:00:00Z",
+  "updated_at": "2025-12-21T10:00:00Z",
+  "description": "feature: Agent API experience - Enable users to access agents via streaming API with scoped API keys and in-app developer documentation."
+}

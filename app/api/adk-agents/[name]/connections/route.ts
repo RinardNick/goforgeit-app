@@ -192,9 +192,8 @@ export async function DELETE(
 ) {
   try {
     const { name: agentName } = await params;
-    const { searchParams } = new URL(request.url);
-    const parentFilename = searchParams.get('parentFilename');
-    const childFilename = searchParams.get('childFilename');
+    const parentFilename = request.nextUrl.searchParams.get('parentFilename');
+    const childFilename = request.nextUrl.searchParams.get('childFilename');
 
     if (!parentFilename || !childFilename) {
       return NextResponse.json(

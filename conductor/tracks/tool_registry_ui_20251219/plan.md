@@ -21,16 +21,16 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Tool Listing & Management' (Protocol in workflow.md) a92ea70
 
 ## Phase 3: Tool Creation Flow ("The Forge")
-- [ ] Task: Implement the "New Tool" dialog/modal.
-    - [ ] Subtask: Create a modal that accepts a natural language description for a new tool.
-- [ ] Task: Integrate with the Builder/Forge Agent.
-    - [ ] Subtask: Implement the API call to send the user's description to the Builder Agent.
-    - [ ] Subtask: Handle the streaming response (if applicable) or the final generated tool definition.
-    - [ ] Subtask: Populate the `ToolEditor` with the generated code/schema for review.
-- [ ] Task: Implement "Save Tool" functionality.
-    - [ ] Subtask: Create the API call to persist the new tool definition to the backend/ADK.
-    - [ ] Subtask: Refresh the tool list upon successful save.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Tool Creation Flow' (Protocol in workflow.md)
+- [x] Task: Implement the "New Tool" dialog/modal. 42ab19a
+    - [x] Subtask: Create a modal that accepts a natural language description for a new tool.
+- [x] Task: Integrate with the Builder/Forge Agent. 42ab19a
+    - [x] Subtask: Implement the API call to send the user's description to the Builder Agent.
+    - [x] Subtask: Handle the streaming response (if applicable) or the final generated tool definition.
+    - [x] Subtask: Populate the `ToolEditor` with the generated code/schema for review.
+- [x] Task: Implement "Save Tool" functionality. 42ab19a
+    - [x] Subtask: Create the API call to persist the new tool definition to the backend/ADK.
+    - [x] Subtask: Refresh the tool list upon successful save.
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Tool Creation Flow' (Protocol in workflow.md)
 
 ## Phase 4: Integration & Polish
 - [ ] Task: Verify end-to-end flow.
