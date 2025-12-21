@@ -13,7 +13,9 @@ const ADMIN_EMAILS = (process.env.ALLOWED_EMAILS || 'nickarinard@gmail.com').spl
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   callbacks: {
-    ...authConfig.callbacks,
+    // Don't spread authConfig.callbacks here - the 'authorized' callback
+    // is only for middleware and expects request.nextUrl which isn't available
+    // when auth() is called from API routes
     async signIn({ user }) {
       const email = user.email || '';
 
