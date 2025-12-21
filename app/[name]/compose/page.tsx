@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import YAML from 'yaml';
 import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
-import { ToolRegistryPanel } from '@/app/components/AgentComposer';
+import { ToolRegistryPanel, ToolEditorModal } from '@/app/components/AgentComposer';
 import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
 import {
   agentFilesToNodes,
@@ -48,6 +48,7 @@ export default function ADKAgentComposePage() {
   const [circularDependencyWarning, setCircularDependencyWarning] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(true);
   const [showToolRegistry, setShowToolRegistry] = useState(false);
+  const [editingTool, setEditingTool] = useState<{ filename: string; content: string } | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [validationResults, setValidationResults] = useState<Record<string, { valid: boolean; errors: Array<{ type: string; message: string; field?: string; value?: string }> }>>({});
 
@@ -1015,23 +1016,14 @@ export default function ADKAgentComposePage() {
               onYamlChange={handleYamlChange}
             />
 
-            {/* Tool Registry Panel */}
             <ToolRegistryPanel
               isOpen={showToolRegistry}
               onClose={() => setShowToolRegistry(false)}
               files={files}
               projectName={agentName}
               onEditTool={(filename, content) => {
-                // We'll reuse the existing state-based editor logic from CustomPythonToolsPanel 
-                // by essentially mimicking what happens when you click edit there.
-                // However, CustomPythonToolsPanel's editor state is internal to it.
-                // For a truly unified experience, we might want to lift that state.
-                // For now, let's just close the registry and let the user edit from the PropertiesPanel
-                // OR we can implement a global editor state.
-                // Given the current structure, let's close registry and "select" the node if possible.
+                setEditingTool({ filename, content });
                 setShowToolRegistry(false);
-                // If it's a python tool, we don't have a node for it.
-                // So we'll need to implement a project-wide editor.
               }}
               onDeleteTool={async (filename) => {
                 if (confirm(`Are you sure you want to delete ${filename}?`)) {
@@ -1051,6 +1043,14 @@ export default function ADKAgentComposePage() {
                 setShowToolRegistry(false);
                 setToolAgentContext({ filename, parentName: 'Registry' });
               }}
+            />
+
+            <ToolEditorModal
+              isOpen={!!editingTool}
+              filename={editingTool?.filename || null}
+              initialContent={editingTool?.content || ''}
+              onClose={() => setEditingTool(null)}
+              onSave={handleSaveFile}
             />
 
             {/* AI Assistant Panel */}
