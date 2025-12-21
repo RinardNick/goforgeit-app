@@ -49,16 +49,16 @@ export async function GET(req: NextRequest) {
     // Get allowed agents for this org (and project if specified)
     const projectId = req.nextUrl.searchParams.get('projectId');
 
-    let allowedAgents: { name: string, project_id: string }[];
+    let allowedAgents: { id: string, name: string, project_id: string }[];
     
     if (projectId) {
-      allowedAgents = await query<{ name: string, project_id: string }>(
-        'SELECT name, project_id FROM agents WHERE org_id = $1 AND project_id = $2',
+      allowedAgents = await query<{ id: string, name: string, project_id: string }>(
+        'SELECT id, name, project_id FROM agents WHERE org_id = $1 AND project_id = $2',
         [org.id, projectId]
       );
     } else {
-      allowedAgents = await query<{ name: string, project_id: string }>(
-        'SELECT name, project_id FROM agents WHERE org_id = $1',
+      allowedAgents = await query<{ id: string, name: string, project_id: string }>(
+        'SELECT id, name, project_id FROM agents WHERE org_id = $1',
         [org.id]
       );
     }
@@ -68,12 +68,16 @@ export async function GET(req: NextRequest) {
     // Filter agents: Only show agents that exist both on backend AND in our DB for this org
     const agents = allAgentNames
       .filter(name => allowedNames.has(name))
-      .map((name) => ({
-        id: name,
-        name: name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-        source: 'adk' as const,
-        projectId: allowedAgents.find(a => a.name === name)?.project_id
-      }));
+      .map((name) => {
+        const dbAgent = allowedAgents.find(a => a.name === name);
+        return {
+          id: name, // ADK name/slug
+          uuid: dbAgent?.id, // DB UUID for scoping
+          name: name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+          source: 'adk' as const,
+          projectId: dbAgent?.project_id
+        };
+      });
 
     return NextResponse.json({
       agents,

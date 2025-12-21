@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { SuccessMessage } from '@/components/ui/SuccessMessage';
+import ForgeApiKeysSection from './ForgeApiKeysSection';
 
 type Provider = 'google' | 'openai' | 'anthropic';
 
@@ -312,6 +313,8 @@ export default function ApiKeysSection() {
           })}
         </div>
       )}
+
+      <ForgeApiKeysSection />
 
       {/* Modal for adding/updating key */}
       {modalOpen && selectedProvider && (
