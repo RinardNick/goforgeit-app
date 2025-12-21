@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeADKAgent, getADKSession, createADKSession, updateADKSession } from '@/lib/adk/client';
+import { executeADKAgentStream, getADKSession, createADKSession, updateADKSession, ADKRunEvent } from '@/lib/adk/client';
 import { z } from 'zod';
 import path from 'path';
 import { auth } from '@/auth';
@@ -234,7 +234,7 @@ export async function POST(
       root_directory: projectPath
     });
 
-    const result = await executeADKAgent(
+    const stream = executeADKAgentStream(
       'builder_agent', // Must match name in builder_agent.yaml
       fullMessage,
       {
@@ -243,31 +243,40 @@ export async function POST(
       }
     );
 
-    console.log(`[Assistant] builder_agent response received.`);
+    let fullResponse = '';
+    const events: ADKRunEvent[] = [];
+    
+    // Iterate through the stream to accumulate the result
+    // This ensures all sub-agent transfers and tool calls are processed by the engine
+    let streamResult;
+    while (true) {
+      const { done, value } = await stream.next();
+      if (done) {
+        streamResult = value;
+        break;
+      }
+      fullResponse += value;
+    }
 
-    // Map ADK Tool Calls to the frontend's "ExecutedAction" format
-    // The frontend uses this to display "✓ Created agent" chips
-    const executedActions = (result.toolCalls || []).map(tc => ({
+    console.log(`[Assistant] builder_agent streaming execution complete.`);
+
+    // Map tool calls from the stream result
+    const executedActions = (streamResult.toolCalls || []).map(tc => ({
       tool: tc.name,
       args: tc.args,
       result: {
         success: tc.status === 'success',
-        // Generate human-readable summary instead of raw JSON
         message: summarizeToolResult(tc.name, tc.result),
         data: typeof tc.result === 'object' ? tc.result as Record<string, unknown> : undefined
       }
     }));
 
-    // Determine completion status
-    // If the agent called "task_complete", mark as complete
-    const isComplete = executedActions.some(a => a.tool === 'task_complete' && a.result.success);
-
     return NextResponse.json({
-      response: result.response, // The text response from the LLM
+      response: fullResponse,
       executedActions,
-      isComplete,
-      sessionId: result.sessionId, // Return session ID for tracking/debugging
-      events: result.events, // Return ADK events for debug panel
+      isComplete: executedActions.some(a => a.tool === 'task_complete' && a.result.success),
+      sessionId: streamResult.sessionId,
+      events: streamResult.events,
     });
 
   } catch (error) {
