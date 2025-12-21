@@ -242,7 +242,7 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
       <div className="flex items-center gap-2 mb-2 relative z-10">
         <span className="text-lg opacity-90">{config.icon}</span>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold font-heading text-foreground truncate text-sm tracking-wide">{data.name}</h3>
+          <h3 className="font-bold font-heading text-foreground break-words text-sm tracking-wide">{data.name}</h3>
           <span className={`text-[10px] font-mono font-medium ${config.color} uppercase`}>{data.agentClass}</span>
         </div>
         <div className="flex gap-1">
@@ -276,7 +276,7 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
 
       {/* Model (for LlmAgent) */}
       {data.model && (
-        <div className="text-[10px] text-muted-foreground/60 mb-2 truncate font-mono">
+        <div className="text-[10px] text-muted-foreground/60 mb-2 break-all font-mono">
           MODEL: <span className="text-muted-foreground">{data.model}</span>
         </div>
       )}
@@ -299,27 +299,27 @@ function AgentNode({ id, data, selected }: AgentNodeProps) {
             <div className="mt-2 pt-2 border-t border-border">
               <div className="flex flex-wrap gap-1">
                 {data.tools?.map((tool, idx) => (
-                  <span key={`tool-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-muted/50 border border-border text-muted-foreground rounded-sm font-mono">
+                  <span key={`tool-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-muted/50 border border-border text-muted-foreground rounded-sm font-mono break-all">
                     {tool}
                   </span>
                 ))}
                 {data.agentTools?.map((agentTool, idx) => (
-                  <span key={`agent-tool-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-300 rounded-sm font-mono flex items-center gap-0.5">
+                  <span key={`agent-tool-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-300 rounded-sm font-mono flex items-center gap-0.5 break-all">
                     🤖 {agentTool.agentName}
                   </span>
                 ))}
                 {data.toolConfigs && Array.from(data.toolConfigs.keys()).map((toolName) => (
-                  <span key={`tool-config-${toolName}`} className="text-[9px] px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 rounded-sm font-mono">
+                  <span key={`tool-config-${toolName}`} className="text-[9px] px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 rounded-sm font-mono break-all">
                     {toolName}
                   </span>
                 ))}
                 {data.mcpServers?.map((server, idx) => (
-                  <span key={`mcp-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-300 rounded-sm font-mono">
+                  <span key={`mcp-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-300 rounded-sm font-mono break-all">
                     MCP: {server.name}
                   </span>
                 ))}
                 {data.openApiTools?.map((tool, idx) => (
-                  <span key={`openapi-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300 rounded-sm font-mono">
+                  <span key={`openapi-${idx}`} className="text-[9px] px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300 rounded-sm font-mono break-all">
                     {tool.name}
                   </span>
                 ))}
