@@ -24,6 +24,7 @@ interface ToolRegistryPanelProps {
   onEditTool?: (filename: string, content: string) => void;
   onDeleteTool?: (filename: string) => void;
   onNavigateToAgent?: (filename: string) => void;
+  onNewCustomTool?: () => void;
 }
 
 export function ToolRegistryPanel({
@@ -34,6 +35,7 @@ export function ToolRegistryPanel({
   onEditTool,
   onDeleteTool,
   onNavigateToAgent,
+  onNewCustomTool,
 }: ToolRegistryPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -93,7 +95,10 @@ export function ToolRegistryPanel({
         </div>
         
         <div className="grid grid-cols-2 gap-2">
-          <button className="flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-sm text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-md">
+          <button 
+            onClick={onNewCustomTool}
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-sm text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-md"
+          >
             <Plus size={14} /> New Custom Tool
           </button>
           <button className="flex items-center justify-center gap-2 px-3 py-2 bg-accent text-foreground border border-border rounded-sm text-xs font-bold uppercase tracking-wider hover:bg-muted transition-all">

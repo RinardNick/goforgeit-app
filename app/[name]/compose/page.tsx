@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import YAML from 'yaml';
 import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
-import { ToolRegistryPanel, ToolEditorModal } from '@/app/components/AgentComposer';
+import { ToolRegistryPanel, ToolEditorModal, CreateToolModal } from '@/app/components/AgentComposer';
 import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
 import {
   agentFilesToNodes,
@@ -48,6 +48,7 @@ export default function ADKAgentComposePage() {
   const [circularDependencyWarning, setCircularDependencyWarning] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(true);
   const [showToolRegistry, setShowToolRegistry] = useState(false);
+  const [showCreateTool, setShowCreateTool] = useState(false);
   const [editingTool, setEditingTool] = useState<{ filename: string; content: string } | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [validationResults, setValidationResults] = useState<Record<string, { valid: boolean; errors: Array<{ type: string; message: string; field?: string; value?: string }> }>>({});
@@ -56,6 +57,45 @@ export default function ADKAgentComposePage() {
   const displayName = agentName
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
+
+  // Handle Forge Tool
+  const handleForgeTool = async (description: string) => {
+    try {
+      const response = await fetch(`/api/agents/${agentName}/assistant`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `Create a new python tool based on this description: ${description}. Please write the code to tools/<tool_name>.py.`,
+          context: {
+            agents: nodes.map(n => ({
+              filename: (n.data as AgentNodeData).filename || '',
+              name: (n.data as AgentNodeData).name || '',
+              agentClass: (n.data as AgentNodeData).agentClass || '',
+            })),
+            selectedAgent: selectedNode ? {
+              filename: (selectedNode.data as AgentNodeData).filename || '',
+              name: (selectedNode.data as AgentNodeData).name || '',
+            } : null,
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to forge tool');
+      }
+
+      const result = await response.json();
+      
+      // Refresh files to see the new tool
+      await loadFiles(false);
+      
+      // Optionally show success or open the new tool in editor
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to forge tool');
+    }
+  };
 
   // Get the currently selected file's YAML
   const selectedFileData = files.find(f => f.filename === selectedFile);
@@ -1043,6 +1083,10 @@ export default function ADKAgentComposePage() {
                 setShowToolRegistry(false);
                 setToolAgentContext({ filename, parentName: 'Registry' });
               }}
+              onNewCustomTool={() => {
+                setShowToolRegistry(false);
+                setShowCreateTool(true);
+              }}
             />
 
             <ToolEditorModal
@@ -1051,6 +1095,12 @@ export default function ADKAgentComposePage() {
               initialContent={editingTool?.content || ''}
               onClose={() => setEditingTool(null)}
               onSave={handleSaveFile}
+            />
+
+            <CreateToolModal
+              isOpen={showCreateTool}
+              onClose={() => setShowCreateTool(false)}
+              onSubmit={handleForgeTool}
             />
 
             {/* AI Assistant Panel */}
