@@ -31,7 +31,7 @@ export function AgentCard({ id, name, onDelete }: AgentCardProps) {
             </span>
           </div>
           <h3 className="text-xl font-heading text-foreground group-hover:text-primary transition-colors">{name}</h3>
-          <p className="text-sm text-muted-foreground/60 font-mono mt-1">{id}</p>
+          <p className="text-sm text-muted-foreground/60 font-mono mt-1 break-all">{id}</p>
         </div>
         
         <button

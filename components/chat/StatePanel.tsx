@@ -195,7 +195,7 @@ export function StatePanel({ sessionState, onStateUpdate }: StatePanelProps) {
                   </div>
                 ) : (
                   // View mode
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
                       <span
                         data-testid="state-scope-badge"
@@ -208,7 +208,7 @@ export function StatePanel({ sessionState, onStateUpdate }: StatePanelProps) {
                       <span data-testid="state-key" className="font-bold text-foreground font-mono tracking-tight">{entry.key}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span data-testid="state-value" className={`font-mono text-xs ${entry.changed ? 'text-primary' : 'text-muted-foreground opacity-80'}`}>
+                      <span data-testid="state-value" className={`font-mono text-xs break-all ${entry.changed ? 'text-primary' : 'text-muted-foreground opacity-80'}`}>
                         {typeof entry.value === 'string' ? entry.value : JSON.stringify(entry.value)}
                       </span>
                       {entry.changed && <span data-testid="state-value-changed" className="text-primary text-[10px] bg-primary/10 px-2 py-0.5 rounded-full font-mono font-bold uppercase animate-pulse">changed</span>}
