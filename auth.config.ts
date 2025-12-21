@@ -23,8 +23,16 @@ export const authConfig: NextAuthConfig = {
   },
   callbacks: {
     // Edge-compatible authorized callback for middleware
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
+
+      // Defensive: handle case where request or nextUrl might be undefined
+      const nextUrl = request?.nextUrl;
+      if (!nextUrl) {
+        // If no nextUrl, allow the request to proceed (will be handled by route)
+        return true;
+      }
+
       const pathname = nextUrl.pathname;
 
       // Public routes that don't require authentication
