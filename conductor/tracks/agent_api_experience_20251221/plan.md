@@ -19,12 +19,12 @@
     - [x] Subtask: Implement explicit session creation and linking to `api_key_id`.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Backend - Agent Execution API & Streaming' (Protocol in workflow.md) [0b4da22]
 
-## Phase 3: Frontend - API Key Management UI
-- [ ] Task: Enhance the API Keys Settings page.
-    - [ ] Subtask: Update `app/settings/api-keys/page.tsx` to allow naming and scoping keys.
-    - [ ] Subtask: Implement "Select Agents" UI (multi-select) for scoping.
-    - [ ] Subtask: Add "Organization-Wide" toggle for scoping.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend - API Key Management UI' (Protocol in workflow.md)
+## Phase 3: Frontend - API Key Management UI [checkpoint: 5085759]
+- [x] Task: Enhance the API Keys Settings page. [5085759]
+    - [x] Subtask: Update `app/settings/api-keys/page.tsx` to allow naming and scoping keys.
+    - [x] Subtask: Implement "Select Agents" UI (multi-select) for scoping.
+    - [x] Subtask: Add "Organization-Wide" toggle for scoping.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend - API Key Management UI' (Protocol in workflow.md) [5085759]
 
 ## Phase 4: Frontend - Developer Info UI (`</>` Icon)
 - [ ] Task: Add `</>` Developer Info button to Agent UI.
