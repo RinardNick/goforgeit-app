@@ -82,6 +82,7 @@ export async function createApiKey(params: CreateApiKeyParams): Promise<CreateAp
     name: result.name,
     description: result.description,
     created_at: result.created_at,
+    created_by: params.userId,
     scopedAgents: result.scoped_agents,
     apiKey // Return the full key only here
   };
