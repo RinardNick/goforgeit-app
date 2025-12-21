@@ -47,7 +47,8 @@ export async function GET(req: NextRequest) {
     const allAgentNames = await listADKAgents();
 
     // Get allowed agents for this org (and project if specified)
-    const projectId = req.nextUrl.searchParams.get('projectId');
+    const url = new URL(req.url);
+    const projectId = url.searchParams.get('projectId');
 
     let allowedAgents: { id: string, name: string, project_id: string }[];
     

@@ -141,6 +141,7 @@ export async function POST(req: NextRequest) {
     return new Response('Unauthorized: Invalid API Key', { status: 401 });
   }
 
-  const sessionId = req.nextUrl.searchParams.get('sessionId');
+  const reqUrl = new URL(req.url);
+  const sessionId = reqUrl.searchParams.get('sessionId');
   // ... rest of implementation
 }

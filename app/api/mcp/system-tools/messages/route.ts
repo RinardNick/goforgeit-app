@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { transportMap } from "@/lib/mcp/server";
 
 export async function POST(req: NextRequest) {
-  const sessionId = req.nextUrl.searchParams.get("sessionId");
+  const reqUrl = new URL(req.url);
+  const sessionId = reqUrl.searchParams.get("sessionId");
 
   if (!sessionId) {
     return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });

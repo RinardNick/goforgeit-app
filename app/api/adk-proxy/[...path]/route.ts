@@ -13,7 +13,8 @@ async function proxyRequest(
   params: { path: string[] }
 ) {
   const path = params.path.join('/');
-  const targetUrl = `${ADK_ROUTER_URL}/${path}${req.nextUrl.search}`;
+  const reqUrl = new URL(req.url);
+  const targetUrl = `${ADK_ROUTER_URL}/${path}${reqUrl.search}`;
 
   const headers: HeadersInit = {};
   req.headers.forEach((value, key) => {
