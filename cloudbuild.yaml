@@ -43,6 +43,16 @@ steps:
       - 'GOOGLE_CLIENT_SECRET=${_GOOGLE_CLIENT_SECRET}'
       - '--set-env-vars'
       - 'ALLOWED_EMAILS=${_ALLOWED_EMAILS}'
+      - '--set-env-vars'
+      - 'GEMINI_API_KEY=${_GEMINI_API_KEY}'
+      - '--set-env-vars'
+      - 'PROVIDER_KEY_SECRET=${_PROVIDER_KEY_SECRET}'
+      - '--set-env-vars'
+      - 'NEXT_PUBLIC_APP_URL=https://app.goforgeit.com'
+      - '--set-env-vars'
+      - 'GCS_BUCKET_NAME=goforgeit-adk-agents'
+      - '--set-env-vars'
+      - 'ADK_BACKEND_URL=${_ADK_BACKEND_URL}'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/app-goforgeit/app:$COMMIT_SHA'
@@ -58,3 +68,6 @@ substitutions:
   _GOOGLE_CLIENT_ID: ''
   _GOOGLE_CLIENT_SECRET: ''
   _ALLOWED_EMAILS: ''
+  _GEMINI_API_KEY: ''
+  _PROVIDER_KEY_SECRET: ''
+  _ADK_BACKEND_URL: ''
