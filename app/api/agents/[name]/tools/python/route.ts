@@ -306,7 +306,8 @@ export async function PUT(
   { params }: { params: Promise<{ name: string }> }
 ) {
   const { name: agentName } = await params;
-  const filename = request.nextUrl.searchParams.get('filename');
+  const reqUrl = new URL(request.url);
+  const filename = reqUrl.searchParams.get('filename');
 
   if (!filename) {
     return NextResponse.json(
@@ -399,7 +400,8 @@ export async function DELETE(
   { params }: { params: Promise<{ name: string }> }
 ) {
   const { name: agentName } = await params;
-  const filename = request.nextUrl.searchParams.get('filename');
+  const reqUrl = new URL(request.url);
+  const filename = reqUrl.searchParams.get('filename');
 
   if (!filename) {
     return NextResponse.json(

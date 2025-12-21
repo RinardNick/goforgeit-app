@@ -25,7 +25,8 @@ Forge transforms the user from an overwhelmed individual contributor into a **Co
 
 ## 4. Key Features & Capabilities
 *   **Conversational Agent Management:** A natural language chat interface to hire, schedule, and direct a team of agents.
-*   **Universal Agent Registry (API/MCP):** A centralized hub to manage agents that can be deployed anywhere—exposed via API for developers or via MCP for integration with IDEs (Cursor) and other AI clients (Claude Desktop).
+*   **Universal Agent Registry (API/MCP):** A centralized hub to manage agents that can be deployed anywhere—exposed via a streaming **Agent Execution API** for developers or via MCP for integration with IDEs (Cursor) and other AI clients (Claude Desktop).
+*   **Secure API Access & Scoping:** Robust management of **Forge API Keys** with granular scoping (per-agent or organization-wide), allowing external applications to leverage Forge agents while maintaining full observability and traceability in the Forge dashboard.
 *   **Agent Builder & "Forge":** specialized meta-agents that assist in creating and refining new tools and agents on demand.
 *   **Multi-Tenant Architecture:** Secure `Organization > Project > Agent` hierarchy supporting both personal productivity and enterprise team deployment.
 *   **Enterprise Integration:** Capabilities to embed agents into existing business systems or user products.
