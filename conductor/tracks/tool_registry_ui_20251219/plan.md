@@ -9,7 +9,7 @@
     - [x] Subtask: Create `app/components/AgentComposer/ToolRegistryPanel.tsx`.
     - [x] Subtask: Add a "Tools" tab/button to `app/components/AgentComposer/Navigation.tsx` (or equivalent).
     - [x] Subtask: Implement a basic list view in `ToolsPanel` to display placeholder tool data.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Analysis & Scaffolding' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Analysis & Scaffolding' (Protocol in workflow.md)
 
 ## Phase 2: Tool Listing & Management
 - [ ] Task: Connect the Tool List to the backend.

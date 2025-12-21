@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Implement the Tool Registry UI to manage custom tools within the Visual Builder
+## [~] Track: Implement the Tool Registry UI to manage custom tools within the Visual Builder
 *Link: [./conductor/tracks/tool_registry_ui_20251219/](./conductor/tracks/tool_registry_ui_20251219/)*

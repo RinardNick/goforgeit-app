@@ -56,6 +56,7 @@ adk web \
   --allow_origins=http://localhost:3000 \
   --session_service_uri="$SESSION_URI" \
   --host=0.0.0.0 \
+  --reload_agents \
   adk-service/agents \
   > /tmp/adk-web.log 2>&1 &
 
