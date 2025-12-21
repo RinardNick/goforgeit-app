@@ -3,32 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import {
-  loadConversationForAgent,
-  saveConversationForAgent,
-  clearConversationForAgent,
-  getSessionIdForAgent,
-  resetSessionIdForAgent,
-} from '@/lib/adk/assistant-conversation-store';
-
-// Executed action from the backend
-interface ExecutedAction {
-  tool: string;
-  args: Record<string, unknown>;
-  result: {
-    success: boolean;
-    message: string;
-    data?: Record<string, unknown>;
-  };
-}
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  executedActions?: ExecutedAction[];
-  isComplete?: boolean;
-}
+import { useAssistant, Message, ExecutedAction } from '@/lib/hooks/useAssistant';
 
 export interface AIAssistantPanelProps {
   isOpen: boolean;
@@ -101,33 +76,25 @@ export function AIAssistantPanel({
   onRefreshNeeded,
   apiBasePath = '/api/agents',
 }: AIAssistantPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    messages,
+    isLoading,
+    sendMessage,
+    clearConversation,
+  } = useAssistant({
+    projectName,
+    apiBasePath,
+    currentAgents,
+    selectedAgent,
+    onRefreshNeeded,
+  });
+
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-
-  // Load conversation and session ID from localStorage when projectName changes
-  useEffect(() => {
-    if (projectName) {
-      const savedMessages = loadConversationForAgent(projectName);
-      setMessages(savedMessages as Message[]);
-      // Get or create session ID for this project's conversation
-      const savedSessionId = getSessionIdForAgent(projectName);
-      setSessionId(savedSessionId);
-    }
-  }, [projectName]);
-
-  // Save conversation to localStorage when messages change
-  useEffect(() => {
-    if (projectName && messages.length > 0) {
-      saveConversationForAgent(projectName, messages);
-    }
-  }, [projectName, messages]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -182,63 +149,9 @@ export function AIAssistantPanel({
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: inputValue.trim(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    const content = inputValue.trim();
     setInputValue('');
-    setIsLoading(true);
-
-    try {
-      // Call the AI assistant API using the configurable base path
-      const response = await fetch(`${apiBasePath}/${projectName}/assistant`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage.content,
-          sessionId: sessionId,  // Pass session ID for conversation continuity
-          context: {
-            agents: currentAgents,
-            selectedAgent: selectedAgent,
-          },
-          history: messages.map(m => ({ role: m.role, content: m.content })),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response');
-      }
-
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: data.response,
-        executedActions: data.executedActions,
-        isComplete: data.isComplete,
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
-      // If any actions were executed, trigger a refresh of the canvas
-      if (data.executedActions && data.executedActions.length > 0) {
-        onRefreshNeeded?.();
-      }
-    } catch (error) {
-      const errorMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
+    await sendMessage(content);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -253,12 +166,8 @@ export function AIAssistantPanel({
     inputRef.current?.focus();
   };
 
-  const handleClearConversation = () => {
-    setMessages([]);
-    clearConversationForAgent(projectName);
-    // Reset session ID so the next conversation starts fresh in ADK
-    const newSessionId = resetSessionIdForAgent(projectName);
-    setSessionId(newSessionId);
+  const handleClear = () => {
+    clearConversation();
   };
 
   if (!isOpen) return null;
@@ -291,7 +200,7 @@ export function AIAssistantPanel({
           {messages.length > 0 && (
             <button
               data-testid="ai-assistant-clear"
-              onClick={handleClearConversation}
+              onClick={handleClear}
               className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent transition-colors"
               title="Clear conversation"
             >

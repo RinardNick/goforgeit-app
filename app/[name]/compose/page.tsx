@@ -49,8 +49,9 @@ export default function ADKAgentComposePage() {
   const [circularDependencyWarning, setCircularDependencyWarning] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(true);
   const [showToolRegistry, setShowToolRegistry] = useState(false);
-  const [showApiInstructions, setShowApiInstructions] = useState(false);
   const [showCreateTool, setShowCreateTool] = useState(false);
+  const [showWorkspace, setShowWorkspace] = useState(false);
+  const [workspaceDescription, setWorkspaceDescription] = useState('');
   const [editingTool, setEditingTool] = useState<{ filename: string; content: string } | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [validationResults, setValidationResults] = useState<Record<string, { valid: boolean; errors: Array<{ type: string; message: string; field?: string; value?: string }> }>>({});
@@ -60,48 +61,26 @@ export default function ADKAgentComposePage() {
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  // Handle Forge Tool
-  const handleForgeTool = async (description: string) => {
+  // Handle Save Forged Files
+  const handleSaveForgedFiles = async (forgedFiles: Array<{ filename: string; content: string }>) => {
     try {
-      const response = await fetch(`/api/agents/${agentName}/assistant`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: `COMMAND: Use the forge_agent to IMMEDIATELY create a new python tool based on this description: ${description}. 
-          
-          DIRECTIVE: Skip all architectural discussion and confirmation steps. Proceed directly to calling 'write_files' via the forge_agent.
-          
-          LOCATION: The tool must be written to the 'tools/' directory within the current project.
-          
-          REQUIREMENT: Ensure 'tools/__init__.py' also exists.`,
-          context: {
-            agents: nodes.map(n => ({
-              filename: (n.data as AgentNodeData).filename || '',
-              name: (n.data as AgentNodeData).name || '',
-              agentClass: (n.data as AgentNodeData).agentClass || '',
-            })),
-            selectedAgent: selectedNode ? {
-              filename: (selectedNode.data as AgentNodeData).filename || '',
-              name: (selectedNode.data as AgentNodeData).name || '',
-            } : null,
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to forge tool');
+      for (const file of forgedFiles) {
+        const response = await fetch(`/api/agents/${agentName}/files`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.filename, yaml: file.content }),
+        });
+        if (!response.ok) throw new Error(`Failed to save ${file.filename}`);
       }
-
-      const result = await response.json();
       
-      // Refresh files to see the new tool
       await loadFiles(false);
-      
-      // Optionally show success or open the new tool in editor
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
+      
+      // Auto-open Registry to show results
+      setShowToolRegistry(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to forge tool');
+      setError(err instanceof Error ? err.message : 'Failed to save forged files');
     }
   };
 
@@ -1109,7 +1088,23 @@ export default function ADKAgentComposePage() {
             <CreateToolModal
               isOpen={showCreateTool}
               onClose={() => setShowCreateTool(false)}
-              onSubmit={handleForgeTool}
+              onSubmit={async (description) => {
+                setWorkspaceDescription(description);
+                setShowWorkspace(true);
+              }}
+            />
+
+            <ForgeWorkspaceModal
+              isOpen={showWorkspace}
+              onClose={() => setShowWorkspace(false)}
+              projectName={agentName}
+              currentAgents={nodes.map(n => ({
+                filename: (n.data as AgentNodeData).filename || '',
+                name: (n.data as AgentNodeData).name || '',
+                agentClass: (n.data as AgentNodeData).agentClass || '',
+              }))}
+              initialDescription={workspaceDescription}
+              onSave={handleSaveForgedFiles}
             />
 
             <ApiInstructionsModal

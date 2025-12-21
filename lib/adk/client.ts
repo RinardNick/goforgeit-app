@@ -542,7 +542,7 @@ export async function* executeADKAgentStream(
     sessionId?: string;
     headers?: Record<string, string>;
   } = {}
-): AsyncGenerator<string, ADKExecutionResult, unknown> {
+): AsyncGenerator<{ type: 'text'; content: string } | { type: 'tool_call'; tool: string; args: Record<string, unknown> } | { type: 'tool_response'; tool: string; response: unknown }, ADKExecutionResult, unknown> {
   const userId = options.userId || 'default-user';
 
   // Create or get session
@@ -607,14 +607,26 @@ export async function* executeADKAgentStream(
               for (const part of eventData.content.parts) {
                 if (part.text) {
                   fullResponse += part.text;
-                  yield part.text;
+                  yield { type: 'text', content: part.text };
                 }
                 if (part.functionCall) {
-                  toolCalls.push({
+                  const call = {
                     name: part.functionCall.name,
                     args: part.functionCall.args,
-                    status: 'pending',
-                  });
+                    status: 'pending' as const,
+                  };
+                  toolCalls.push(call);
+                  yield { type: 'tool_call', tool: part.functionCall.name, args: part.functionCall.args };
+                }
+                if (part.functionResponse) {
+                  const matchingCall = toolCalls.find(
+                    (tc) => tc.name === part.functionResponse?.name
+                  );
+                  if (matchingCall) {
+                    matchingCall.result = part.functionResponse.response;
+                    matchingCall.status = 'success' as const;
+                  }
+                  yield { type: 'tool_response', tool: part.functionResponse.name, response: part.functionResponse.response };
                 }
               }
             }

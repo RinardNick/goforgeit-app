@@ -243,40 +243,66 @@ export async function POST(
       }
     );
 
-    let fullResponse = '';
-    const events: ADKRunEvent[] = [];
-    
-    // Iterate through the stream to accumulate the result
-    // This ensures all sub-agent transfers and tool calls are processed by the engine
-    let streamResult;
-    while (true) {
-      const { done, value } = await stream.next();
-      if (done) {
-        streamResult = value;
-        break;
+    // Create a TransformStream to process the ADK events and pipe them to the client
+    const encoder = new TextEncoder();
+    const customStream = new ReadableStream({
+      async start(controller) {
+        let fullResponse = '';
+        let streamResult;
+
+        try {
+          while (true) {
+            const { done, value } = await stream.next();
+            if (done) {
+              streamResult = value;
+              break;
+            }
+
+            if (value.type === 'text') {
+              fullResponse += value.content;
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content: value.content })}\n\n`));
+            } else if (value.type === 'tool_call') {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_call', tool: value.tool, args: value.args })}\n\n`));
+            } else if (value.type === 'tool_response') {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_response', tool: value.tool, response: value.response })}\n\n`));
+            }
+          }
+
+          // After text stream is done, streamResult contains the final tool calls and events
+          const executedActions = (streamResult.toolCalls || []).map(tc => ({
+            tool: tc.name,
+            args: tc.args,
+            result: {
+              success: tc.status === 'success',
+              message: summarizeToolResult(tc.name, tc.result),
+              data: typeof tc.result === 'object' ? tc.result as Record<string, unknown> : undefined
+            }
+          }));
+
+          // Send the final summary and actions
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+            type: 'done', 
+            response: fullResponse,
+            executedActions,
+            isComplete: executedActions.some(a => a.tool === 'task_complete' && a.result.success),
+            sessionId: streamResult.sessionId
+          })}\n\n`));
+
+        } catch (error) {
+          console.error('[Assistant Stream Error]:', error);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', message: String(error) })}\n\n`));
+        } finally {
+          controller.close();
+        }
       }
-      fullResponse += value;
-    }
+    });
 
-    console.log(`[Assistant] builder_agent streaming execution complete.`);
-
-    // Map tool calls from the stream result
-    const executedActions = (streamResult.toolCalls || []).map(tc => ({
-      tool: tc.name,
-      args: tc.args,
-      result: {
-        success: tc.status === 'success',
-        message: summarizeToolResult(tc.name, tc.result),
-        data: typeof tc.result === 'object' ? tc.result as Record<string, unknown> : undefined
-      }
-    }));
-
-    return NextResponse.json({
-      response: fullResponse,
-      executedActions,
-      isComplete: executedActions.some(a => a.tool === 'task_complete' && a.result.success),
-      sessionId: streamResult.sessionId,
-      events: streamResult.events,
+    return new Response(customStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     });
 
   } catch (error) {
