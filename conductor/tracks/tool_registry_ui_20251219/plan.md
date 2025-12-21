@@ -1,14 +1,14 @@
 # Track Plan: Tool Registry UI
 
 ## Phase 1: Analysis & Scaffolding
-- [ ] Task: Analyze existing AgentComposer structure and backend API for tools.
-    - [ ] Subtask: Review `app/components/AgentComposer` to identify the best integration point for the Tools panel.
-    - [ ] Subtask: Inspect `app/api/agents/[name]/assistant` and `adk-service` to understand how to fetch/save tools.
-    - [ ] Subtask: Document the API contract for tool management (CRUD operations).
-- [ ] Task: Create the basic UI shell for the Tool Registry.
-    - [ ] Subtask: Create `app/components/AgentComposer/ToolsPanel.tsx`.
-    - [ ] Subtask: Add a "Tools" tab/button to `app/components/AgentComposer/Navigation.tsx` (or equivalent).
-    - [ ] Subtask: Implement a basic list view in `ToolsPanel` to display placeholder tool data.
+- [x] Task: Analyze existing AgentComposer structure and backend API for tools.
+    - [x] Subtask: Review `app/components/AgentComposer` to identify the best integration point for the Tools panel.
+    - [x] Subtask: Inspect `app/api/agents/[name]/assistant` and `adk-service` to understand how to fetch/save tools.
+    - [x] Subtask: Document the API contract for tool management (CRUD operations).
+- [x] Task: Create the basic UI shell for the Tool Registry. 47b3a26
+    - [x] Subtask: Create `app/components/AgentComposer/ToolRegistryPanel.tsx`.
+    - [x] Subtask: Add a "Tools" tab/button to `app/components/AgentComposer/Navigation.tsx` (or equivalent).
+    - [x] Subtask: Implement a basic list view in `ToolsPanel` to display placeholder tool data.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Analysis & Scaffolding' (Protocol in workflow.md)
 
 ## Phase 2: Tool Listing & Management
