@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/client';
 import { auth } from '@/auth';
 import { ensureUserOrg } from '@/lib/db/utils';
+import { headers, cookies } from 'next/headers';
 
 export const runtime = 'nodejs';
 
@@ -11,11 +12,14 @@ export const runtime = 'nodejs';
  */
 export async function GET(req: NextRequest) {
   console.log('GET /api/projects hit (unwrapped)');
-  console.log('AUTH_URL:', process.env.AUTH_URL);
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('auth type:', typeof auth);
   
   try {
+    const headerList = await headers();
+    const cookieStore = await cookies();
+    
+    console.log('Headers count:', [...headerList.keys()].length);
+    console.log('Cookies count:', [...cookieStore.getAll()].length);
+    
     console.log('Calling auth()...');
     const session = await auth();
     console.log('auth() success, session exists:', !!session);

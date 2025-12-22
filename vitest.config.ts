@@ -12,10 +12,12 @@ export default defineConfig({
     include: [
       'lib/hooks/__tests__/*.test.ts', 
       'lib/hooks/__tests__/*.test.tsx',
-      'app/components/AgentComposer/__tests__/*.test.tsx'
+      'app/components/AgentComposer/__tests__/*.test.tsx',
+      'lib/db/__tests__/*.test.ts',
+      'lib/adk/__tests__/tool-manager.test.ts'
     ],
     // Exclude tests that use node:test
-    exclude: ['lib/adk/__tests__/*.test.ts', 'lib/db/__tests__/*.test.ts'],
+    exclude: [],
   },
   resolve: {
     alias: {
