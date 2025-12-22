@@ -1,7 +1,7 @@
 # Implementation Plan: Centralized Tool Registry
 
 ## Phase 1: Database Schema & Core Logic
-- [ ] Task: Create database migration for `tool_registry`.
+- [~] Task: Create database migration for `tool_registry`.
     - [ ] Subtask: Define schema including name, type, description, config (JSONB), org_id, category, tags (JSONB).
 - [ ] Task: Implement `lib/db/tool-registry.ts` CRUD operations.
     - [ ] Subtask: Write unit tests for creating, reading, updating, and deleting tools.

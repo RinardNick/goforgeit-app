@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Centralized Tool Registry for Cross-Agent Reuse
+## [~] Track: Centralized Tool Registry for Cross-Agent Reuse
 *Link: [./conductor/tracks/tool_registry_20251221/](./conductor/tracks/tool_registry_20251221/)*
 
 ---
