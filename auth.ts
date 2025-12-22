@@ -1,21 +1,36 @@
 import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
+import Google from 'next-auth/providers/google';
 import { checkUserOrganizationMembership } from './lib/db/utils';
 
 // Allowed emails for access (fallback/admin override)
 const ADMIN_EMAILS = (process.env.ALLOWED_EMAILS || 'nickarinard@gmail.com').split(',').map(e => e.trim());
 
+const isTestMode = process.env.NODE_ENV === 'test' || process.env.IS_E2E_TEST === 'true';
+
 /**
  * Full auth configuration with database callbacks.
  * Use this for server-side auth (API routes, server components).
  * For middleware, use auth.config.ts instead (edge-compatible).
+ *
+ * IMPORTANT: This config does NOT include the 'authorized' callback
+ * to avoid 'searchParams' errors when auth() is called from API routes.
  */
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  ...authConfig,
+  secret: process.env.AUTH_SECRET || (isTestMode ? 'test-secret-key-for-testing-only' : undefined),
+  trustHost: true,
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   callbacks: {
-    // Don't spread authConfig.callbacks here - the 'authorized' callback
-    // is only for middleware and expects request.nextUrl which isn't available
-    // when auth() is called from API routes
+    // Only include signIn and session callbacks - NOT 'authorized'
+    // The 'authorized' callback is only for middleware (in auth.config.ts)
     async signIn({ user }) {
       const email = user.email || '';
 
