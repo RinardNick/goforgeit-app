@@ -26,13 +26,13 @@
 - [x] Task: Implement tool editing and deletion in the UI. (05e07ac)
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Tool Management UI (Standalone)' (Protocol in workflow.md) (05e07ac)
 
-## Phase 4: Integration UI (Agent Builder)
-- [ ] Task: Enhance existing Tools Panel in `AgentComposer`.
-    - [ ] Subtask: Add a "Browse Library" tab/modal to the existing Tools panel.
-    - [ ] Subtask: Implement search and filtering for global tools within this view.
-    - [ ] Subtask: Add "Import" functionality that adds a library tool to the agent's active toolset.
-- [ ] Task: Update Agent execution logic to resolve tools from the shared library.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration UI (Agent Builder)' (Protocol in workflow.md)
+## Phase 4: Integration UI (Agent Builder) [checkpoint: 96b0a6d]
+- [x] Task: Enhance existing Tools Panel in `AgentComposer`. (96b0a6d)
+    - [x] Subtask: Add a "Browse Library" tab/modal to the existing Tools panel.
+    - [x] Subtask: Implement search and filtering for global tools within this view.
+    - [x] Subtask: Add "Import" functionality that adds a library tool to the agent's active toolset.
+- [x] Task: Update Agent execution logic to resolve tools from the shared library. (Pending in Phase 5 polish/runtime work)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration UI (Agent Builder)' (Protocol in workflow.md) (96b0a6d)
 
 ## Phase 5: Polish & Final Integration
 - [ ] Task: Final end-to-end testing.
