@@ -5,8 +5,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Navigation from '@/app/components/Navigation';
 import ApiKeysSection from './api-keys/ApiKeysSection';
 import BillingSection from './billing/BillingSection';
+import ToolsSection from './tools/ToolsSection';
 
-type SettingsTab = 'api-keys' | 'billing';
+type SettingsTab = 'api-keys' | 'billing' | 'tools';
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   {
@@ -15,6 +16,15 @@ const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'tools',
+    label: 'Tool Registry',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 00-1 1v1a2 2 0 11-4 0v-1a1 1 0 00-1-1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
       </svg>
     ),
   },
@@ -51,7 +61,7 @@ function SettingsContent() {
                 onClick={() => handleTabChange(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
               >
@@ -67,6 +77,7 @@ function SettingsContent() {
       <div className="flex-1 min-w-0">
         {currentTab === 'api-keys' && <ApiKeysSection />}
         {currentTab === 'billing' && <BillingSection />}
+        {currentTab === 'tools' && <ToolsSection />}
       </div>
     </div>
   );

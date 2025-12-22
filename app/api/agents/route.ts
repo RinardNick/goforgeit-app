@@ -24,15 +24,20 @@ export async function GET(req: NextRequest) {
   console.log('GET /api/agents hit (unwrapped)');
   try {
     const session = await auth();
+    console.log('[API/Agents] Session:', session);
+
     if (!session?.user?.email) {
+      console.log('[API/Agents] Unauthorized: No email');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Ensure user has an organization
     const org = await ensureUserOrg(session.user.email);
+    console.log('[API/Agents] Org:', org);
 
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
+    console.log('[API/Agents] ADK Health:', isHealthy);
     if (!isHealthy) {
       return NextResponse.json(
         {
