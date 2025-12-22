@@ -100,9 +100,8 @@ export function ToolRegistryPanel({ onImport }: ToolRegistryPanelProps) {
                 )}
               </div>
               <LoadingButton
-                size="sm"
-                variant="outline"
-                className="shrink-0"
+                variant="secondary"
+                className="shrink-0 text-xs px-3 py-1.5 h-8"
                 isLoading={importing === tool.id}
                 onClick={() => handleImport(tool)}
               >
