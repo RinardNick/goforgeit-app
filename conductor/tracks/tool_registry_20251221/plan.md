@@ -12,7 +12,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Core Logic' (Protocol in workflow.md) (0b12bac)
 
 ## Phase 2: AI Categorization Engine
-- [ ] Task: Implement AI Categorization Service using Genkit.
+- [~] Task: Implement AI Categorization Service using Genkit.
     - [ ] Subtask: Create a new Genkit flow that takes tool code/definition and returns a category and tags.
     - [ ] Subtask: Write unit tests with mocked LLM responses.
     - [ ] Subtask: Integrate categorization into the `registerTool` database logic.

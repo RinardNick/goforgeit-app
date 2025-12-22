@@ -43,17 +43,16 @@ export async function GET(req: NextRequest) {
 /**
  * POST /api/projects
  * Create a new project in the authenticated user's organization
- *
- * Using auth() wrapper pattern for NextAuth v5 compatibility
  */
-export const POST = auth(async (req) => {
+export async function POST(req: NextRequest) {
+  console.log('POST /api/projects hit (unwrapped)');
   try {
-    // req.auth contains the session when using auth() wrapper
-    if (!req.auth?.user?.email) {
+    const session = await auth();
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const org = await ensureUserOrg(req.auth.user.email);
+    const org = await ensureUserOrg(session.user.email);
     const body = await req.json();
     const { name, description } = body;
 
@@ -71,4 +70,4 @@ export const POST = auth(async (req) => {
     console.error('Error creating project:', error);
     return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }
-});
+}
