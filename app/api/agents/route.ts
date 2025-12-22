@@ -23,6 +23,13 @@ const storage = USE_GCS ? new Storage() : null;
  * Using auth() wrapper pattern for NextAuth v5 compatibility
  */
 export const GET = auth(async (req) => {
+  console.log('GET /api/agents hit');
+  console.log('req keys:', Object.keys(req));
+  console.log('req.url:', req.url);
+  // @ts-ignore
+  console.log('req.nextUrl:', req.nextUrl ? 'exists' : 'undefined');
+  console.log('req.auth:', JSON.stringify(req.auth));
+
   try {
     // req.auth contains the session when using auth() wrapper
     if (!req.auth?.user?.email) {
