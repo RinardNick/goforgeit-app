@@ -16,8 +16,43 @@ import {
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useAssistant, Message } from '@/lib/hooks/useAssistant';
+import { useAssistant, Message, ExecutedAction } from '@/lib/hooks/useAssistant';
 import { LoadingButton } from '@/components/ui/LoadingButton';
+
+// Tool icons and display names (Synchronized with AIAssistantPanel)
+const TOOL_CONFIG: Record<string, { icon: string; label: string }> = {
+  // Legacy tools
+  create_agent: { icon: '🆕', label: 'Create Agent' },
+  add_sub_agent: { icon: '🔗', label: 'Add Sub-Agent' },
+  add_tool: { icon: '🔧', label: 'Add Tool' },
+  modify_agent: { icon: '✏️', label: 'Modify Agent' },
+  create_python_tool: { icon: '🐍', label: 'Create Python Tool' },
+  list_agents: { icon: '📋', label: 'List Agents' },
+  read_agent: { icon: '📖', label: 'Read Agent' },
+  task_complete: { icon: '✅', label: 'Complete' },
+  // Builder agent tools (Google ADK)
+  'builder_agent.tools.read_config_files.read_config_files': { icon: '📖', label: 'Read Config' },
+  'builder_agent.tools.write_config_files.write_config_files': { icon: '💾', label: 'Write Config' },
+  'builder_agent.tools.explore_project.explore_project': { icon: '🔍', label: 'Explore Project' },
+  'builder_agent.tools.read_files.read_files': { icon: '📄', label: 'Read Files' },
+  'builder_agent.tools.write_files.write_files': { icon: '✏️', label: 'Write Files' },
+  'builder_agent.tools.delete_files.delete_files': { icon: '🗑️', label: 'Delete Files' },
+  'builder_agent.tools.cleanup_unused_files.cleanup_unused_files': { icon: '🧹', label: 'Cleanup' },
+  'builder_agent.tools.search_adk_source.search_adk_source': { icon: '🔎', label: 'Search Source' },
+  'builder_agent.tools.search_adk_knowledge.search_adk_knowledge': { icon: '📚', label: 'Search Knowledge' },
+};
+
+// Helper to get tool display info
+function getToolDisplay(toolName: string): { icon: string; label: string } {
+  if (TOOL_CONFIG[toolName]) return TOOL_CONFIG[toolName];
+  const parts = toolName.split('.');
+  const shortName = parts[parts.length - 1];
+  if (TOOL_CONFIG[shortName]) return TOOL_CONFIG[shortName];
+  return {
+    icon: '⚙️',
+    label: shortName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+  };
+}
 
 interface ForgeWorkspaceModalProps {
   isOpen: boolean;
@@ -273,6 +308,49 @@ Describe the tool you wish to create (e.g., *"A tool to fetch the latest stock p
                       m.content
                     )}
                   </div>
+
+                  {/* Tool Usage UI (Synchronized with AIAssistantPanel) */}
+                  {m.role === 'assistant' && m.executedActions && m.executedActions.length > 0 && (
+                    <div className="mt-3 mr-4" data-testid="executed-actions">
+                      <div className="flex flex-wrap gap-1.5">
+                        {m.executedActions.map((action, idx) => {
+                          const toolDisplay = getToolDisplay(action.tool);
+                          return (
+                            <div
+                              key={idx}
+                              className={`group relative inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-mono transition-all ${
+                                action.result.success
+                                  ? 'bg-success/10 text-success border border-success/20 hover:bg-success/15'
+                                  : 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/15'
+                              }`}
+                              title={action.result.message}
+                            >
+                              <span className="text-xs">{toolDisplay.icon}</span>
+                              <span className="font-medium">{toolDisplay.label}</span>
+                              {action.result.success ? (
+                                <span className="text-success/80">✓</span>
+                              ) : (
+                                <span className="text-destructive/80">✗</span>
+                              )}
+                              <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-popover border border-border rounded shadow-lg text-[10px] text-popover-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 max-w-[200px] truncate">
+                                {action.result.message}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Completion badge */}
+                  {m.role === 'assistant' && m.isComplete && (
+                    <div className="mt-2 mr-4 pl-1">
+                      <span className="inline-flex items-center gap-1.5 text-[10px] bg-success/10 border border-success/20 text-success px-2 py-0.5 rounded-full font-mono uppercase tracking-wide">
+                        <span className="w-1.5 h-1.5 rounded-full bg-success"></span>
+                        Task completed
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
               {isLoading && (
@@ -340,11 +418,16 @@ Describe the tool you wish to create (e.g., *"A tool to fetch the latest stock p
                   theme="vs-dark"
                   value={forgedFiles[activeFile]}
                   onMount={handleEditorDidMount}
+                  onChange={(val) => {
+                    if (activeFile) {
+                      setForgedFiles(prev => ({ ...prev, [activeFile]: val || '' }));
+                    }
+                  }}
                   options={{
                     fontSize: 13,
                     fontFamily: 'var(--font-mono)',
                     minimap: { enabled: false },
-                    readOnly: true,
+                    readOnly: false,
                     automaticLayout: true,
                     padding: { top: 20, bottom: 20 },
                   }}

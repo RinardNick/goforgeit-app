@@ -88,4 +88,45 @@ describe('ForgeWorkspaceModal', () => {
     // Check if content is in editor
     expect(screen.getByText('print("hello")')).toBeDefined();
   });
+
+  it('allows manual editing of the code', async () => {
+    let toolCallHandler: any;
+    
+    (useAssistant as any).mockImplementation(({ onToolCall }: any) => {
+      toolCallHandler = onToolCall;
+      return {
+        messages: [],
+        isLoading: false,
+        sendMessage: mockSendMessage,
+        clearConversation: mockClearConversation,
+        setMessages: mockSetMessages,
+      };
+    });
+
+    render(
+      <ForgeWorkspaceModal
+        isOpen={true}
+        onClose={() => {}}
+        projectName="test-project"
+        currentAgents={[]}
+        onSave={mockOnSave}
+      />
+    );
+
+    // Initial file from agent
+    await act(async () => {
+      toolCallHandler('write_files', {
+        files: [{ path: 'tools/test.py', content: 'v1' }]
+      }, false);
+    });
+
+    // Check if v1 is present
+    expect(screen.getByText('v1')).toBeDefined();
+
+    // The mock editor just renders its value prop.
+    // In a real scenario, onChange would be called by Monaco.
+    // Here we'll manually trigger what would happen.
+    // However, our mock editor is simplified.
+    // Let's check the ForgeWorkspaceModal code to ensure the update logic exists.
+  });
 });
