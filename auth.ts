@@ -29,8 +29,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: '/login',
   },
   callbacks: {
-    // Only include signIn and session callbacks - NOT 'authorized'
-    // The 'authorized' callback is only for middleware (in auth.config.ts)
+    // Edge-compatible authorized callback for middleware
+    authorized({ auth, request }) {
+      // Defensive: handle case where request or nextUrl might be undefined
+      const nextUrl = request?.nextUrl;
+      if (!nextUrl) {
+        return true;
+      }
+      return !!auth?.user;
+    },
+    // Only include signIn and session callbacks
     async signIn({ user }) {
       const email = user.email || '';
 
