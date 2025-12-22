@@ -14,7 +14,8 @@ export default defineConfig({
       'lib/hooks/__tests__/*.test.tsx',
       'app/components/AgentComposer/__tests__/*.test.tsx',
       'lib/db/__tests__/*.test.ts',
-      'lib/adk/__tests__/tool-manager.test.ts'
+      'lib/adk/__tests__/tool-manager.test.ts',
+      'lib/genkit/__tests__/categorization.test.ts'
     ],
     // Exclude tests that use node:test
     exclude: [],

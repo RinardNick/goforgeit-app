@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as db from '../client';
+
+// Mock categorizeToolFlow
+vi.mock('../../genkit/categorization', () => ({
+  categorizeToolFlow: vi.fn().mockResolvedValue({ category: 'AI', tags: ['auto'] }),
+}));
+
 import * as toolRegistry from '../tool-registry';
+import { categorizeToolFlow } from '../../genkit/categorization';
 
 // Mock the db client
 vi.mock('../client', () => ({
@@ -42,6 +49,21 @@ describe('Tool Registry DB Operations', () => {
         expect.arrayContaining(['Test Tool', 'CUSTOM'])
       );
       expect(result).toEqual(mockResult);
+    });
+
+    it('auto-categorizes if metadata is missing', async () => {
+      const toolData = {
+        name: 'Empty Metadata Tool',
+        type: 'CUSTOM' as const,
+        config: { path: 'test.py' },
+        orgId: 'org-123',
+      };
+
+      (db.queryOne as any).mockResolvedValue({ id: 'new-id', ...toolData });
+
+      await toolRegistry.registerTool(toolData);
+
+      expect(categorizeToolFlow).toHaveBeenCalled();
     });
   });
 

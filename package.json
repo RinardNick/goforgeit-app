@@ -20,6 +20,7 @@
     "@deepgram/sdk": "^4.11.2",
     "@genkit-ai/ai": "^1.26.0",
     "@genkit-ai/core": "^1.26.0",
+    "@genkit-ai/googleai": "^1.27.0",
     "@google-cloud/storage": "^7.17.3",
     "@google/generative-ai": "^0.21.0",
     "@modelcontextprotocol/sdk": "^1.25.0",

@@ -1,6 +1,8 @@
 import { genkit } from 'genkit';
+import { googleAI } from '@genkit-ai/googleai';
 
-// Initialize Genkit with no plugins for now (tools don't strictly need plugins unless they use models)
+// Initialize Genkit with Google AI plugin
 export const ai = genkit({
-  plugins: [],
+  plugins: [googleAI()],
+  model: 'googleai/gemini-2.0-flash-exp', // Default model
 });

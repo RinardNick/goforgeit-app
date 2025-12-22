@@ -1,6 +1,8 @@
 import { query, queryOne } from './client';
+import { categorizeToolFlow } from '../genkit/categorization';
 
 export type ToolType = 'CUSTOM' | 'MCP';
+// ... (rest of imports and types)
 
 export interface Tool {
   id: string;
@@ -30,6 +32,25 @@ export type CreateToolInput = {
 };
 
 export async function registerTool(input: CreateToolInput): Promise<Tool> {
+  let category = input.category;
+  let tags = input.tags;
+
+  // Auto-categorize if not provided
+  if (!category || !tags || tags.length === 0) {
+    try {
+      // Determine content to analyze
+      const content = input.type === 'CUSTOM'
+        ? (input.config.code || input.config.path || input.name)
+        : JSON.stringify(input.config);
+
+      const result = await categorizeToolFlow(content);
+      category = category || result.category;
+      tags = (tags && tags.length > 0) ? tags : result.tags;
+    } catch (error) {
+      console.warn('Auto-categorization failed during registration:', error);
+    }
+  }
+
   const sql = `
     INSERT INTO tool_registry 
     (name, type, description, config, org_id, source_project_id, category, tags, is_public)
@@ -44,8 +65,8 @@ export async function registerTool(input: CreateToolInput): Promise<Tool> {
     input.config,
     input.orgId,
     input.sourceProjectId,
-    input.category,
-    JSON.stringify(input.tags || []),
+    category,
+    JSON.stringify(tags || []),
     input.isPublic || false
   ];
 
