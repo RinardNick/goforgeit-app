@@ -22,6 +22,14 @@ export const categorizeToolFlow = ai.defineFlow(
       output: { schema: CategorizationSchema },
     });
 
-    return response.output();
+    if (!response) {
+      throw new Error('No response from AI');
+    }
+
+    const result = response?.output;
+    if (!result) {
+      throw new Error('Failed to generate categorization');
+    }
+    return result;
   }
 );

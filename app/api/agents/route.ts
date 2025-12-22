@@ -21,11 +21,10 @@ const storage = USE_GCS ? new Storage() : null;
  * List all available ADK agents from the backend (filtered by organization and optionally project)
  */
 export async function GET(req: NextRequest) {
-  console.log('GET /api/agents hit (unwrapped)');
+  console.log('GET /api/agents hit (unwrapped) - 2025-12-22 fix');
   try {
     const session = await auth();
-    console.log('[API/Agents] Session:', session);
-
+    
     if (!session?.user?.email) {
       console.log('[API/Agents] Unauthorized: No email');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -33,11 +32,9 @@ export async function GET(req: NextRequest) {
 
     // Ensure user has an organization
     const org = await ensureUserOrg(session.user.email);
-    console.log('[API/Agents] Org:', org);
 
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
-    console.log('[API/Agents] ADK Health:', isHealthy);
     if (!isHealthy) {
       return NextResponse.json(
         {
@@ -53,8 +50,14 @@ export async function GET(req: NextRequest) {
     const allAgentNames = await listADKAgents();
 
     // Get allowed agents for this org (and project if specified)
-    const url = new URL(req.url);
-    const projectId = url.searchParams.get('projectId');
+    // Use req.nextUrl if available, otherwise fallback to parsing req.url
+    let projectId: string | null = null;
+    if (req.nextUrl) {
+        projectId = req.nextUrl.searchParams.get('projectId');
+    } else {
+        const url = new URL(req.url);
+        projectId = url.searchParams.get('projectId');
+    }
 
     let allowedAgents: { id: string, name: string, project_id: string }[];
     

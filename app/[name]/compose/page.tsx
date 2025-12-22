@@ -1044,39 +1044,6 @@ export default function ADKAgentComposePage() {
               onYamlChange={handleYamlChange}
             />
 
-            <ToolRegistryPanel
-              isOpen={showToolRegistry}
-              onClose={() => setShowToolRegistry(false)}
-              files={files}
-              projectName={agentName}
-              onEditTool={(filename, content) => {
-                setEditingTool({ filename, content });
-                setShowToolRegistry(false);
-              }}
-              onDeleteTool={async (filename) => {
-                if (confirm(`Are you sure you want to delete ${filename}?`)) {
-                  try {
-                    const response = await fetch(`/api/agents/${agentName}/files?filename=${encodeURIComponent(filename)}`, {
-                      method: 'DELETE',
-                    });
-                    if (response.ok) {
-                      await loadFiles(false);
-                    }
-                  } catch (err) {
-                    setError('Failed to delete tool');
-                  }
-                }
-              }}
-              onNavigateToAgent={(filename) => {
-                setShowToolRegistry(false);
-                setToolAgentContext({ filename, parentName: 'Registry' });
-              }}
-              onNewCustomTool={() => {
-                setShowToolRegistry(false);
-                setShowWorkspace(true);
-              }}
-            />
-
             <ToolEditorModal
               isOpen={!!editingTool}
               filename={editingTool?.filename || null}

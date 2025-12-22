@@ -530,7 +530,6 @@ function AgentComposerInner({
             mcpServerStates={mcpServerStates}
             onClose={onPaneClick}
             onUpdateData={updateSelectedNodeData}
-            onUpdateDataLocal={updateSelectedNodeDataLocal}
             onUpdateToolConfig={updateToolConfig}
             onDelete={deleteSelectedNode}
             onExpandToolSection={handleExpandToolSection}
