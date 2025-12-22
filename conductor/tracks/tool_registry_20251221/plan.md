@@ -18,13 +18,13 @@
 - [x] Task: Integrate categorization into the `registerTool` database logic. (60e0899)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: AI Categorization Engine' (Protocol in workflow.md) (60e0899)
 
-## Phase 3: Tool Management UI (Standalone)
-- [ ] Task: Create `/settings/tools` management page.
-    - [ ] Subtask: Implement a list view of all registered tools and MCP servers.
-    - [ ] Subtask: Create a "Register Tool" dialog that allows selecting an existing tool from an agent.
-    - [ ] Subtask: Create an "Add MCP Server" dialog.
-- [ ] Task: Implement tool editing and deletion in the UI.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Tool Management UI (Standalone)' (Protocol in workflow.md)
+## Phase 3: Tool Management UI (Standalone) [checkpoint: 05e07ac]
+- [x] Task: Create `/settings/tools` management page. (05e07ac)
+    - [x] Subtask: Implement a list view of all registered tools and MCP servers.
+    - [x] Subtask: Create a "Register Tool" dialog that allows selecting an existing tool from an agent.
+    - [x] Subtask: Create an "Add MCP Server" dialog.
+- [x] Task: Implement tool editing and deletion in the UI. (05e07ac)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Tool Management UI (Standalone)' (Protocol in workflow.md) (05e07ac)
 
 ## Phase 4: Integration UI (Agent Builder)
 - [ ] Task: Enhance existing Tools Panel in `AgentComposer`.
