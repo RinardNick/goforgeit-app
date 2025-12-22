@@ -49,6 +49,8 @@ export default function ADKAgentComposePage() {
   const [circularDependencyWarning, setCircularDependencyWarning] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(true);
   const [showToolRegistry, setShowToolRegistry] = useState(false);
+  const [showApiInstructions, setShowApiInstructions] = useState(false);
+  const [showCreateTool, setShowCreateTool] = useState(false);
   const [showWorkspace, setShowWorkspace] = useState(false);
   const [editingTool, setEditingTool] = useState<{ filename: string; content: string } | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -1092,6 +1094,10 @@ export default function ADKAgentComposePage() {
                 name: (n.data as AgentNodeData).name || '',
                 agentClass: (n.data as AgentNodeData).agentClass || '',
               }))}
+              selectedAgent={selectedNode ? {
+                filename: (selectedNode.data as AgentNodeData).filename || '',
+                name: (selectedNode.data as AgentNodeData).name || '',
+              } : null}
               onSave={handleSaveForgedFiles}
             />
 

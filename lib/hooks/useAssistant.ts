@@ -96,7 +96,7 @@ export function useAssistant({
           sessionId: sessionId,
           context: {
             agents: currentAgents,
-            selectedAgent: selectedAgent,
+            selectedAgent: selectedAgent || null,
           },
           history: messages.map(m => ({ role: m.role, content: m.content })),
         }),

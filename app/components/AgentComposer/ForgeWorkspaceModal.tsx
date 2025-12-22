@@ -24,6 +24,7 @@ interface ForgeWorkspaceModalProps {
   onClose: () => void;
   projectName: string;
   currentAgents: Array<{ filename: string; name: string; agentClass: string }>;
+  selectedAgent?: { filename: string; name: string } | null;
   onSave: (files: Array<{ filename: string; content: string }>) => Promise<void>;
 }
 
@@ -32,6 +33,7 @@ export function ForgeWorkspaceModal({
   onClose,
   projectName,
   currentAgents,
+  selectedAgent,
   onSave,
 }: ForgeWorkspaceModalProps) {
   // --- State ---
@@ -53,6 +55,7 @@ export function ForgeWorkspaceModal({
     projectName,
     apiBasePath: '/api/agents',
     currentAgents,
+    selectedAgent,
     onToolCall: (tool, args, isPartial) => {
       // Intercept write_files to update local buffers
       if (tool.includes('write_files')) {
