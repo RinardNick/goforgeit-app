@@ -1,15 +1,15 @@
 # Implementation Plan: Centralized Tool Registry
 
-## Phase 1: Database Schema & Core Logic
-- [~] Task: Create database migration for `tool_registry`.
-    - [ ] Subtask: Define schema including name, type, description, config (JSONB), org_id, category, tags (JSONB).
-- [ ] Task: Implement `lib/db/tool-registry.ts` CRUD operations.
-    - [ ] Subtask: Write unit tests for creating, reading, updating, and deleting tools.
-    - [ ] Subtask: Implement `registerTool`, `listTools`, `getTool`, `updateTool`, `deleteTool`.
-- [ ] Task: Refactor ADK file structure for "Shared" tools.
-    - [ ] Subtask: Create `lib/adk/shared/tools` directory.
-    - [ ] Subtask: Implement utility to move/link files from agent-specific folders to shared storage.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Core Logic' (Protocol in workflow.md)
+## Phase 1: Database Schema & Core Logic [checkpoint: 0b12bac]
+- [x] Task: Create database migration for `tool_registry`. (3f94cbc)
+    - [x] Subtask: Define schema including name, type, description, config (JSONB), org_id, category, tags (JSONB).
+- [x] Task: Implement `lib/db/tool-registry.ts` CRUD operations. (e813d9d)
+    - [x] Subtask: Write unit tests for creating, reading, updating, and deleting tools.
+    - [x] Subtask: Implement `registerTool`, `listTools`, `getTool`, `updateTool`, `deleteTool`.
+- [x] Task: Refactor ADK file structure for "Shared" tools. (e813d9d)
+    - [x] Subtask: Create `lib/adk/shared/tools` directory.
+    - [x] Subtask: Implement utility to move/link files from agent-specific folders to shared storage.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Core Logic' (Protocol in workflow.md) (0b12bac)
 
 ## Phase 2: AI Categorization Engine
 - [ ] Task: Implement AI Categorization Service using Genkit.
