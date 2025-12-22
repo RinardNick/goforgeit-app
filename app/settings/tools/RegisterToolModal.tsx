@@ -39,9 +39,10 @@ export default function RegisterToolModal({ isOpen, onClose, onSuccess }: Regist
     try {
       const res = await fetch('/api/projects');
       const data = await res.json();
-      setProjects(data);
+      setProjects(data.projects || []);
     } catch (err) {
       console.error('Failed to fetch projects');
+      setProjects([]);
     }
   }
 
@@ -53,9 +54,13 @@ export default function RegisterToolModal({ isOpen, onClose, onSuccess }: Regist
     try {
       const res = await fetch(`/api/adk-agents?project=${projectName}`);
       const data = await res.json();
-      setAgents(data);
+      const agentList = Array.isArray(data) ? data : (data.agents || []);
+      // Map objects to IDs (snake_case names)
+      const agentNames = agentList.map((a: any) => typeof a === 'string' ? a : a.id);
+      setAgents(agentNames);
     } catch (err) {
       console.error('Failed to fetch agents');
+      setAgents([]);
     }
   }
 

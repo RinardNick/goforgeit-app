@@ -85,7 +85,7 @@ export default function ToolsSection() {
         />
       </div>
 
-      {error && <ErrorMessage message={error} onDismiss={() => setError(null)} />}
+      {error && <ErrorMessage message={error} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {loading ? (
@@ -148,6 +148,28 @@ export default function ToolsSection() {
                   {tool.tags.length > 3 && (
                     <span className="text-[9px] text-muted-foreground/50 font-mono ml-1">+{tool.tags.length - 3} more</span>
                   )}
+                </div>
+              )}
+
+              {/* Discovered Tools (for MCP) */}
+              {tool.type === 'MCP' && tool.config?.tools && Array.isArray(tool.config.tools) && tool.config.tools.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+                    Available Tools ({tool.config.tools.length})
+                  </p>
+                  <div className="space-y-1">
+                    {tool.config.tools.slice(0, 3).map((t: any, i: number) => (
+                      <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground/80">
+                        <span className="w-1 h-1 rounded-full bg-info/50 flex-shrink-0"></span>
+                        <span className="font-mono truncate">{t.name}</span>
+                      </div>
+                    ))}
+                    {tool.config.tools.length > 3 && (
+                      <p className="text-[10px] text-muted-foreground/50 italic pl-3">
+                        +{tool.config.tools.length - 3} more
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
