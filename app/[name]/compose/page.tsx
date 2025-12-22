@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import YAML from 'yaml';
 import Navigation from '@/app/components/Navigation';
 import type { AgentNodeData, ADKAgentClass } from '@/app/components/AgentComposer';
-import { ToolRegistryPanel, ToolEditorModal, CreateToolModal, ForgeWorkspaceModal } from '@/app/components/AgentComposer';
+import { ToolRegistryPanel, ToolEditorModal, ForgeWorkspaceModal, CreateToolModal } from '@/app/components/AgentComposer';
 import { AIAssistantPanel, ComposeHeader, YAMLEditorPanel } from '@/components/compose';
 import { ApiInstructionsModal } from '@/components/ui';
 import {
@@ -49,9 +49,7 @@ export default function ADKAgentComposePage() {
   const [circularDependencyWarning, setCircularDependencyWarning] = useState<string | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(true);
   const [showToolRegistry, setShowToolRegistry] = useState(false);
-  const [showCreateTool, setShowCreateTool] = useState(false);
   const [showWorkspace, setShowWorkspace] = useState(false);
-  const [workspaceDescription, setWorkspaceDescription] = useState('');
   const [editingTool, setEditingTool] = useState<{ filename: string; content: string } | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [validationResults, setValidationResults] = useState<Record<string, { valid: boolean; errors: Array<{ type: string; message: string; field?: string; value?: string }> }>>({});
@@ -1073,7 +1071,7 @@ export default function ADKAgentComposePage() {
               }}
               onNewCustomTool={() => {
                 setShowToolRegistry(false);
-                setShowCreateTool(true);
+                setShowWorkspace(true);
               }}
             />
 
@@ -1085,15 +1083,6 @@ export default function ADKAgentComposePage() {
               onSave={handleSaveFile}
             />
 
-            <CreateToolModal
-              isOpen={showCreateTool}
-              onClose={() => setShowCreateTool(false)}
-              onSubmit={async (description) => {
-                setWorkspaceDescription(description);
-                setShowWorkspace(true);
-              }}
-            />
-
             <ForgeWorkspaceModal
               isOpen={showWorkspace}
               onClose={() => setShowWorkspace(false)}
@@ -1103,7 +1092,6 @@ export default function ADKAgentComposePage() {
                 name: (n.data as AgentNodeData).name || '',
                 agentClass: (n.data as AgentNodeData).agentClass || '',
               }))}
-              initialDescription={workspaceDescription}
               onSave={handleSaveForgedFiles}
             />
 

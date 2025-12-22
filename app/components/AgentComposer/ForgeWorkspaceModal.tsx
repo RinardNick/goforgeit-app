@@ -24,7 +24,6 @@ interface ForgeWorkspaceModalProps {
   onClose: () => void;
   projectName: string;
   currentAgents: Array<{ filename: string; name: string; agentClass: string }>;
-  initialDescription?: string;
   onSave: (files: Array<{ filename: string; content: string }>) => Promise<void>;
 }
 
@@ -33,7 +32,6 @@ export function ForgeWorkspaceModal({
   onClose,
   projectName,
   currentAgents,
-  initialDescription = '',
   onSave,
 }: ForgeWorkspaceModalProps) {
   // --- State ---
@@ -50,6 +48,7 @@ export function ForgeWorkspaceModal({
     isLoading,
     sendMessage,
     clearConversation,
+    setMessages,
   } = useAssistant({
     projectName,
     apiBasePath: '/api/agents',
@@ -79,18 +78,21 @@ export function ForgeWorkspaceModal({
 
   // --- Effects ---
   useEffect(() => {
-    if (isOpen && initialDescription && messages.length === 0) {
-      const prompt = `COMMAND: Use the forge_agent to IMMEDIATELY create a new python tool based on this description: ${initialDescription}. 
-      
-      DIRECTIVE: Skip all architectural discussion and confirmation steps. Proceed directly to calling 'write_files' via the forge_agent.
-      
-      LOCATION: The tool must be written to the 'tools/' directory within the current project.
-      
-      REQUIREMENT: Ensure 'tools/__init__.py' also exists.`;
-      
-      sendMessage(prompt);
+    if (isOpen && messages.length === 0) {
+      // Add a specialized welcome message from the assistant
+      const welcomeMsg: Message = {
+        id: `assistant-welcome-${Date.now()}`,
+        role: 'assistant',
+        content: `### Welcome to the Transmutation Engine.
+        
+I am the **Forge Agent**. My sole purpose is to manifest new capabilities for your agents through precise Python implementations.
+
+**How to begin:**
+Describe the tool you wish to create (e.g., *"A tool to fetch the latest stock price for a given ticker"*). I will then architect the logic and stream the implementation into the workspace for your review.`,
+      };
+      setMessages([welcomeMsg]);
     }
-  }, [isOpen, initialDescription, messages.length, sendMessage]);
+  }, [isOpen, messages.length, setMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -180,9 +182,11 @@ export function ForgeWorkspaceModal({
                       : 'bg-muted/30 border border-border text-muted-foreground'
                   }`}>
                     {m.role === 'assistant' ? (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose prose-invert prose-xs max-w-none font-sans leading-relaxed">
-                        {m.content}
-                      </ReactMarkdown>
+                      <div className="prose prose-invert prose-xs max-w-none font-sans leading-relaxed">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {m.content}
+                        </ReactMarkdown>
+                      </div>
                     ) : (
                       m.content
                     )}
