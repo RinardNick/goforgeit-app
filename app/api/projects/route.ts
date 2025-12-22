@@ -22,6 +22,10 @@ export const GET = auth(async (req) => {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('Skipping DB calls for debugging');
+    return NextResponse.json({ projects: [] });
+
+    /*
     const org = await ensureUserOrg(req.auth.user.email);
 
     // List projects for this org
@@ -31,6 +35,7 @@ export const GET = auth(async (req) => {
     );
 
     return NextResponse.json({ projects });
+    */
   } catch (error) {
     console.error('Error listing projects:', error);
     return NextResponse.json({ error: 'Failed to list projects' }, { status: 500 });
