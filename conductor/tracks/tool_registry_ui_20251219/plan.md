@@ -57,4 +57,4 @@
 - [x] Task: Wire up the "Save & Register" flow. a48dedd
     - [x] Subtask: Implement the final commit of forged files to the backend.
     - [x] Subtask: Auto-close workspace and open Tool Registry on success.
-- [~] Task: Conductor - User Manual Verification 'Phase 6: Forge Workspace UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 6: Forge Workspace UI' (Protocol in workflow.md) f2fd1ea

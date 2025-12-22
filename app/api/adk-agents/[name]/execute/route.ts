@@ -88,7 +88,7 @@ export async function POST(
 
             // Get final result
             result = await generator.next();
-            if (result.value && typeof result.value !== 'string') {
+            if (result.value && typeof result.value === 'object' && 'sessionId' in result.value) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                 type: 'done',
                 sessionId: result.value.sessionId,

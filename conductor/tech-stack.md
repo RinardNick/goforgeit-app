@@ -9,7 +9,9 @@
 ## 2. AI & Agent Infrastructure
 *   **Agent Engine:** [Google ADK](https://github.com/google/ai-delivery-kit) (v1.21+) - Core execution engine for YAML-defined agents.
 *   **Orchestration & Tools:** [Google Genkit](https://firebase.google.com/docs/genkit) - Used for robust infrastructure tools and fallback agents.
-*   **Interoperability:** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) - Standardized interface for exposing agents as tools and connecting to external clients.
+*   **Interoperability:** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) - Standardized interface for agents and tools.
+*   **Streaming:** Server-Sent Events (SSE) for real-time tool execution visibility and interactive code generation.
+*   **Shared Logic:** `useAssistant` hook for unified conversation management across UI components.
 *   **Models:** Multi-model support via ADK/LiteLLM (Gemini 3.0, Claude 3.5, OpenAI).
 
 ## 3. Data & Storage
