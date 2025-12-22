@@ -1,0 +1,8 @@
+{
+  "track_id": "agent_scheduling_20251221",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2025-12-21T19:00:00Z",
+  "updated_at": "2025-12-21T19:00:00Z",
+  "description": "A robust scheduling system that allows users to send automated notes/prompts to any agent (including orchestrators) on a one-time or recurring basis, with integrated session debugging."
+}

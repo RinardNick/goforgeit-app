@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Universal Chat Interface (The Orchestrator)
-*Link: [./conductor/tracks/universal_chat_20251222/](./conductor/tracks/universal_chat_20251222/)*
+## [ ] Track: Agent Task Scheduling & Management
+*Link: [./conductor/tracks/agent_scheduling_20251221/](./conductor/tracks/agent_scheduling_20251221/)*

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { listADKAgents, checkADKHealth } from '@/lib/adk';
 import { Storage } from '@google-cloud/storage';
 import fs from 'fs/promises';
@@ -19,16 +19,18 @@ const storage = USE_GCS ? new Storage() : null;
 /**
  * GET /api/agents
  * List all available ADK agents from the backend (filtered by organization and optionally project)
+ *
+ * Using auth() wrapper pattern for NextAuth v5 compatibility
  */
-export async function GET(req: NextRequest) {
+export const GET = auth(async (req) => {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    // req.auth contains the session when using auth() wrapper
+    if (!req.auth?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Ensure user has an organization
-    const org = await ensureUserOrg(session.user.email);
+    const org = await ensureUserOrg(req.auth.user.email);
 
     // Check if ADK backend is available
     const isHealthy = await checkADKHealth();
@@ -96,21 +98,23 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * POST /api/agents
  * Create a new ADK agent within a project
+ *
+ * Using auth() wrapper pattern for NextAuth v5 compatibility
  */
-export async function POST(req: NextRequest) {
+export const POST = auth(async (req) => {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    // req.auth contains the session when using auth() wrapper
+    if (!req.auth?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Ensure user has an organization
-    const org = await ensureUserOrg(session.user.email);
+    const org = await ensureUserOrg(req.auth.user.email);
 
     const body = await req.json();
     const { name, projectId } = body;
@@ -217,4 +221,4 @@ tools: []
       { status: 500 }
     );
   }
-}
+});
