@@ -176,20 +176,76 @@ Describe the tool you wish to create (e.g., *"A tool to fetch the latest stock p
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Communication_Link</span>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-background">
               {messages.map((m) => (
-                <div key={m.id} className={`${m.role === 'user' ? 'ml-4' : 'mr-4'}`}>
-                  <div className={`p-3 rounded-sm text-sm ${
-                    m.role === 'user' 
-                      ? 'bg-primary/5 border border-primary/10 text-foreground' 
-                      : 'bg-muted/30 border border-border text-muted-foreground'
-                  }`}>
+                <div key={m.id}>
+                  <div
+                    data-testid={m.role === 'assistant' ? 'assistant-message' : 'user-message'}
+                    className={`${
+                      m.role === 'user'
+                        ? 'ml-8 bg-primary/10 border border-primary/20 text-foreground'
+                        : 'mr-4 bg-muted/30 border border-border text-muted-foreground'
+                    } p-4 rounded-sm text-sm font-sans leading-relaxed shadow-sm transition-colors`}
+                  >
                     {m.role === 'assistant' ? (
-                      <div className="prose prose-invert prose-xs max-w-none font-sans leading-relaxed">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {m.content}
-                        </ReactMarkdown>
-                      </div>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          // Headings
+                          h1: ({ children }) => <h1 className="text-lg font-bold font-heading text-foreground mb-3 mt-4 first:mt-0">{children}</h1>,
+                          h2: ({ children }) => <h2 className="text-base font-bold font-heading text-foreground mb-2 mt-3 first:mt-0">{children}</h2>,
+                          h3: ({ children }) => <h3 className="text-sm font-bold font-heading text-foreground mb-2 mt-3 first:mt-0">{children}</h3>,
+                          // Paragraphs
+                          p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+                          // Lists
+                          ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1 marker:text-primary">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1 marker:text-primary">{children}</ol>,
+                          li: ({ children }) => <li className="ml-2">{children}</li>,
+                          // Code
+                          code: ({ className, children }) => {
+                            const isInline = !className;
+                            if (isInline) {
+                              return <code className="bg-muted border border-border text-primary px-1 py-0.5 rounded text-xs font-mono">{children}</code>;
+                            }
+                            return (
+                              <code className="block bg-muted/50 border border-border text-foreground p-3 rounded-sm text-xs font-mono overflow-x-auto my-3">
+                                {children}
+                              </code>
+                            );
+                          },
+                          pre: ({ children }) => <pre className="my-2">{children}</pre>,
+                          // Tables (GFM)
+                          table: ({ children }) => (
+                            <div className="overflow-x-auto my-3">
+                              <table className="min-w-full border border-border text-xs">{children}</table>
+                            </div>
+                          ),
+                          thead: ({ children }) => <thead className="bg-muted text-foreground">{children}</thead>,
+                          tbody: ({ children }) => <tbody>{children}</tbody>,
+                          tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,
+                          th: ({ children }) => <th className="px-3 py-2 text-left font-semibold border-r border-border last:border-r-0">{children}</th>,
+                          td: ({ children }) => <td className="px-3 py-2 border-r border-border last:border-r-0">{children}</td>,
+                          // Links
+                          a: ({ href, children }) => (
+                            <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline hover:text-primary/80">
+                              {children}
+                            </a>
+                          ),
+                          // Blockquotes
+                          blockquote: ({ children }) => (
+                            <blockquote className="border-l-2 border-primary pl-3 my-3 italic text-muted-foreground/80">
+                              {children}
+                            </blockquote>
+                          ),
+                          // Horizontal rule
+                          hr: () => <hr className="my-4 border-border" />,
+                          // Strong and emphasis
+                          strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+                          em: ({ children }) => <em className="italic text-muted-foreground">{children}</em>,
+                        }}
+                      >
+                        {m.content}
+                      </ReactMarkdown>
                     ) : (
                       m.content
                     )}
