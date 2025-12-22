@@ -3,7 +3,17 @@
  * Runs all .sql files in the migrations/ directory in order
  */
 
-import 'dotenv/config';
+import fs from 'fs';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Explicitly load .env.local if it exists, before other imports
+if (fs.existsSync(path.join(__dirname, '../.env.local'))) {
+  dotenv.config({ path: path.join(__dirname, '../.env.local') });
+} else {
+  dotenv.config(); // Fallback to .env
+}
+
 import { getPool } from '../lib/db/client';
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
