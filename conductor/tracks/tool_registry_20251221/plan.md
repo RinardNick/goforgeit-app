@@ -11,12 +11,12 @@
     - [x] Subtask: Implement utility to move/link files from agent-specific folders to shared storage.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Core Logic' (Protocol in workflow.md) (0b12bac)
 
-## Phase 2: AI Categorization Engine
-- [~] Task: Implement AI Categorization Service using Genkit.
-    - [ ] Subtask: Create a new Genkit flow that takes tool code/definition and returns a category and tags.
-    - [ ] Subtask: Write unit tests with mocked LLM responses.
-    - [ ] Subtask: Integrate categorization into the `registerTool` database logic.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: AI Categorization Engine' (Protocol in workflow.md)
+## Phase 2: AI Categorization Engine [checkpoint: 60e0899]
+- [x] Task: Implement AI Categorization Service using Genkit. (60e0899)
+    - [x] Subtask: Create a new Genkit flow that takes tool code/definition and returns a category and tags.
+- [x] Task: Write unit tests with mocked LLM responses. (60e0899)
+- [x] Task: Integrate categorization into the `registerTool` database logic. (60e0899)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: AI Categorization Engine' (Protocol in workflow.md) (60e0899)
 
 ## Phase 3: Tool Management UI (Standalone)
 - [ ] Task: Create `/settings/tools` management page.
