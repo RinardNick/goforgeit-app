@@ -3,15 +3,23 @@ import { query } from '@/lib/db/client';
 import { auth } from '@/auth';
 import { ensureUserOrg } from '@/lib/db/utils';
 
+export const runtime = 'nodejs';
+
 /**
  * GET /api/projects
  * List all projects for the authenticated user's organization
  */
 export async function GET(req: NextRequest) {
   console.log('GET /api/projects hit (unwrapped)');
+  console.log('AUTH_URL:', process.env.AUTH_URL);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('auth type:', typeof auth);
   
   try {
+    console.log('Calling auth()...');
     const session = await auth();
+    console.log('auth() success, session exists:', !!session);
+    
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -20,7 +28,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ projects: [] });
   } catch (error) {
     console.error('Error listing projects:', error);
-    return NextResponse.json({ error: 'Failed to list projects' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to list projects',
+      details: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    }, { status: 500 });
   }
 }
 
