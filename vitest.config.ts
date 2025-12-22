@@ -8,8 +8,12 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
-    // Only include React hook tests that need vitest/jsdom
-    include: ['lib/hooks/__tests__/*.test.ts', 'lib/hooks/__tests__/*.test.tsx'],
+    // Only include React hook and component tests that need vitest/jsdom
+    include: [
+      'lib/hooks/__tests__/*.test.ts', 
+      'lib/hooks/__tests__/*.test.tsx',
+      'app/components/AgentComposer/__tests__/*.test.tsx'
+    ],
     // Exclude tests that use node:test
     exclude: ['lib/adk/__tests__/*.test.ts', 'lib/db/__tests__/*.test.ts'],
   },

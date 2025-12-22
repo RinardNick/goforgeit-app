@@ -43,6 +43,17 @@ export function ForgeWorkspaceModal({
   const [isSaving, setIsSaving] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<any>(null);
+  const forgedFilesRef = useRef<Record<string, string>>({});
+
+  // Sync ref with state for use in callbacks
+  useEffect(() => {
+    forgedFilesRef.current = forgedFiles;
+  }, [forgedFiles]);
+
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+  };
 
   // --- Assistant Hook ---
   const {
@@ -61,16 +72,28 @@ export function ForgeWorkspaceModal({
       if (tool.includes('write_files')) {
         const files = args.files as Record<string, string> | Array<{path: string, content: string}>;
         if (files) {
-          const newFiles = { ...forgedFiles };
+          const newFiles = { ...forgedFilesRef.current };
+          let changedActive = false;
+
           if (Array.isArray(files)) {
             files.forEach(f => {
               newFiles[f.path] = f.content;
-              if (!activeFile) setActiveFile(f.path);
+              if (!activeFile && !changedActive) {
+                setActiveFile(f.path);
+                changedActive = true;
+              }
+              // If we're currently viewing this file, update editor content directly if possible
+              if (f.path === activeFile && editorRef.current) {
+                // editorRef.current.setValue(f.content); // Avoid jumping cursor if possible
+              }
             });
           } else {
             Object.entries(files).forEach(([path, content]) => {
               newFiles[path] = content;
-              if (!activeFile) setActiveFile(path);
+              if (!activeFile && !changedActive) {
+                setActiveFile(path);
+                changedActive = true;
+              }
             });
           }
           setForgedFiles(newFiles);
@@ -316,6 +339,7 @@ Describe the tool you wish to create (e.g., *"A tool to fetch the latest stock p
                   defaultLanguage={activeFile.endsWith('.py') ? 'python' : 'yaml'}
                   theme="vs-dark"
                   value={forgedFiles[activeFile]}
+                  onMount={handleEditorDidMount}
                   options={{
                     fontSize: 13,
                     fontFamily: 'var(--font-mono)',
