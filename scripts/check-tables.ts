@@ -1,26 +1,34 @@
+import fs from 'fs';
+import dotenv from 'dotenv';
+import path from 'path';
+
+if (fs.existsSync(path.join(__dirname, '../.env.local'))) {
+  dotenv.config({ path: path.join(__dirname, '../.env.local') });
+} else {
+  dotenv.config();
+}
+
 import { query } from '../lib/db/client';
 
-async function main() {
+async function listTables() {
   try {
-    console.log('Checking tables in database...');
-    const tables = await query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public'
-      ORDER BY table_name;
-    `);
+    console.log('Connecting to:', process.env.DATABASE_URL?.replace(/:[^:]*@/, ':****@'));
     
-    console.log('Tables found:', tables.map(t => t.table_name));
+    const res = await query(
+      "SELECT table_schema, table_name FROM information_schema.tables WHERE table_name = 'tool_registry'"
+    );
+    console.log('Tool Registry Table:', res);
+
+    const rows = await query('SELECT count(*) FROM public.tool_registry');
+    console.log('Rows in tool_registry:', rows);
     
-    const agentsTable = tables.find(t => t.table_name === 'agents');
-    if (agentsTable) {
-      console.log('✅ agents table exists');
-    } else {
-      console.error('❌ agents table MISSING');
-    }
-  } catch (error) {
-    console.error('Error querying database:', error);
+    // Check migrations table
+    const migrations = await query('SELECT * FROM migrations');
+    console.log('Migrations:', migrations.map((r: any) => r.filename));
+
+  } catch (err) {
+    console.error(err);
   }
 }
 
-main();
+listTables();

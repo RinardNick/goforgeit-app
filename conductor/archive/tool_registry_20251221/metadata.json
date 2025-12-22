@@ -1,0 +1,8 @@
+{
+  "track_id": "tool_registry_20251221",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2025-12-21T18:30:00Z",
+  "updated_at": "2025-12-21T18:30:00Z",
+  "description": "A centralized tool registry for managing and reusing custom tools and MCP servers across agents and projects, featuring AI-powered categorization and a unified UI."
+}

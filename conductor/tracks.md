@@ -4,10 +4,15 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Centralized Tool Registry for Cross-Agent Reuse
-*Link: [./conductor/tracks/tool_registry_20251221/](./conductor/tracks/tool_registry_20251221/)*
+## [ ] Track: Agent Task Scheduling & Management
+*Link: [./conductor/tracks/agent_scheduling_20251221/](./conductor/tracks/agent_scheduling_20251221/)*
 
 ---
 
-## [ ] Track: Agent Task Scheduling & Management
-*Link: [./conductor/tracks/agent_scheduling_20251221/](./conductor/tracks/agent_scheduling_20251221/)*
+## [ ] Track: Expand Agent API for Configuration & Settings
+*Link: [./conductor/tracks/agent_settings_20251222/](./conductor/tracks/agent_settings_20251222/)*
+
+---
+
+## [ ] Track: A2UI System Integration (Agent-to-User Interface)
+*Link: [./conductor/tracks/a2ui_integration_20251222/](./conductor/tracks/a2ui_integration_20251222/)*

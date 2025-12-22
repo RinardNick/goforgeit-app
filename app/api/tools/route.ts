@@ -52,7 +52,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(tool);
     } catch (error) {
       console.error('Failed to register tool:', error);
-      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Internal Server Error', 
+        details: error instanceof Error ? error.message : String(error) 
+      }, { status: 500 });
     }
   } catch (err) {
     console.error('[API/Tools] Unexpected error:', err);

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-export type ToolType = 'builtin' | 'mcp' | 'agent' | 'openapi' | 'python';
+export type ToolType = 'builtin' | 'mcp' | 'agent' | 'openapi' | 'python' | 'registry';
 
 interface AddToolsDropdownProps {
   onSelectToolType: (type: ToolType) => void;
@@ -15,6 +15,7 @@ const TOOL_TYPES: { type: ToolType; label: string; description: string; icon: st
   { type: 'agent', label: 'Agent Tools', description: 'Use other agents as tools', icon: '🤖' },
   { type: 'openapi', label: 'OpenAPI Tools', description: 'REST APIs via OpenAPI spec', icon: '🌐' },
   { type: 'python', label: 'Custom Python Tools', description: 'Custom Python function tools', icon: '🐍' },
+  { type: 'registry', label: 'Tool Registry', description: 'Import from global tool library', icon: '📚' },
 ];
 
 export function AddToolsDropdown({ onSelectToolType, disabledTypes = [] }: AddToolsDropdownProps) {
