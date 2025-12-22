@@ -52,7 +52,7 @@ export async function registerTool(input: CreateToolInput): Promise<Tool> {
   }
 
   const sql = `
-    INSERT INTO tool_registry 
+    INSERT INTO public.tool_registry 
     (name, type, description, config, org_id, source_project_id, category, tags, is_public)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *;
@@ -77,7 +77,7 @@ export async function registerTool(input: CreateToolInput): Promise<Tool> {
 
 export async function listTools(orgId: string): Promise<Tool[]> {
   const sql = `
-    SELECT * FROM tool_registry 
+    SELECT * FROM public.tool_registry 
     WHERE org_id = $1 
     ORDER BY created_at DESC;
   `;
@@ -85,7 +85,7 @@ export async function listTools(orgId: string): Promise<Tool[]> {
 }
 
 export async function getTool(id: string): Promise<Tool | null> {
-  const sql = `SELECT * FROM tool_registry WHERE id = $1;`;
+  const sql = `SELECT * FROM public.tool_registry WHERE id = $1;`;
   return queryOne<Tool>(sql, [id]);
 }
 
@@ -108,7 +108,7 @@ export async function updateTool(id: string, updates: Partial<CreateToolInput>):
   values.push(id); // ID is the last param
 
   const sql = `
-    UPDATE tool_registry 
+    UPDATE public.tool_registry 
     SET ${fields.join(', ')}
     WHERE id = $${idx}
     RETURNING *;
@@ -118,5 +118,5 @@ export async function updateTool(id: string, updates: Partial<CreateToolInput>):
 }
 
 export async function deleteTool(id: string): Promise<void> {
-  await query('DELETE FROM tool_registry WHERE id = $1', [id]);
+  await query('DELETE FROM public.tool_registry WHERE id = $1', [id]);
 }

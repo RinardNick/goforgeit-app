@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/client';
 import { auth } from '@/auth';
 import { ensureUserOrg } from '@/lib/db/utils';
-import { headers, cookies } from 'next/headers';
 
 export const runtime = 'nodejs';
 
@@ -11,31 +10,27 @@ export const runtime = 'nodejs';
  * List all projects for the authenticated user's organization
  */
 export async function GET(req: NextRequest) {
-  console.log('GET /api/projects hit (unwrapped)');
-  
   try {
-    const headerList = await headers();
-    const cookieStore = await cookies();
-    
-    console.log('Headers count:', [...headerList.keys()].length);
-    console.log('Cookies count:', [...cookieStore.getAll()].length);
-    
-    console.log('Calling auth()...');
     const session = await auth();
-    console.log('auth() success, session exists:', !!session);
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Skipping DB calls for debugging');
-    return NextResponse.json({ projects: [] });
+    // Ensure user has an organization
+    const org = await ensureUserOrg(session.user.email);
+
+    const projects = await query(
+      'SELECT * FROM projects WHERE org_id = $1 ORDER BY created_at DESC',
+      [org.id]
+    );
+
+    return NextResponse.json({ projects });
   } catch (error) {
     console.error('Error listing projects:', error);
     return NextResponse.json({ 
       error: 'Failed to list projects',
-      details: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
+      details: error instanceof Error ? error.message : String(error)
     }, { status: 500 });
   }
 }
@@ -45,7 +40,6 @@ export async function GET(req: NextRequest) {
  * Create a new project in the authenticated user's organization
  */
 export async function POST(req: NextRequest) {
-  console.log('POST /api/projects hit (unwrapped)');
   try {
     const session = await auth();
     if (!session?.user?.email) {
