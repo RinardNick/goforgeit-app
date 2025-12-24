@@ -149,7 +149,7 @@ async function parseAdkEvalResult(resultFilePath: string): Promise<EvalCaseResul
             parts: [{ text: '' }],
             role: 'model',
           },
-          actual_tool_calls: [], // TODO: Extract from intermediate_data if needed
+          actual_tool_calls: actual_invocation?.intermediate_data?.tool_uses || [],
           metrics,
           passed: turnPassed,
         });
